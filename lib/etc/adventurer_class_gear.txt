@@ -1,0 +1,4 @@
+class|mage|weapons=light_pistol,heavy_pistol|armor=armored_vest|ammo=ball|initware=none
+class|adept|weapons=katana,melee_weapon|armor=armored_jacket|ammo=ball|initware=none
+class|decker|weapons=light_pistol,smg|armor=armored_vest|ammo=ball|initware=none
+class|samurai|weapons=assault_rifle,shotgun,katana|armor=sec_armor|ammo=ball,apds|initware=wired_2

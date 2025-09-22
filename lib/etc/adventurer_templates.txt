@@ -1,0 +1,11 @@
+# List of mob VNUMs to use as base templates for adventurers.
+# You can use brand-new prototypes you add to lib/world/mob/ or existing "humanoid" mobs.
+# IMPORTANT: In src/spec_assign.cpp, assign each of these VNUMs to adventurer_spec with ASSIGNMOB().
+# Example:
+# ASSIGNMOB(99001, adventurer_spec);  // Adventurer: Samurai
+# ASSIGNMOB(99002, adventurer_spec);  // Adventurer: Adept
+# Fill with your actual VNUMs below, one per line:
+# 99001
+# 99002
+# 99003
+1401

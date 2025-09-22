@@ -16,6 +16,7 @@
 #include "interpreter.hpp"
 #include "utils.hpp"
 #include "archetypes.hpp"
+#include "spec_adventurer.hpp"
 
 extern void perform_secret_room_assignments();
 extern void perform_secret_mob_assignments();
@@ -651,6 +652,7 @@ void assign_mobiles(void)
   SPECIAL(pocsec_unlocker);
   SPECIAL(soulbound_unbinder);
   SPECIAL(peaceful_bones_bouncer);
+  SPECIAL(adventurer_spec);
 
   SPECIAL(test_bouncer);
   ASSIGNMOB(10000, test_bouncer);
@@ -877,6 +879,9 @@ void assign_mobiles(void)
 
   /* Star Sapphire */
   ASSIGNMOB(70302, bouncer_gentle);
+
+  //Adventurers
+  ASSIGNMOB(19837, adventurer_spec);
 
 #ifdef USE_PRIVATE_CE_WORLD
   /* New Multnomah gate guard */

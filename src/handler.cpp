@@ -35,6 +35,7 @@
 #include "player_exdescs.hpp"
 #include "otaku.hpp"
 #include "gmcp.hpp"
+#include "spec_adventurer.hpp"
 
 /* external functions */
 extern void stop_fighting(struct char_data * ch);
@@ -1559,6 +1560,10 @@ void char_to_room(struct char_data * ch, struct room_data *room)
   _char_with_spell_to_room(ch, SPELL_SHADOW, ch->in_room->shadow);
   _char_with_spell_to_room(ch, SPELL_LIGHT, ch->in_room->light);
   _char_with_spell_to_room(ch, SPELL_POLTERGEIST, ch->in_room->poltergeist);
+
+  if (ch && !IS_NPC(ch) && get_ch_in_room(ch)) {
+    adventurer_on_pc_enter_room(ch, get_ch_in_room(ch));
+  }
 }
 
 // Checks obj_to_x preconditions for common errors. Overwrites buf3. Returns TRUE for kosher, FALSE otherwise.

@@ -22,6 +22,7 @@
 #include "db.hpp"
 #include "awake.hpp"
 #include "ignore_system.hpp"
+#include "spec_adventurer.hpp"
 
 /* extern variables */
 extern struct room_data *world;
@@ -110,8 +111,9 @@ ACMD(do_action)
   }
 
   InnerVoice::maybe_grant_emote_attitude(ch);
-
   InnerVoice::notify_social(ch, vict);
+  adventurer_notify_social(ch, vict, cmd);
+
 }
 
 void perform_wizsocial(char *orig, struct char_data * ch, struct char_data *vict,

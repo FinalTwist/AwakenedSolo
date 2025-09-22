@@ -79,6 +79,7 @@
 #include "factions.hpp"
 #include "player_exdescs.hpp"
 #include "gmcp.hpp"
+#include "spec_adventurer.hpp"
 
 
 const unsigned perfmon::kPulsePerSecond = PASSES_PER_SEC;
@@ -1595,6 +1596,7 @@ void game_loop(int mother_desc)
       EscalatorProcess();
       ElevatorProcess();
       msdp_update();
+      adventurer_maintain();
     }
 
     // Every 10 IRL seconds
@@ -3100,7 +3102,7 @@ void close_socket(struct descriptor_data *d)
   REMOVE_FROM_LIST(d, descriptor_list, next);
   global_descriptor_list_invalidated = TRUE;
 
-  //DELETE_ARRAY_IF_EXTANT(d->showstr_head);
+  DELETE_ARRAY_IF_EXTANT(d->showstr_head);
 
   // Clean up message history lists.
   delete_message_history(d);

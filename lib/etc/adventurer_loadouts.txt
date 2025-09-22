@@ -1,0 +1,5 @@
+# Optional: Each line is a space-separated list of object VNUMs to give to a spawned adventurer.
+# The system picks one random line and attempts to load each VNUM to inventory (best effort).
+# Example (replace with objects that exist in your world):
+# 2003 2010 3050   # pistol / ammo / jacket
+# 2100 3120 4050   # katana / armor vest / first-aid kit

@@ -1,0 +1,6 @@
+# Adventurer difficulty tiers with multiplicative attribute scaling
+tier|1|Green|weight=25|skill_mult=0.65|skill_jitter=1|attr_mult=1.00,1.00,1.00,1.00,1.00,1.00|weapons=light_pistol,heavy_pistol|armor=lined_coat,armored_vest|ammo=ball|initware=none
+tier|2|Street|weight=35|skill_mult=0.85|skill_jitter=1|attr_mult=1.00,1.05,1.05,1.00,1.00,1.00|weapons=heavy_pistol,smg|armor=armored_jacket,sec_vest|ammo=ball|initware=wired_1
+tier|3|Runner|weight=25|skill_mult=1.00|skill_jitter=2|attr_mult=1.08,1.10,1.10,1.08,1.00,1.08|weapons=smg,assault_rifle,shotgun|armor=armor_vest_ffba,sec_armor|ammo=ball,apds|initware=wired_2
+tier|4|Prime|weight=12|skill_mult=1.20|skill_jitter=2|attr_mult=1.18,1.22,1.22,1.12,1.08,1.18|weapons=assault_rifle,ar_gl,lmg|armor=sec_armor_ffba,mil_spec_light|ammo=ball,apds,exex|initware=wired_2
+tier|5|Apex|weight=3|skill_mult=1.40|skill_jitter=3|attr_mult=1.28,1.35,1.35,1.18,1.12,1.28|weapons=assault_rifle_rc,lmg_rc|armor=mil_spec_med|ammo=apds,exex|initware=wired_3

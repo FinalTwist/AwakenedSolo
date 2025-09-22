@@ -1,0 +1,3 @@
+template_mobile_vnum=19837
+zone_entry_spawn_chance_percent=5
+despawn_zone_inactivity_seconds=900
