@@ -881,7 +881,7 @@ void assign_mobiles(void)
   ASSIGNMOB(70302, bouncer_gentle);
 
   //Adventurers
-  ASSIGNMOB(19837, adventurer_spec);
+  ASSIGNMOB(25200, adventurer_spec);
 
 #ifdef USE_PRIVATE_CE_WORLD
   /* New Multnomah gate guard */
@@ -1154,8 +1154,6 @@ void assign_rooms(void)
   ASSIGNROOM(60626, chargen_unpractice_skill);
   ASSIGNROOM(60627, chargen_unpractice_skill);
   ASSIGNROOM(60628, chargen_unpractice_skill);
-  ASSIGNROOM(60661, chargen_unpractice_skill);
-  ASSIGNROOM(60662, chargen_unpractice_skill);
   /* CharGen - auto-set archetype end rooms etc */
   for (int i = 0; i < NUM_CCR_ARCHETYPES; i++) {
     ASSIGNROOM(archetypes[i]->auth_room, auth_room);

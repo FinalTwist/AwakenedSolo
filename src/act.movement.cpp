@@ -89,63 +89,36 @@ int can_move(struct char_data *ch, int dir, int extra)
 
   char empty_argument = '\0';
   if (IS_SET(extra, CHECK_SPECIAL) && special(ch, convert_dir[dir], &empty_argument))
-    
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, NULL, NULL);
+    return 0;
+
+  // QoL: Auto-open/unlock with key if enabled.
+  if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
+    if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
+      bool changed = FALSE;
+      if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
+        LOCK_DOOR(ch->in_room, 0, dir);
+        if (EXIT(ch, dir)->to_room)
+          LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
+        send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
+        changed = TRUE;
+      }
+      if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
+        OPEN_DOOR(ch->in_room, 0, dir);
+        if (EXIT(ch, dir)->to_room)
+          OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
+        send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
+        changed = TRUE;
+      }
+      if (changed) {
+        return perform_move(ch, dir, extra, NULL, NULL);
+      }
     }
   }
-}
-
-    return 0;
 
   if (ch->in_room && ch->in_room->icesheet[0] && !IS_ASTRAL(ch) && !IS_AFFECTED(ch, AFF_LEVITATE)) {
     if (FIGHTING(ch) && success_test(GET_QUI(ch), ch->in_room->icesheet[0] + modify_target(ch)) < 1)
     {
       send_to_char("The ice at your feet causes you to trip and fall!\r\n", ch);
-      
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, NULL, NULL);
-    }
-  }
-}
-
-    return 0;
     } else {
       send_to_char("You step cautiously across the ice sheet, keeping yourself from falling.\r\n", ch);
     }
@@ -156,32 +129,6 @@ if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
     // Builders are restricted to their zone.
     if (builder_cant_go_there(ch, EXIT(ch, dir)->to_room)) {
       send_to_char("Sorry, as a first-level builder you're only able to move to rooms you have edit access for.\r\n", ch);
-      
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, NULL, NULL);
-    }
-  }
-}
-
-    return 0;
     }
     // Everyone is restricted from edit-locked zones that aren't connected.
     FALSE_CASE(!ch_can_bypass_edit_lock(ch, EXIT(ch, dir)->to_room), "Sorry, that zone is locked.");
@@ -205,63 +152,36 @@ if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
 
       if (!has_vehicle_to_go_to) {
         send_to_char("Walking across the freeway would spell instant death.\r\n", ch);
-        
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, NULL, NULL);
-    }
-  }
-}
-
-    return 0;
       }
     }
   }
 
   if (!CH_CAN_ENTER_APARTMENT(EXIT(ch, dir)->to_room, ch)) {
-    send_to_char("That's private property -- no trespassing!\r\n", ch);
-    
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
+    // QoL: Auto-open/unlock with key if enabled.
+    if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
+      if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
+        bool changed = FALSE;
+        if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
+          LOCK_DOOR(ch->in_room, 0, dir);
+          if (EXIT(ch, dir)->to_room)
+            LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
+          send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
+          changed = TRUE;
+        }
+        if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
+          OPEN_DOOR(ch->in_room, 0, dir);
+          if (EXIT(ch, dir)->to_room)
+            OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
+          send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
+          changed = TRUE;
+        }
+        if (changed) {
+          return perform_move(ch, dir, extra, NULL, NULL);
+        }
+      }
     }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, NULL, NULL);
-    }
-  }
-}
 
+    send_to_char("That's private property -- no trespassing!\r\n", ch);
     return 0;
   }
   
@@ -277,32 +197,8 @@ if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
         send_to_char("You use your staff powers to bypass the tunnel restriction.\r\n", ch);
       } else {
         send_to_char("There isn't enough room there for another person!\r\n", ch);
-        
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, NULL, NULL);
-    }
-  }
-}
-
-    return 0;
+    
+        return 0;
       }
     }
   }
@@ -313,31 +209,6 @@ if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
       send_to_char("You use your staff powers to bypass the cramped-space restriction.\r\n", ch);
     } else {
       send_to_char("Try as you might, you can't fit in there!\r\n", ch);
-      
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, NULL, NULL);
-    }
-  }
-}
-
     return 0;
     }
   }
@@ -389,91 +260,16 @@ if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
       dam = convert_damage(stage(-test, SERIOUS));
       send_to_char(ch, "You struggle to retain consciousness as the current resists your every move.\r\n");
       if (dam > 0 && (damage(ch, ch, dam, TYPE_DROWN, FALSE) || GET_POS(ch) < POS_STANDING))
-        
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, NULL, NULL);
-    }
-  }
-}
-
     return 0;
     } else if (!swimming_successes) {
       dam = convert_damage(stage(-test, MODERATE));
       send_to_char(ch, "The current resists your movements.\r\n");
       if (dam > 0 && (damage(ch, ch, dam, TYPE_DROWN, FALSE) || GET_POS(ch) < POS_STANDING))
-        
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, NULL, NULL);
-    }
-  }
-}
-
     return 0;
     } else if (swimming_successes < 3) {
       dam = convert_damage(stage(-test, LIGHT));
       send_to_char(ch, "The current weakly resists your efforts to move.\r\n");
       if (dam > 0 && (damage(ch, ch, dam, TYPE_DROWN, FALSE) || GET_POS(ch) < POS_STANDING))
-        
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, NULL, NULL);
-    }
-  }
-}
-
     return 0;
     }
   }
@@ -661,31 +457,6 @@ int do_simple_move(struct char_data *ch, int dir, int extra, struct char_data *v
   struct veh_data *tveh;
   struct room_data *was_in = NULL;
   if (!can_move(ch, dir, extra))
-    
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, NULL, NULL);
-    }
-  }
-}
-
     return 0;
 
   // Sneaking characters incur a slight delay, mitigated by their quickness and athletics.
@@ -903,31 +674,6 @@ if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
     bool character_died;
     // We break the return code paradigm here to avoid having the code check follower data for a dead NPC.
     if (IS_NPC(ch) && (character_died = perform_fall(ch))) {
-      
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, NULL, NULL);
-    }
-  }
-}
-
     return 0;
     }
     return 1;
@@ -1374,62 +1120,11 @@ int perform_move(struct char_data *ch, int dir, int extra, struct char_data *vic
   struct follow_type *k, *next;
 
   if (ch == NULL || dir < 0 || dir >= NUM_OF_DIRS)
-    
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, vict, vict_veh);
-    }
-  }
-}
-
-    return 0;
 
   stop_watching(ch);
 
   if (ch->in_veh || ch->char_specials.rigging) {
     move_vehicle(ch, dir);
-    
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, vict, vict_veh);
-    }
-  }
-}
-
     return 0;
   }
 
@@ -1453,60 +1148,10 @@ if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
       act("PANIC! $N caught you before you could escape!\r\n", FALSE, ch, 0, blocker, TO_CHAR);
       act("You lunge forward and block $n's escape.", FALSE, ch, 0, blocker, TO_VICT);
       act("$N lunges forward and blocks $n's escape.", FALSE, ch, 0, blocker, TO_NOTVICT);
-      
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, vict, vict_veh);
-    }
-  }
-}
-
-    return 0;
+      return 0;
     } else {
       act("PANIC! You couldn't escape!\r\n", FALSE, ch, 0, 0, TO_CHAR);
-      
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, vict, vict_veh);
-    }
-  }
-}
-
-    return 0;
+      return 0;
     }
   }
 
@@ -1514,31 +1159,6 @@ if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
   if (!EXIT(ch, dir) || !EXIT(ch, dir)->to_room || EXIT(ch, dir)->to_room == &world[0]) {
     FALSE_CASE(!LIGHT_OK(ch), "Something seems to be in the way...");
     send_to_char("You cannot go that way...\r\n", ch);
-    
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, vict, vict_veh);
-    }
-  }
-}
-
     return 0;
   }
 
@@ -1546,31 +1166,6 @@ if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
   if (IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && !IS_SENATOR(ch)) {
     FALSE_CASE(!LIGHT_OK(ch), "Something seems to be in the way...");
     send_to_char("You cannot go that way...\r\n", ch);
-    
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, vict, vict_veh);
-    }
-  }
-}
-
     return 0;
   }
 
@@ -1592,31 +1187,29 @@ if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
         send_to_char("It seems to be closed.\r\n", ch);
       }
     }
-    
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
+    // QoL: Auto-open/unlock with key if enabled.
+    if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
+      if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
+        bool changed = FALSE;
+        if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
+          LOCK_DOOR(ch->in_room, 0, dir);
+          if (EXIT(ch, dir)->to_room)
+            LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
+          send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
+          changed = TRUE;
+        }
+        if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
+          OPEN_DOOR(ch->in_room, 0, dir);
+          if (EXIT(ch, dir)->to_room)
+            OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
+          send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
+          changed = TRUE;
+        }
+        if (changed) {
+          return perform_move(ch, dir, extra, vict, vict_veh);
+        }
+      }
     }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, vict, vict_veh);
-    }
-  }
-}
-
     return 0;
   }
 
@@ -1631,31 +1224,6 @@ if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
     } else {
       send_to_char(ch, "Sorry, you need to be a level-%d staff member to go there.\r\n", EXIT(ch, dir)->to_room->staff_level_lock);
     }
-    
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, vict, vict_veh);
-    }
-  }
-}
-
     return 0;
   }
 
@@ -1668,32 +1236,7 @@ if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
       if (!in_room_found && elevator[index].floor[car_rating].shaft_vnum == ch->in_room->number) {
         if (elevator[index].is_moving) {
           send_to_char("All you can do is cling to the shaft and hope for the best!\r\n", ch); // giggity
-          
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, vict, vict_veh);
-    }
-  }
-}
-
-    return 0;
+          return 0;
         } else {
           // We found the shaft room and it's okay.
           in_room_found = TRUE;
@@ -1704,32 +1247,7 @@ if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
         // Check for the car being at this floor.
         if (elevator[index].is_moving) {
           send_to_char("Are you crazy? There's a moving elevator car there!\r\n", ch);
-          
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, vict, vict_veh);
-    }
-  }
-}
-
-    return 0;
+          return 0;
         } else {
           // We found the shaft room and it's okay.
           to_room_found = TRUE;
@@ -1766,31 +1284,6 @@ if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
     } else {
       act("$n struggles against the bindings at $s feet, but can't seem to break them.", TRUE, ch, 0, 0, TO_ROOM);
       send_to_char("You struggle against the bindings at your feet but get nowhere!\r\n", ch);
-      
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, vict, vict_veh);
-    }
-  }
-}
-
     return 0;
     }
   }
@@ -1810,36 +1303,13 @@ if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
     else
       send_to_char("You pass through the closed door.\r\n", ch);
   }
-  if (!IS_SET(extra, LEADER))
+
+    if (!IS_SET(extra, LEADER)){
     return (do_simple_move(ch, dir, extra, NULL));
+    }
 
   was_in = ch->in_room;
   if (!do_simple_move(ch, dir, extra | LEADER, vict))
-    
-// QoL: Auto-open/unlock with key if enabled.
-if (PRF_FLAGGED(ch, PRF_AUTO_OPEN)) {
-  if (!IS_ASTRAL(ch) && !IS_SET(EXIT(ch, dir)->exit_info, EX_HIDDEN) && DOOR_IS_OPENABLE(ch, 0, dir)) {
-    bool changed = FALSE;
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_LOCKED) && EXIT(ch, dir)->key > 0 && has_key(ch, EXIT(ch, dir)->key)) {
-      LOCK_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        LOCK_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You unlock the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED)) {
-      OPEN_DOOR(ch->in_room, 0, dir);
-      if (EXIT(ch, dir)->to_room)
-        OPEN_DOOR(EXIT(ch, dir)->to_room, 0, rev_dir[dir]);
-      send_to_char(ch, "^GAuto:^n You open the %s to %s.\r\n", GET_DOOR_NAME(ch, dir), thedirs[dir]);
-      changed = TRUE;
-    }
-    if (changed) {
-      return perform_move(ch, dir, extra, vict, vict_veh);
-    }
-  }
-}
-
     return 0;
 
   for (k = ch->followers; k; k = next) {
@@ -1935,6 +1405,7 @@ int find_door(struct char_data *ch, const char *type, char *dir, const char *cmd
     }
   }
 }
+  
 
 #define NEED_OPEN       1
 #define NEED_CLOSED     2

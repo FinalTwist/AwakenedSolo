@@ -57,7 +57,7 @@ template<typename T> static T clamp_val(T v, T lo, T hi) { if (v < lo) return lo
 // ---------- config & state ----------
 static int adv_zone_entry_spawn_chance_pct = 5;
 static int adv_zone_inactivity_despawn_seconds = 900;
-static long adv_template_mobile_vnum = 19837; // default, overridable via config
+static long adv_template_mobile_vnum = 25200; // default, overridable via config
 
 static std::vector<std::string> adv_spawn_allow_flags;
 static std::vector<std::string> adv_spawn_disallow_flags;
