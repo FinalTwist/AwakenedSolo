@@ -110,7 +110,7 @@ int can_move(struct char_data *ch, int dir, int extra)
         changed = TRUE;
       }
       if (changed) {
-        return perform_move(ch, dir, extra, NULL, NULL);
+        return 1; // door is now open/unlocked; caller can proceed
       }
     }
   }
@@ -176,7 +176,7 @@ int can_move(struct char_data *ch, int dir, int extra)
           changed = TRUE;
         }
         if (changed) {
-          return perform_move(ch, dir, extra, NULL, NULL);
+          return 1; // door is now open/unlocked; caller can proceed
         }
       }
     }
@@ -1120,6 +1120,7 @@ int perform_move(struct char_data *ch, int dir, int extra, struct char_data *vic
   struct follow_type *k, *next;
 
   if (ch == NULL || dir < 0 || dir >= NUM_OF_DIRS)
+    return 0;
 
   stop_watching(ch);
 
@@ -1206,7 +1207,7 @@ int perform_move(struct char_data *ch, int dir, int extra, struct char_data *vic
           changed = TRUE;
         }
         if (changed) {
-          return perform_move(ch, dir, extra, vict, vict_veh);
+          return 1; // door is now open/unlocked; caller can proceed
         }
       }
     }

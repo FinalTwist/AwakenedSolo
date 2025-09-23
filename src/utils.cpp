@@ -10088,3 +10088,29 @@ void maybe_reseed_ambient_rooms() {
     next = now + 3600; // once per hour tick
   }
 }
+
+//extern struct obj_data *obj_proto;  // safe even if db.hpp already declares it
+
+void safe_set_obj_restring(struct obj_data *obj, const char *s) {
+  const int r = GET_OBJ_RNUM(obj);
+  const char *proto = (r >= 0 ? obj_proto[r].restring : NULL);
+  if (obj->restring && obj->restring != proto)
+    delete [] obj->restring;
+  obj->restring = str_dup(s);
+}
+
+void safe_set_obj_look(struct obj_data *obj, const char *s) {
+  const int r = GET_OBJ_RNUM(obj);
+  const char *proto = (r >= 0 ? obj_proto[r].text.look_desc : NULL);
+  if (obj->text.look_desc && obj->text.look_desc != proto)
+    delete [] obj->text.look_desc;
+  obj->text.look_desc = str_dup(s);
+}
+
+void safe_set_obj_roomdesc(struct obj_data *obj, const char *s) {
+  const int r = GET_OBJ_RNUM(obj);
+  const char *proto = (r >= 0 ? obj_proto[r].text.room_desc : NULL);
+  if (obj->text.room_desc && obj->text.room_desc != proto)
+    delete [] obj->text.room_desc;
+  obj->text.room_desc = str_dup(s);
+}

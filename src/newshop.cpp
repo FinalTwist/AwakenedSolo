@@ -3585,8 +3585,7 @@ struct obj_data *shop_package_up_ware(struct obj_data *obj) {
   GET_OBJ_EXTRA(shop_container).SetBit(ITEM_EXTRA_KEPT);
 
   snprintf(buf3, sizeof(buf3), "a packaged-up '%s'%s", GET_OBJ_NAME(obj), obj->restring ? " (restrung)" : "");
-  DELETE_ARRAY_IF_EXTANT(shop_container->restring);
-  shop_container->restring = str_dup(buf3);
+  safe_set_obj_restring(shop_container, buf3);
 
   obj_to_obj(obj, shop_container);
   return shop_container;

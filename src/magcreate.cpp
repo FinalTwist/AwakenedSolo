@@ -155,8 +155,7 @@ void spedit_parse(struct descriptor_data *d, const char *arg)
         return;
       }
 
-      DELETE_ARRAY_IF_EXTANT(SPELL->restring);
-      SPELL->restring = str_dup(arg);
+      safe_set_obj_restring(SPELL, arg);
       spedit_disp_menu(d);
       break;
     }

@@ -7,7 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
+#pragma once
 #ifndef _utils_h_
 #define _utils_h_
 
@@ -1764,3 +1764,7 @@ const char *a_an(char *string);
 void maybe_trigger_street_microevent(struct char_data *ch);
 void maybe_reseed_ambient_rooms();
 void maybe_seed_system_art();
+
+void safe_set_obj_restring(struct obj_data *obj, const char *s);
+void safe_set_obj_look(struct obj_data *obj, const char *s);
+void safe_set_obj_roomdesc(struct obj_data *obj, const char *s);

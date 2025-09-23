@@ -7630,8 +7630,7 @@ bool restring_with_args(struct char_data *ch, char *argument, bool using_sysp) {
   snprintf(buf2, sizeof(buf2), "%s restrung '%s' (%ld) to '%s'", GET_CHAR_NAME(ch), obj->text.name, GET_OBJ_VNUM(obj), buf);
   mudlog(buf2, ch, LOG_WIZLOG, TRUE);
 
-  DELETE_ARRAY_IF_EXTANT(obj->restring);
-  obj->restring = str_dup(buf);
+  safe_set_obj_restring(obj, buf);
   send_to_char(ch, "%s successfully restrung.\r\n", obj->text.name);
 
   // Repackage it to reflect its restrung status.

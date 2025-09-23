@@ -5925,15 +5925,25 @@ ACMD(do_selljunk)
     extern struct shop_data *shop_table;
     for (int shop_nr = 0; shop_nr <= top_of_shopt; shop_nr++) {
       if (shop_table[shop_nr].keeper == GET_MOB_VNUM(keeper)) {
-        for (struct obj_data *obj = ch->carrying; obj; obj = obj->next_content) {
-          if (IS_OBJ_STAT(obj, ITEM_EXTRA_NODROP) || IS_OBJ_STAT(obj, ITEM_EXTRA_NOSELL)) continue;
-          if (GET_OBJ_COST(obj) > max_value) continue;
+        // Iterate safely: snapshot 'next' before anything that might delete 'obj'.
+        for (struct obj_data *obj = ch->carrying, *next = NULL; obj; obj = next) {
+          next = obj->next_content;
+
+          if (IS_OBJ_STAT(obj, ITEM_EXTRA_NODROP) || IS_OBJ_STAT(obj, ITEM_EXTRA_NOSELL))
+            continue;
+          if (GET_OBJ_COST(obj) > max_value)
+            continue;
+
           extern bool shop_will_buy_item_from_ch(rnum_t shop_nr, struct obj_data *obj, struct char_data *ch);
-          if (!shop_will_buy_item_from_ch(shop_nr, obj, ch)) continue;
-          const char *kw = fname(const_cast<char *>(GET_OBJ_NAME(obj)));
-          char cmd[MAX_INPUT_LENGTH];
-          snprintf(cmd, sizeof(cmd), "sell %s", kw);
-          command_interpreter(ch, cmd, "selljunk");
+          if (!shop_will_buy_item_from_ch(shop_nr, obj, ch))
+            continue;
+
+          // Use first keyword like the "sell X" command would.
+          char namebuf[MAX_INPUT_LENGTH];
+          strlcpy(namebuf, fname(const_cast<char *>(GET_OBJ_NAME(obj))), sizeof(namebuf));
+
+          // Call the shop logic directly; this will obj_from_char() and extract_obj(obj) on success.
+          shop_sell(namebuf, ch, keeper, shop_nr);
         }
         send_to_char(ch, "Autosell complete up to value %d.\r\n", max_value);
         return;
@@ -5959,12 +5969,18 @@ ACMD(do_repairall)
   if (!fixer) { send_to_char("There's no fixer here to repair your gear.\r\n", ch); return; }
 
   int count = 0;
-  for (struct obj_data *obj = ch->carrying; obj; obj = obj->next_content) {
+  for (struct obj_data *obj = ch->carrying, *next = NULL; obj; obj = next) {
+    next = obj->next_content;
+
     if (GET_OBJ_CONDITION(obj) >= GET_OBJ_BARRIER(obj)) continue;
-    const char *kw = fname(const_cast<char*>(GET_OBJ_NAME(obj)));
+
+    char kw[MAX_INPUT_LENGTH];
+    strlcpy(kw, fname(const_cast<char*>(GET_OBJ_NAME(obj))), sizeof(kw));
+
     char cmd[MAX_INPUT_LENGTH];
     if (use_credstick) snprintf(cmd, sizeof(cmd), "repair credstick %s", kw);
     else snprintf(cmd, sizeof(cmd), "repair %s", kw);
+
     command_interpreter(ch, cmd, "repairall");
     count++;
   }

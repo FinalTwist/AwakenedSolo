@@ -74,8 +74,7 @@ void art_edit_parse(struct descriptor_data *d, const char *arg) {
       }
 
       if (d->edit_mode == ART_EDIT_NAME) {
-        DELETE_ARRAY_IF_EXTANT(ART->restring);
-        ART->restring = str_dup(arg);
+        safe_set_obj_restring(ART, arg);
       } else {
         char replaced_colors[MAX_INPUT_LENGTH + 1];
         replace_substring(arg, buf2, "^n", "^g");

@@ -74,3 +74,5 @@ extern const char *shop_type[3];
 extern const char *selling_type[];
 
 int get_eti_test_results(struct char_data *ch, int eti_skill, int availtn, int availoff, int kinesics, int meta_penalty, int lifestyle, int pheromone_dice, int skill_dice);
+// Make shop_sell callable from other modules (autosell).
+void shop_sell(char *arg, struct char_data *ch, struct char_data *keeper, vnum_t shop_nr);
