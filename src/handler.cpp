@@ -2551,6 +2551,15 @@ void extract_veh(struct veh_data * veh)
     return;
   }
 
+    // Structural guard: already fully unlinked?
+  if (veh->in_room == NULL && veh->in_veh == NULL
+      && veh->next_veh == NULL) {
+    // Optional: log
+    // mudlog_vfprintf(NULL, LOG_SYSLOG, "GUARD: extract_veh(%p) '%s' already unlinked",
+    //                 (void*)veh, veh->short_description ? veh->short_description : "<null>");
+    return;
+  }
+
   if (veh->in_room == NULL && veh->in_veh == NULL) {
     if (veh->carriedvehs || veh->people) {
       strncpy(buf, "SYSERR: extract_veh called on vehicle-with-contents without containing room or veh! The game will likely now shit itself and die; GLHF.", sizeof(buf));
@@ -2710,6 +2719,16 @@ void extract_obj(struct obj_data * obj, bool dont_warn_on_kept_items)
     return;
   }
 
+    // Structural guard: already fully unlinked from all containers/carriers?
+    if (obj->in_room == NULL && obj->in_obj == NULL && obj->carried_by == NULL
+        && obj->in_veh == NULL && obj->worn_by == NULL
+        && obj->next_content == NULL) {
+      // Optional: log
+      // mudlog_vfprintf(NULL, LOG_SYSLOG, "GUARD: extract_obj(%p) vnum %ld name %s already unlinked",
+      //                 (void*)obj, GET_OBJ_VNUM(obj), GET_OBJ_NAME(obj));
+      return;
+    }
+
   struct phone_data *phone, *temp;
   bool set = FALSE;
 
@@ -2856,6 +2875,22 @@ void extract_char(struct char_data * ch, bool do_save)
 {
   if (!ch) {
     mudlog_vfprintf(NULL, LOG_SYSLOG, "SYSERR: Received NULL char to extract_ch()!");
+    return;
+  }
+
+    // Logical one-shot guard: if someone already started extracting this char, bail.
+  if (ch->being_extracted) {
+    // Optional: uncomment to log duplicate attempts
+    mudlog_vfprintf(NULL, LOG_SYSLOG, "GUARD: extract_char(%p) called twice for %s", (void*)ch, GET_CHAR_NAME(ch));
+    return;
+  }
+  ch->being_extracted = true;
+
+    // Structural guard: if already fully unlinked from room/vehicle lists, do nothing.
+  if (ch->in_room == NULL && ch->in_veh == NULL
+      && ch->next_in_room == NULL && ch->next_in_veh == NULL) {
+    // Optional: log
+    // mudlog_vfprintf(NULL, LOG_SYSLOG, "GUARD: extract_char(%p) for %s already unlinked", (void*)ch, GET_CHAR_NAME(ch));
     return;
   }
 

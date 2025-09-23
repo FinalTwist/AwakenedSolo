@@ -627,7 +627,24 @@ void adventurer_maintain() {
       if (is_adventurer(ch)) {
         struct room_data* room = get_ch_in_room(ch);
         if (room && room->zone == z) {
-          extract_char(ch, FALSE);
+          if (!ch->being_extracted) {
+            ch->being_extracted = TRUE;
+            // Clean adventurer gear before extraction so nothing drops.
+            if (IS_NPC(ch)) {
+              for (int i = 0; i < NUM_WEARS; i++) {
+                if (GET_EQ(ch, i)) {
+                  struct obj_data *o = unequip_char(ch, i, /*show_messages=*/FALSE, /*from_rent=*/FALSE, /*skip_events=*/TRUE);
+                  if (o) extract_obj(o, true);
+                }
+              }
+              for (struct obj_data *o = ch->carrying, *next; o; o = next) {
+                next = o->next_content;
+                obj_from_char(o);
+                extract_obj(o, true);
+              }
+            }
+            extract_char(ch, FALSE);
+          }
         }
       }
       ch = next;

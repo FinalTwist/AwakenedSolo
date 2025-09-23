@@ -1003,6 +1003,8 @@ struct char_data
   std::unordered_map<idnum_t, int> faction_rep = {};
 
   bool alias_dirty_bit;
+  // Set to true the moment any code path starts extracting this char. Prevents double free.
+  bool being_extracted;
 
   /* Named after 'magic bullet pants', the 'technology' in FPS games that allows you to never have to worry about which mag has how much ammo in it. */
   unsigned short bullet_pants[(END_OF_AMMO_USING_WEAPONS + 1) - START_OF_AMMO_USING_WEAPONS][NUM_AMMOTYPES];
@@ -1025,7 +1027,7 @@ struct char_data
       cyberware(NULL), bioware(NULL), next_in_room(NULL), next_in_character_list(NULL), next_fighting(NULL), next_in_zone(NULL),
       next_in_veh(NULL), next_watching(NULL), followers(NULL), master(NULL), spells(NULL), ignore_data(NULL), pgroup(NULL),
       pgroup_invitations(NULL), congregation_bonus_pool(0), last_loop_rand(0), pc_invis_resistance_test_results(NULL),
-      mob_invis_resistance_test_results(NULL), alias_dirty_bit(FALSE), mob_loaded_in_room(NULL), precast_spells(NULL),
+      mob_invis_resistance_test_results(NULL), alias_dirty_bit(FALSE), being_extracted(FALSE), mob_loaded_in_room(NULL), precast_spells(NULL),
       is_carrying_vehicle(FALSE)
   {
     ZERO_OUT_ARRAY(equipment, NUM_WEARS);

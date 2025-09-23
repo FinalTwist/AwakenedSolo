@@ -1541,6 +1541,7 @@ void game_loop(int mother_desc)
       matrix_hour_update();
       point_update();
       weather_change();
+  
       if (time_info.hours == 17) {
         for (i = 0; i <= top_of_world; i++) {
           if (ROOM_FLAGGED(&world[i], ROOM_STREETLIGHTS)) {
@@ -1559,7 +1560,7 @@ void game_loop(int mother_desc)
             }
           }
         }
-      }
+      };
       if (time_info.hours == 7) {
         for (i = 0; i <= top_of_world; i++) {
           if (ROOM_FLAGGED(&world[i], ROOM_STREETLIGHTS)) {
@@ -1580,7 +1581,6 @@ void game_loop(int mother_desc)
         }
       }
     }
-
     // Every 70 MUD minutes
     if (!(pulse % (70 * SECS_PER_MUD_MINUTE * PASSES_PER_SEC)))
       save_all_apartments_and_storage_rooms();

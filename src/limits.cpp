@@ -1043,12 +1043,10 @@ void point_update(void)
   maybe_seed_system_art();
 PERF_PROF_SCOPE(pr_, __func__);
   ACMD_DECLARE(do_use);
-
   // Generate the wholist file.
   ACMD_CONST(do_who);
   if (character_list)
     do_who(character_list, "", 0, 1);
-
   /* characters */
   bool is_npc = FALSE;
 
@@ -1182,7 +1180,6 @@ PERF_PROF_SCOPE(pr_, __func__);
 
           if (HUNTING(i) && !AFF_FLAGGED(i, AFF_TRACKING) && ++HOURS_SINCE_TRACK(i) > 8)
             HUNTING(i) = NULL;
-
           if (i->bioware)
             if (check_bioware(i)) {
               // They died? Time to restart the loop.

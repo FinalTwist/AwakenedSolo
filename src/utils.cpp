@@ -9860,43 +9860,198 @@ static std::string sysart_theme_for_room(struct room_data *room) {
   if(has("sewer")) return "sewer"; if(has("subway")||has("metro")||has("tunnel")) return "subway"; if(has("bridge")) return "bridge";
   if(has("apartment")||has("residential")||has("condo")) return "residential"; if(has("arcology")) return "arcology"; return "city";
 }
-static void sysart_spawn_in_room(long room_vnum, const char *name, const char *look, const char *roomdesc) {
+/*static void sysart_spawn_in_room(long room_vnum, const char *name, const char *look, const char *roomdesc) {
   int rnum=real_room(room_vnum); if(rnum<0) return; struct obj_data *art=read_object(OBJ_CUSTOM_ART, VIRTUAL, OBJ_LOAD_REASON_CREATE_ART); if(!art) return;
   GET_ART_AUTHOR_IDNUM(art)=0; GET_OBJ_VAL(art,1)=SYS_ART_MARKER; GET_OBJ_WEAR(art).RemoveBit(ITEM_WEAR_TAKE); GET_OBJ_EXTRA(art).SetBit(ITEM_EXTRA_NOSELL); GET_OBJ_EXTRA(art).SetBit(ITEM_EXTRA_NORENT);
   DELETE_ARRAY_IF_EXTANT(art->restring); art->restring=str_dup(name); DELETE_ARRAY_IF_EXTANT(art->text.look_desc); art->text.look_desc=str_dup(look); DELETE_ARRAY_IF_EXTANT(art->text.room_desc); art->text.room_desc=str_dup(roomdesc);
   extern struct room_data *world; obj_to_room(art, &world[rnum]);
+}+++ may have crashed when run*/
+
+static void sysart_spawn_in_room(long room_vnum, const char *name, const char *look, const char *roomdesc) {
+  int rnum = real_room(room_vnum);
+  if (rnum < 0) return;
+
+  // Create the art object (your existing create call).
+  struct obj_data *art = create_obj();
+  if (!art) return;
+
+  GET_OBJ_TYPE(art) = ITEM_OTHER;                    // or whichever generic type your code expects
+  GET_OBJ_TIMER(art) = 0;
+  GET_OBJ_RNUM(art) = -1;  
+  GET_ART_AUTHOR_IDNUM(art) = 0;
+  GET_OBJ_VAL(art, 1) = SYS_ART_MARKER;
+  GET_OBJ_EXTRA(art).SetBit(ITEM_EXTRA_NOSELL);
+  GET_OBJ_EXTRA(art).SetBit(ITEM_EXTRA_NORENT);
+
+  // >>>>>> BEGIN SAFE STRING SETS (no freeing of proto strings) <<<<<<
+  int pr = GET_OBJ_RNUM(art);                      // prototype index of this object
+  const char *proto_restring  = (pr >= 0 ? obj_proto[pr].restring            : NULL);
+  const char *proto_look_desc = (pr >= 0 ? obj_proto[pr].text.look_desc      : NULL);
+  const char *proto_room_desc = (pr >= 0 ? obj_proto[pr].text.room_desc      : NULL);
+
+  // Only delete if the instance already owns a distinct allocation (never delete proto strings)
+  if (art->restring && art->restring != proto_restring) {
+    delete [] art->restring;
+  }
+  art->restring = str_dup(name);
+
+  if (art->text.look_desc && art->text.look_desc != proto_look_desc) {
+    delete [] art->text.look_desc;
+  }
+  art->text.look_desc = str_dup(look);
+
+  if (art->text.room_desc && art->text.room_desc != proto_room_desc) {
+    delete [] art->text.room_desc;
+  }
+  art->text.room_desc = str_dup(roomdesc);
+  // <<<<<< END SAFE STRING SETS >>>>>>
+
+  extern struct room_data *world;
+  obj_to_room(art, &world[rnum]);
 }
+
 static bool sysart_exists_in_room(long room_vnum, const char *name, const char *look) {
   int rnum=real_room(room_vnum); if(rnum<0) return false; extern struct room_data *world;
   for(struct obj_data *obj=world[rnum].contents; obj; obj=obj->next_content) if(GET_OBJ_VNUM(obj)==OBJ_CUSTOM_ART && GET_OBJ_VAL(obj,1)==SYS_ART_MARKER) {
     const char*nm=GET_OBJ_NAME(obj)?GET_OBJ_NAME(obj):""; const char*lk=obj->text.look_desc?obj->text.look_desc:""; if(!str_cmp(nm,name)&&!str_cmp(lk,look)) return true; }
   return false;
 }
+// Compose randomized “system art” text (name, look-desc, room-desc) using BRAG/MOCK/DECO templates.
 static void sysart_compose(const std::string &theme, std::string &out_name, std::string &out_look, std::string &out_room) {
-  static const char* types[]={"graffito","stencil","paste-up","projection","holo-sticker","fiberlight scrawl","AR tag","microprint mural"};
-  static const char* adjs[]={"neon","glitched","holographic","spray-splattered","handmade","augmented","pixel-bled","datastream","chrome-edged","UV-reactive"};
-  static const char* signoffs[]={"— no fear","— stay chromed","— no gods, no grids","— trust the run","— frag luck","— optics on","— zero traces"};
-  static const char* corpnames[]={"Renraku","Ares","Aztechnology","Shiawase","Mitsuhama","Saeder-Krupp","Evo","NeoNET","Horizon"};
-  static const char* rivals[]={"NullCat","ChromeWitch","VectorKid","Bytegeist","SilkRazor","GhostShift","NovaFlux","PixeLich","ZephyrJack","GlitchVandal"};
-  static const char* hp[]={"Zero","Nano","Glitch","Chrome","Neon","Ghost","Cipher","Razor","Byte","Phantom","Nova","Static","Zephyr","Viper","Pixel","Flux","Wraith","Echo","Grim","Shock"};
-  static const char* hs[]={"runner","jack","blade","witch","smith","hacker","kid","queen","king","vandal","flux","shift","geist","wolf","cat","spider","rider","shade","mancer","net"};
-  auto pick=[&](const char*const*arr,int n){ return arr[number(0,n-1)]; };
-  auto make_handle=[&](){ std::string h=std::string(pick(hp,20))+pick(hs,20); if(!number(0,2)){ char b[8]; snprintf(b,sizeof(b),"%d",number(0,99)); h+=b;} return h; };
-  std::string type=pick(types,8), adj=pick(adjs,10), handle=make_handle(), rival=rivals[number(0,9)], corp=corpnames[number(0,8)];
-  int mode_roll=number(1,100);
-  if (mode_roll<=35) { // BRAG
-    static const char* brag[]={"Stencil reads: 'Soloed a %s blacksite. Ask @%s.'","Holo-spray boasts: '@%s ghosted %s HQ—first try, no trace.'","Projection flickers: 'Gridrunner @%s cracked a %s vault and left a smile.'","Paste-up lists bounties crossed out—last line: '@%s walked away.'","Fiberlight scrawl: 'Frag your ICE, %s. @%s was here.'"};
-    char buf[MAX_STRING_LENGTH]; const char* fmt=brag[number(0,4)]; snprintf(buf,sizeof(buf),fmt, corp.c_str(), handle.c_str());
-    out_name=std::string("^C")+type+"^n by @"+handle; out_look=buf; out_room=std::string("A ")+adj+" "+type+" signed by @"+handle+" glows with loud confidence.";
-  } else if (mode_roll<=60) { // MOCK
-    static const char* mock[]={"Spray tag jeers: '@%s still sandboxing hello world.'","Stencil jab: 'Hey @%s, your deck throttles like a toaster.'","AR tag tracks you and snickers: 'Looking for @%s? They faceplanted on %s ICE.'","Holo-sticker: '@%s, patch your rig before you brag.'","Paste-up meme shows @%s getting bounced by a %s receptionist."};
-    char buf[MAX_STRING_LENGTH]; const char* fmt=mock[number(0,4)]; snprintf(buf,sizeof(buf),fmt, rival.c_str(), corp.c_str());
-    out_name=std::string("^C")+type+"^n by @"+handle; out_look=buf; out_room="A cheeky "+type+" needles a rival handle—runner drama made permanent.";
-  } else { // DECO
-    static const char* deco[]={"A %s koi loops in AR, scales flickering like code.","A stenciled cherry blossom drifts across a chrome skull.","A glitch-art skyline overlays the real one, half a beat out of sync.","Microprint poetry crawls along the wall if you squint just right.","A neon fox chases its tail around a pillar, leaving light trails."};
-    char buf[MAX_STRING_LENGTH]; const char* fmt=deco[number(0,4)]; snprintf(buf,sizeof(buf),fmt, theme.c_str());
-    out_name=std::string("^C")+type+"^n by @"+handle; out_look=buf; if(!number(0,1)){ out_look+=" "; out_look+=signoffs[number(0,6)]; }
-    out_room=std::string("A ")+adj+" "+type+" by @"+handle+" brightens the "+theme+" here.";
+  static const char* types[]={
+    "graffito","stencil","paste-up","projection","holo-sticker","fiberlight scrawl","AR tag","microprint mural"
+  };
+  static const char* adjs[]={
+    "neon","glitched","holographic","spray-splattered","handmade","augmented","pixel-bled","datastream","chrome-edged","UV-reactive"
+  };
+  static const char* signoffs[]={
+    "— no fear","— stay chromed","— no gods, no grids","— trust the run","— frag luck","— optics on","— zero traces"
+  };
+  static const char* corpnames[]={
+    "Renraku","Ares","Aztechnology","Shiawase","Mitsuhama","Saeder-Krupp","Evo","NeoNET","Horizon"
+  };
+  static const char* rivals[]={
+    "NullCat","ChromeWitch","VectorKid","Bytegeist","SilkRazor","GhostShift","NovaFlux","PixeLich","ZephyrJack","GlitchVandal"
+  };
+  static const char* hp[]={
+    "Zero","Nano","Glitch","Chrome","Neon","Ghost","Cipher","Razor","Byte","Phantom","Nova","Static","Zephyr","Viper","Pixel","Flux","Wraith","Echo","Grim","Shock"
+  };
+  static const char* hs[]={
+    "runner","jack","blade","witch","smith","hacker","kid","queen","king","vandal","flux","shift","geist","wolf","cat","spider","rider","shade","mancer","net"
+  };
+
+  auto pick = [&](const char* const* arr, int n){ return arr[number(0, n-1)]; };
+  auto make_handle = [&](){
+    std::string h = std::string(pick(hp, (int)(sizeof(hp)/sizeof(hp[0]))))
+                  + pick(hs, (int)(sizeof(hs)/sizeof(hs[0])));
+    if (!number(0,2)) { char b[8]; snprintf(b, sizeof(b), "%d", number(0,99)); h += b; }
+    return h;
+  };
+
+  std::string type   = pick(types,   (int)(sizeof(types)/sizeof(types[0])));
+  std::string adj    = pick(adjs,    (int)(sizeof(adjs)/sizeof(adjs[0])));
+  std::string handle = make_handle();
+  std::string rival  = pick(rivals,  (int)(sizeof(rivals)/sizeof(rivals[0])));
+  std::string corp   = pick(corpnames,(int)(sizeof(corpnames)/sizeof(corpnames[0])));
+
+  int mode_roll = number(1,100);  // BRAG 35%, MOCK 25%, DECO 40%
+
+  if (mode_roll <= 35) { // -------- BRAG --------
+    static const char* brag[] = {
+      "Stencil reads: 'Soloed a %s blacksite. Ask @%s.'",                              // (corp, handle)
+      "Holo-spray boasts: '@%s ghosted %s HQ—first try, no trace.'",                   // (handle, corp)
+      "Projection flickers: 'Gridrunner @%s cracked a %s vault and left a smile.'",    // (handle, corp)
+      "Paste-up lists bounties crossed out—last line: '@%s walked away.'",             // (handle)
+      "Fiberlight scrawl: 'Frag your ICE, %s. @%s was here.'",                         // (corp, handle)
+      // PREVIOUS additions:
+      "AR confetti rains: '@%s speedran a %s killbox and streamed it live.'",          // (handle, corp)
+      "Chrome stencil: '@%s patched prod on %s while security was still brewing coffee.'", // (handle, corp)
+      // NEW +5:
+      "Projection burn: '@%s hotwired a %s drone swarm mid-flight.'",                  // (handle, corp)
+      "Paste-up ledger: '@%s rerouted %s payroll with three keystrokes.'",             // (handle, corp)
+      "Fiberlight flex: '@%s jailbroke a %s arcology turnstile—no alarms.'",           // (handle, corp)
+      "Holo tag boasts: '@%s walked out of %s R&D with coffee and root.'",             // (handle, corp)
+      "Microprint stamp: '@%s owned %s testnet before the NDA ink dried.'"             // (handle, corp)
+    };
+    const int n = (int)(sizeof(brag)/sizeof(brag[0]));
+    const char* fmt = brag[number(0, n-1)];
+    char buf[MAX_STRING_LENGTH];
+
+    // Parameter mapping for legacy lines:
+    if (strstr(fmt, "%s blacksite") || strstr(fmt, "your ICE"))
+      snprintf(buf, sizeof(buf), fmt, corp.c_str(), handle.c_str());  // (corp, handle)
+    else if (strstr(fmt, "%s HQ") || strstr(fmt, "cracked a %s") || strstr(fmt, "speedran") || strstr(fmt, "prod on %s"))
+      snprintf(buf, sizeof(buf), fmt, handle.c_str(), corp.c_str());  // (handle, corp)
+    else if (strstr(fmt, "%s R&D") || strstr(fmt, "drone swarm") || strstr(fmt, "payroll") || strstr(fmt, "turnstile") || strstr(fmt, "testnet"))
+      snprintf(buf, sizeof(buf), fmt, handle.c_str(), corp.c_str());  // (handle, corp)
+    else
+      snprintf(buf, sizeof(buf), fmt, handle.c_str());                // (handle) only
+
+    out_name = std::string("^C") + type + "^n by @" + handle;
+    out_look = buf;
+    out_room = std::string("A ") + adj + " " + type + " signed by @" + handle + " glows with loud confidence.";
+  }
+  else if (mode_roll <= 60) { // -------- MOCK --------
+    static const char* mock[] = {
+      "Spray tag jeers: '@%s still sandboxing hello world.'",                         // (rival)
+      "Stencil jab: 'Hey @%s, your deck throttles like a toaster.'",                  // (rival)
+      "AR tag tracks you and snickers: 'Looking for @%s? They faceplanted on %s ICE.'", // (rival, corp)
+      "Holo-sticker: '@%s, patch your rig before you brag.'",                         // (rival)
+      "Paste-up meme shows @%s getting bounced by a %s receptionist.",                 // (rival, corp)
+      // PREVIOUS additions:
+      "Projection gag: '@%s rage-quit a %s onboarding wizard.'",                      // (rival, corp)
+      "Fiberlight doodle: '@%s uses default creds on %s and calls it \"red team\".'", // (rival, corp)
+      // NEW +5:
+      "Stencil roast: '@%s can't even grep their own logs.'",                         // (rival)
+      "AR pointer: 'PSA: @%s thinks 2FA is two fingers.'",                            // (rival)
+      "Projection snark: '@%s got locked out by a %s coffee machine.'",               // (rival, corp)
+      "Paste-up clown: '@%s pushed to prod on %s—on a Friday.'",                      // (rival, corp)
+      "Fiberlight meme: '@%s copies stackoverflow into %s firmware and hopes.'"       // (rival, corp)
+    };
+    const int n = (int)(sizeof(mock)/sizeof(mock[0]));
+    const char* fmt = mock[number(0, n-1)];
+    char buf[MAX_STRING_LENGTH];
+
+    if (strstr(fmt, "faceplanted") || strstr(fmt, "receptionist") || strstr(fmt, "onboarding") ||
+        strstr(fmt, "default creds") || strstr(fmt, "coffee machine") || strstr(fmt, "on %s") || strstr(fmt, "firmware"))
+      snprintf(buf, sizeof(buf), fmt, rival.c_str(), corp.c_str());   // (rival, corp)
+    else
+      snprintf(buf, sizeof(buf), fmt, rival.c_str());                 // (rival)
+
+    out_name = std::string("^C") + type + "^n by @" + handle;
+    out_look = buf;
+    out_room = "A cheeky " + type + " needles a rival handle—runner drama made permanent.";
+  }
+  else { // -------- DECO --------
+    static const char* deco[] = {
+      "A %s koi loops in AR, scales flickering like code.",                             // (theme)
+      "A stenciled cherry blossom drifts across a chrome skull.",                       // ()
+      "A glitch-art skyline overlays the real one, half a beat out of sync.",           // ()
+      "Microprint poetry crawls along the wall if you squint just right.",              // ()
+      "A neon fox chases its tail around a pillar, leaving light trails.",              // ()
+      // PREVIOUS additions:
+      "A lattice of PCB vines climbs the wall, blooming %s petals.",                    // (theme)
+      "A ribbon of white noise twists into a serpent; its teeth spell %s.",             // (theme)
+      // NEW +5:
+      "A %s mandala blooms, petals tessellated into microchips.",                       // (theme)
+      "Hologrid rain falls upward, each drop a tiny %s glyph.",                          // (theme)
+      "A mural of wandering vectors resolves into a %s mask, then dissolves.",          // (theme)
+      "A swarm of voxel butterflies flutters by; their wings whisper '%s'.",            // (theme)
+      "A ribbon of %s calligraphy wraps a pillar in luminous strokes."                  // (theme)
+    };
+    const int n = (int)(sizeof(deco)/sizeof(deco[0]));
+    const char* fmt = deco[number(0, n-1)];
+    char buf[MAX_STRING_LENGTH];
+
+    // Count %s to decide how many args to pass (0/1). We avoid 2+ in DECO on purpose.
+    int placeholders = 0; for (const char* p = fmt; (p = strstr(p, "%s")); p += 2) ++placeholders;
+    if (placeholders >= 1) snprintf(buf, sizeof(buf), fmt, theme.c_str());
+    else                   snprintf(buf, sizeof(buf), fmt);
+
+    out_name = std::string("^C") + type + "^n by @" + handle;
+    out_look = buf;
+    if (!number(0,1)) { out_look += " "; out_look += pick(signoffs, (int)(sizeof(signoffs)/sizeof(signoffs[0]))); }
+    out_room = std::string("A ") + adj + " " + type + " by @" + handle + " brightens the " + theme + " here.";
   }
 }
 void maybe_seed_system_art() {
