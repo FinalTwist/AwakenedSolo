@@ -262,6 +262,13 @@ struct room_data *get_obj_in_room(struct obj_data *obj);
 // Visibility functions.
 bool invis_ok(struct char_data *ch, struct char_data *vict);
 
+// Global Essence discount for ware costs.
+// 75 / 100 = 0.75 => 25% cheaper. Use integers to avoid float drift.
+#ifndef ESSENCE_GLOBAL_MULT_NUM
+  #define ESSENCE_GLOBAL_MULT_NUM 75
+  #define ESSENCE_GLOBAL_MULT_DEN 100
+#endif
+
 /* undefine MAX and MIN so that our functions are used instead */
 #ifdef MAX
 #undef MAX

@@ -9529,24 +9529,26 @@ int calculate_ware_essence_or_index_cost(struct char_data *ch, struct obj_data *
   {
     int esscost = GET_CYBERWARE_ESSENCE_COST_RO(ware);
 
-    // Ghouls and drakes have doubled cyberware essence costs.
+    // Existing character-based modifiers.
     if (IS_GHOUL(ch) || IS_DRAKE(ch))
       esscost *= 2;
-
-    // Eagle Shamans have doubled essence costs.
     if (GET_TRADITION(ch) == TRAD_SHAMANIC && GET_TOTEM(ch) == TOTEM_EAGLE)
       esscost *= 2;
 
+    // === Global Essence discount (25% cheaper by default) ===
+    esscost = (int)((long long)esscost * ESSENCE_GLOBAL_MULT_NUM
+                    + (ESSENCE_GLOBAL_MULT_DEN / 2)) / ESSENCE_GLOBAL_MULT_DEN;
+
     return esscost;
   }
-
   else if (GET_OBJ_TYPE(ware) == ITEM_BIOWARE)
   {
     int indexcost = GET_BIOWARE_ESSENCE_COST(ware);
 
-    // Drakes have doubled bioware index costs.
-    if (IS_DRAKE(ch))
-      indexcost *= 2;
+    // If you ALSO want bioware "index" discounted, keep this block;
+    // otherwise, delete it to leave bioware unchanged.
+    indexcost = (int)((long long)indexcost * ESSENCE_GLOBAL_MULT_NUM
+                      + (ESSENCE_GLOBAL_MULT_DEN / 2)) / ESSENCE_GLOBAL_MULT_DEN;
 
     return indexcost;
   }
