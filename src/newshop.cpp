@@ -24,6 +24,7 @@
 #include "pocketsec.hpp"
 #include "factions.hpp"
 #include "metrics.hpp"
+#include "npcvoice.hpp"
 
 extern struct time_info_data time_info;
 extern const char *pc_race_types[];
@@ -718,6 +719,8 @@ bool shop_receive(struct char_data *ch, struct char_data *keeper, char *arg, int
     } else {
       snprintf(ENDOF(buf), sizeof(buf) - strlen(buf), " %s", shop_table[shop_nr].not_enough_nuyen);
       do_say(keeper, buf, cmd_say, SCMD_SAYTO);
+      if (keeper && IS_NPC(keeper) && ch && !IS_NPC(ch))
+  NPCVoice::shop_event(ch, keeper, 4); // 4 = poor
     }
     return FALSE;
   }
@@ -744,6 +747,9 @@ bool shop_receive(struct char_data *ch, struct char_data *keeper, char *arg, int
     }
 
     bought = 1;
+    // NPCVoice: successful purchase.
+    if (keeper && IS_NPC(keeper) && ch && !IS_NPC(ch))
+      NPCVoice::shop_event(ch, keeper, 1); // 1 = buy
 
     if (cred)
       lose_bank(ch, price, NUYEN_OUTFLOW_SHOP_PURCHASES);
@@ -1124,8 +1130,11 @@ void shop_buy(char *arg, size_t arg_len, struct char_data *ch, struct char_data 
   char buf[MAX_STRING_LENGTH];
   if (!is_open(keeper, shop_nr))
     return;
-  if (!is_ok_char(keeper, ch, shop_nr))
+  if (!is_ok_char(keeper, ch, shop_nr)){
+    if (keeper && IS_NPC(keeper) && ch && !IS_NPC(ch))
+    NPCVoice::shop_event(ch, keeper, 3); // 3 = deny
     return;
+  }
   struct obj_data *obj = NULL, *cred = get_first_credstick(ch, "credstick");
   struct shop_sell_data *sell;
   int price, buynum;
@@ -1443,8 +1452,11 @@ void shop_sell(char *arg, struct char_data *ch, struct char_data *keeper, vnum_t
 
   if (!is_open(keeper, shop_nr))
     return;
-  if (!is_ok_char(keeper, ch, shop_nr))
+  if (!is_ok_char(keeper, ch, shop_nr)){
+    if (keeper && IS_NPC(keeper) && ch && !IS_NPC(ch))
+    NPCVoice::shop_event(ch, keeper, 3); // 3 = deny
     return;
+  }
 
   struct obj_data *obj = NULL, *cred = get_first_credstick(ch, "credstick");
   struct shop_sell_data *sell = shop_table[shop_nr].selling;
@@ -1589,6 +1601,10 @@ void shop_sell(char *arg, struct char_data *ch, struct char_data *keeper, vnum_t
   }
 
   sellprice = negotiate_and_payout_sellprice(ch, keeper, shop_nr, sellprice);
+
+  // NPCVoice: successful sale.
+  if (keeper && IS_NPC(keeper) && ch && !IS_NPC(ch))
+    NPCVoice::shop_event(ch, keeper, 2); // 2 = sell
 
   const char *representation = generate_new_loggable_representation(obj);
   snprintf(buf3, sizeof(buf3), "%s sold %s^g at %s^g (%ld) for %d.", GET_CHAR_NAME(ch), representation, GET_CHAR_NAME(keeper), shop_table[shop_nr].vnum, sellprice);
@@ -1904,8 +1920,11 @@ void shop_value(char *arg, struct char_data *ch, struct char_data *keeper, vnum_
   char buf[MAX_STRING_LENGTH];
   if (!is_open(keeper, shop_nr))
     return;
-  if (!is_ok_char(keeper, ch, shop_nr))
+  if (!is_ok_char(keeper, ch, shop_nr)){
+    if (keeper && IS_NPC(keeper) && ch && !IS_NPC(ch))
+    NPCVoice::shop_event(ch, keeper, 3); // 3 = deny
     return;
+  }
   struct obj_data *obj;
   strlcpy(buf, GET_CHAR_NAME(ch), sizeof(buf));
   if (!*arg)
@@ -2005,8 +2024,11 @@ void shop_info(char *arg, struct char_data *ch, struct char_data *keeper, vnum_t
   int num = 0, num2 = 0;
   if (!is_open(keeper, shop_nr))
     return;
-  if (!is_ok_char(keeper, ch, shop_nr))
+  if (!is_ok_char(keeper, ch, shop_nr)){
+    if (keeper && IS_NPC(keeper) && ch && !IS_NPC(ch))
+    NPCVoice::shop_event(ch, keeper, 3); // 3 = deny
     return;
+  }
   struct obj_data *obj;
   skip_spaces(&arg);
 
@@ -2407,8 +2429,11 @@ void shop_check(char *arg, struct char_data *ch, struct char_data *keeper, vnum_
 
   if (!is_open(keeper, shop_nr))
     return;
-  if (!is_ok_char(keeper, ch, shop_nr))
+  if (!is_ok_char(keeper, ch, shop_nr)){
+    if (keeper && IS_NPC(keeper) && ch && !IS_NPC(ch))
+    NPCVoice::shop_event(ch, keeper, 3); // 3 = deny
     return;
+  }
   int i = 0;
   snprintf(buf, sizeof(buf), "You have the following on order: \r\n");
   for (struct shop_order_data *order = shop_table[shop_nr].order; order; order = order->next)
@@ -2476,8 +2501,11 @@ void shop_rec(char *arg, struct char_data *ch, struct char_data *keeper, vnum_t 
 {
   if (!is_open(keeper, shop_nr))
     return;
-  if (!is_ok_char(keeper, ch, shop_nr))
+  if (!is_ok_char(keeper, ch, shop_nr)){
+    if (keeper && IS_NPC(keeper) && ch && !IS_NPC(ch))
+    NPCVoice::shop_event(ch, keeper, 3); // 3 = deny
     return;
+  }
   char buf[MAX_STRING_LENGTH];
   int number = atoi(arg);
 	if (number <= 0) {
@@ -2515,8 +2543,11 @@ void shop_cancel(char *arg, struct char_data *ch, struct char_data *keeper, vnum
   char buf[MAX_STRING_LENGTH];
   if (!is_open(keeper, shop_nr))
     return;
-  if (!is_ok_char(keeper, ch, shop_nr))
+  if (!is_ok_char(keeper, ch, shop_nr)){
+    if (keeper && IS_NPC(keeper) && ch && !IS_NPC(ch))
+    NPCVoice::shop_event(ch, keeper, 3); // 3 = deny
     return;
+  }
   int number;
   strlcpy(buf, GET_CHAR_NAME(ch), sizeof(buf));
   if (!(number = atoi(arg)))

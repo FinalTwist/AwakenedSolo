@@ -24,6 +24,7 @@
 #include <mysql/mysql.h>
 #include <map>
 #include <algorithm>
+#include "npcvoice.hpp"
 
 #if defined(WIN32) && !defined(__CYGWIN__)
 #include <process.h>
@@ -72,6 +73,7 @@ namespace bf = boost::filesystem;
 #include "zoomies.hpp"
 #include "redit.hpp"
 #include "vehicles.hpp"
+#include "npcvoice.hpp"
 
 ACMD_DECLARE(do_reload);
 
@@ -821,6 +823,8 @@ void DBInit()
 
   log("Building escalator vector.");
   boot_escalators();
+
+  NPCVoice::init();   // <-- load all category files into g_bank
 
   log("DBInit -- DONE.");
 }

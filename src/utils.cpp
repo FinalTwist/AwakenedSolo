@@ -9751,7 +9751,7 @@ void maybe_trigger_street_microevent(struct char_data *ch) {
   time_t now = time(0);
   long key = GET_IDNUM(ch);
   if (last[key] && now - last[key] < 30) return;
-  if (number(0, 99)) { maybe_award_discovery(ch); return; } // 1% chance; still check discovery
+  if (number(0, 95)) { maybe_award_discovery(ch); return; } // 1% chance; still check discovery
 
   last[key] = now;
 

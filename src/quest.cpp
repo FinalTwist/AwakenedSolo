@@ -31,6 +31,7 @@
 #include "newmatrix.hpp"
 #include "config.hpp"
 #include "bullet_pants.hpp"
+#include "npcvoice.hpp"
 
 extern bool memory(struct char_data *ch, struct char_data *vict);
 extern class objList ObjList;
@@ -178,6 +179,7 @@ void initialize_quest_for_ch(struct char_data *ch, int quest_rnum, struct char_d
   act("^n", FALSE, johnson, 0, 0, TO_ROOM);
   handle_info(johnson, quest_rnum, ch);
   InnerVoice::notify_quest_accept(ch, quest_table[quest_rnum].vnum);
+  if (johnson && IS_NPC(johnson)) NPCVoice::quest_event(ch, johnson, 1); // 1 = accept
 }
 
 bool attempt_quit_job(struct char_data *ch, struct char_data *johnson) {

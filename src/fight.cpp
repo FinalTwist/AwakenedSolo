@@ -33,6 +33,7 @@
 #include "factions.hpp"
 #include "metrics.hpp"
 #include "gmcp.hpp"
+#include "npcvoice.hpp"
 int initiative_until_global_reroll = 0;
 
 /* Structures */
@@ -431,6 +432,10 @@ void set_fighting(struct char_data * ch, struct char_data * vict, ...)
   // We set fighting before we call roll_individual_initiative() because we need the fighting target there.
   FIGHTING(ch) = vict;
   GET_POS(ch) = POS_FIGHTING;
+
+    // NPCVoice: combat start barks.
+  if (IS_NPC(vict) && !IS_NPC(ch)) NPCVoice::combat_start(ch, vict);
+  if (IS_NPC(ch) && !IS_NPC(vict)) NPCVoice::combat_start(vict, ch);
 
   roll_individual_initiative(ch);
   order_list(TRUE);
@@ -924,6 +929,10 @@ void raw_kill(struct char_data * ch, idnum_t cause_of_death_idnum)
     for (struct descriptor_data *d = descriptor_list; d; d = d->next) {
       if (d->character && GET_IDNUM(d->character) == cause_of_death_idnum) {
         InnerVoice::notify_enemy_death(d->character, GET_MOB_VNUM(ch));
+        // NPCVoice: death bark from the NPC (victim is 'ch', killer is d->character)
+        if (!IS_NPC(d->character) && IS_NPC(ch)) {
+          NPCVoice::combat_death(d->character, ch);
+        }
         break;
       }
     }
@@ -3035,8 +3044,22 @@ bool can_hurt(struct char_data *ch, struct char_data *victim, int attacktype, bo
   return TRUE;
 }
 
-bool damage(struct char_data *ch, struct char_data *victim, int dam, int attacktype, bool is_physical) {
-  return raw_damage(ch, victim, dam, attacktype, is_physical, TRUE);
+bool damage(struct char_data *ch, struct char_data *victim, int dam, int attacktype, bool is_physical)
+{
+  if (!ch || !victim) return FALSE;
+
+  if (raw_damage(ch, victim, dam, attacktype, is_physical, TRUE)) {
+    // NPCVoice: combat hit bark (only NPC <-> player and same room)
+    if (ch->in_room && victim->in_room && ch->in_room == victim->in_room) {
+      if (IS_NPC(victim) && !IS_NPC(ch)) {
+        NPCVoice::combat_hit(ch, victim);
+      } else if (IS_NPC(ch) && !IS_NPC(victim)) {
+        NPCVoice::combat_hit(victim, ch);
+      }
+    }
+    return TRUE;
+  }
+  return FALSE; // <-- fix the warning by returning on the miss/blocked path
 }
 
 bool damage_without_message(struct char_data *ch, struct char_data *victim, int dam, int attacktype, bool is_physical) {

@@ -1,0 +1,3 @@
+[gang/shop_sell] placeholder line 1
+[gang/shop_sell] placeholder line 2
+[gang/shop_sell] placeholder line 3

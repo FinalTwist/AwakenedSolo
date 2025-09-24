@@ -1,0 +1,3 @@
+[gang/combat_start] placeholder line 1
+[gang/combat_start] placeholder line 2
+[gang/combat_start] placeholder line 3

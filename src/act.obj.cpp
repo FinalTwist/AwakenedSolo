@@ -34,6 +34,7 @@
 #include "vehicles.hpp"
 #include "pets.hpp"
 #include "bullet_pants.hpp"
+#include "npcvoice.hpp"
 
 /* extern variables */
 extern int drink_aff[][3];
@@ -2859,6 +2860,9 @@ void _ch_gives_obj_to_vict(struct char_data *ch, struct obj_data *obj, struct ch
 	obj_from_char(obj);
 	obj_to_char(obj, vict);
 	act("You give $p to $N.", FALSE, ch, obj, vict, TO_CHAR);
+	// NPCVoice: NPC received an item from player.
+  if (vict && IS_NPC(vict) && ch && !IS_NPC(ch))
+    NPCVoice::receive_item(ch, vict, obj);
 	act("$n gives you $p.", FALSE, ch, obj, vict, TO_VICT);
 	if (ch->in_veh)
 	{

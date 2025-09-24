@@ -11,11 +11,19 @@
 
 namespace NPCVoice {
 
+  void init();  // call once at boot to load category files
+
   enum Personality {
     PERS_GANG = 0,
     PERS_NEUTRAL = 1,
     PERS_POLITE = 2
   };
+
+  // Returns true if `said` contains a greeting and mentions `mob` by name.
+bool is_addressed_greeting(const char* said, struct char_data* mob);
+
+// Always replies with a greeting line (from greet.txt) for mob's personality.
+void addressed_greet(struct char_data* ch, struct char_data* mob);
 
   void maybe_greet(struct char_data* ch, struct char_data* mob);
   void maybe_farewell(struct char_data* ch, struct char_data* mob);
@@ -29,5 +37,7 @@ namespace NPCVoice {
 
   void set_personality(struct char_data* mob, Personality p);
   Personality get_personality(struct char_data* mob);
+
+  bool contains_greeting(const char* said);
 
 } // namespace NPCVoice

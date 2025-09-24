@@ -1,0 +1,3 @@
+[gang/shop_deny] placeholder line 1
+[gang/shop_deny] placeholder line 2
+[gang/shop_deny] placeholder line 3

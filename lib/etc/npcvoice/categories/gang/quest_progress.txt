@@ -1,0 +1,3 @@
+[gang/quest_progress] placeholder line 1
+[gang/quest_progress] placeholder line 2
+[gang/quest_progress] placeholder line 3

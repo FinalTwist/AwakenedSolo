@@ -1,0 +1,3 @@
+[gang/farewell] placeholder line 1
+[gang/farewell] placeholder line 2
+[gang/farewell] placeholder line 3

@@ -32,6 +32,7 @@
 #include "ignore_system.hpp"
 #include "config.hpp"
 #include "moderation.hpp"
+#include "npcvoice.hpp"
 
 /* extern variables */
 extern struct skill_data skills[];
@@ -144,6 +145,25 @@ ACMD(do_say)
         store_message_to_history(tmp->desc, COMM_CHANNEL_OSAYS, perform_act(buf, ch, NULL, NULL, tmp, FALSE));
       }
     }
+     // NPCVoice: addressed greetings (100% reply). If player said "hello <NPC>", that NPC replies.
+  bool __nv_handled_greet = false;
+  if (ch->in_room) {
+    for (struct char_data* mob = ch->in_room->people; mob; mob = mob->next_in_room) {
+      if (!IS_NPC(mob) || mob == ch) continue;
+      if (NPCVoice::is_addressed_greeting(argument, mob)) {
+        NPCVoice::addressed_greet(ch, mob);
+        __nv_handled_greet = true;
+      }
+    }
+  }
+
+  // NPCVoice: generic "listen" reactions only if nothing was explicitly addressed
+  if (!__nv_handled_greet && ch->in_room) {
+    for (struct char_data *mob = ch->in_room->people; mob; mob = mob->next_in_room) {
+      if (!IS_NPC(mob) || mob == ch) continue;
+      NPCVoice::maybe_listen(ch, mob, argument);
+    }
+  }
     // Send it to anyone who's rigging a vehicle here.
     for (struct veh_data *veh = ch->in_room ? ch->in_room->vehicles : ch->in_veh->carriedvehs;
          veh;
@@ -155,6 +175,11 @@ ACMD(do_say)
   } else {
     // Speech gives you 5 minutes of grace period. Emotes give you more.
     ch->char_specials.last_social_action = LAST_SOCIAL_ACTION_REQUIREMENT_FOR_CONGREGATION_BONUS - SOCIAL_ACTION_GRACE_PERIOD_GRANTED_BY_SPEECH;
+
+    // NPCVoice: if player used say-to and it’s a greeting, force a greeting reply.
+    if (to && IS_NPC(to) && *argument && NPCVoice::contains_greeting(argument)) {
+      NPCVoice::addressed_greet(ch, to);
+    }
 
     for (tmp = ch->in_room ? ch->in_room->people : ch->in_veh->people; tmp; tmp = ch->in_room ? tmp->next_in_room : tmp->next_in_veh) {
       if (tmp == ch || IS_IGNORING(tmp, is_blocking_ic_interaction_from, ch))
@@ -168,6 +193,30 @@ ACMD(do_say)
           snprintf(buf2, MAX_STRING_LENGTH, " to %s^n", CAN_SEE(tmp, to) ? (safe_found_mem(tmp, to) ? CAP(safe_found_mem(tmp, to)->mem)
                   : GET_NAME(to)) : "someone");
       }
+       // NPCVoice: addressed greetings (100% reply). If player said "hello <NPC>", that NPC replies.
+  bool __nv_handled_greet = false;
+  if (ch->in_room) {
+    for (struct char_data* mob = ch->in_room->people; mob; mob = mob->next_in_room) {
+      if (!IS_NPC(mob) || mob == ch) continue;
+      if (NPCVoice::is_addressed_greeting(argument, mob) || NPCVoice::contains_greeting(argument)) {
+        NPCVoice::addressed_greet(ch, mob);
+        __nv_handled_greet = true;
+      }
+    }
+  }
+
+  // NPCVoice: generic "listen" reactions only if nothing was explicitly addressed
+  if (!__nv_handled_greet && ch->in_room) {
+    for (struct char_data *mob = ch->in_room->people; mob; mob = mob->next_in_room) {
+      if (!IS_NPC(mob) || mob == ch) continue;
+      NPCVoice::maybe_listen(ch, mob, argument);
+    }
+  }
+        // NPCVoice: nearby NPCs react to what was said.
+      for (struct char_data *mob = ch->in_room ? ch->in_room->people : NULL; mob; mob = mob->next_in_room) {
+        if (!IS_NPC(mob) || mob == ch) continue;
+        NPCVoice::maybe_listen(ch, mob, argument);
+      }
 
       snprintf(buf, sizeof(buf), "$z^n says%s in %s, \"%s%s%s^n\"",
               (to ? buf2 : ""),
@@ -180,6 +229,42 @@ ACMD(do_say)
       // Note: includes act()
       store_message_to_history(tmp->desc, COMM_CHANNEL_SAYS, act(buf, FALSE, ch, NULL, tmp, TO_VICT));
     }
+
+    // NPCVoice: addressed greetings (100% reply)
+    bool __nv_handled_greet = false;
+
+    // If the text contains a greeting and mentions an NPC by name, that NPC replies.
+    if (ch->in_room && *argument) {
+      for (struct char_data* mob = ch->in_room->people; mob; mob = mob->next_in_room) {
+        if (!IS_NPC(mob) || mob == ch) continue;
+        if (NPCVoice::is_addressed_greeting(argument, mob)) {
+          NPCVoice::addressed_greet(ch, mob);
+          __nv_handled_greet = true;
+        }
+      }
+    }
+
+    // If no name used but it's a greeting and exactly one NPC is here, reply anyway.
+    if (!__nv_handled_greet && ch->in_room && NPCVoice::contains_greeting(argument)) {
+      struct char_data* only = NULL; int count = 0;
+      for (struct char_data* mob = ch->in_room->people; mob; mob = mob->next_in_room) {
+        if (!IS_NPC(mob) || mob == ch) continue;
+        only = mob; ++count; if (count > 1) break;
+      }
+      if (count == 1 && only) {
+        NPCVoice::addressed_greet(ch, only);
+        __nv_handled_greet = true;
+      }
+    }
+
+    // If nothing was handled explicitly, allow generic listen reactions.
+    if (!__nv_handled_greet && ch->in_room) {
+      for (struct char_data *mob = ch->in_room->people; mob; mob = mob->next_in_room) {
+        if (!IS_NPC(mob) || mob == ch) continue;
+        NPCVoice::maybe_listen(ch, mob, argument);
+      }
+    }
+
     // Send it to anyone who's rigging a vehicle here.
     for (struct veh_data *veh = ch->in_room ? ch->in_room->vehicles : ch->in_veh->carriedvehs;
          veh;

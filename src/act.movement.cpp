@@ -41,6 +41,7 @@
 #ifndef DOOR_IS_OPENABLE
 // #define DOOR_IS_OPENABLE(ch, obj, door) ((obj) ? ((GET_OBJ_TYPE(obj) == ITEM_CONTAINER) && (IS_SET(GET_OBJ_VAL(obj, 1), CONT_CLOSEABLE))) : (IS_SET(EXIT(ch, door)->exit_info, EX_ISDOOR) && !IS_SET(EXIT(ch, door)->exit_info, EX_DESTROYED) && !IS_SET(EXIT(ch, door)->exit_info, EX_HIDDEN)))
 #endif
+#include "npcvoice.hpp"
 
 
 /* external functs */
@@ -518,9 +519,23 @@ int do_simple_move(struct char_data *ch, int dir, int extra, struct char_data *v
   }
 
   was_in = ch->in_room;
+    // NPCVoice: farewells from NPCs in the old room.
+  if (was_in) {
+    for (struct char_data *mob = was_in->people; mob; mob = mob->next_in_room) {
+      if (!IS_NPC(mob) || mob == ch) continue;
+      NPCVoice::maybe_farewell(ch, mob);
+    }
+  }
   STOP_WORKING(ch);
   char_from_room(ch);
   char_to_room(ch, was_in->dir_option[dir]->to_room);
+  // NPCVoice: greetings from NPCs in the new room.
+  if (ch->in_room) {
+    for (struct char_data *mob = ch->in_room->people; mob; mob = mob->next_in_room) {
+      if (!IS_NPC(mob) || mob == ch) continue;
+      NPCVoice::maybe_greet(ch, mob);
+    }
+  }
 
   if (ROOM_FLAGGED(was_in, ROOM_INDOORS) && !ROOM_FLAGGED(ch->in_room, ROOM_INDOORS))
   {
