@@ -5676,6 +5676,25 @@ void display_help(char *help, int help_len, const char *arg, struct char_data *c
     } else {
       // Failed to find a match-- clean up and continue.
       mysql_free_result(res);
+      // --- Filesystem fallback for help topics ---
+      // If DB has no exact match, try lib/text/help/<lowercase>.
+      {
+        char fpath[1024] = {0};
+        char lower[MAX_STRING_LENGTH] = {0};
+        strlcpy(lower, arg, sizeof(lower));
+        for (char *p = lower; *p; ++p) *p = LOWER(*p);
+
+        snprintf(fpath, sizeof(fpath), "lib/text/help/%s", lower);
+        FILE *hf = fopen(fpath, "r");
+        if (hf) {
+          // Slurp file and send
+          size_t n = fread(help, 1, help_len - 1, hf);
+          help[n] = '\0';
+          fclose(hf);
+          return; // handled by filesystem
+        }
+      }
+      // --- end filesystem fallback ---
     }
   }
 

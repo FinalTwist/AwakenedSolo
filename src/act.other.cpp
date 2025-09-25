@@ -5653,6 +5653,8 @@ ACMD(do_pickpocket)
     thief_dice = (int) ((thief_dice * 3) / 2);
   }
 
+  thief_dice += MAX(0, (GET_QUI(ch) - 3) / 2); // small bump from QUI above baseline
+
   if (thief_dice < 1) thief_dice = 1;
 
   // Opposed success test, flat TN 4 on both sides.

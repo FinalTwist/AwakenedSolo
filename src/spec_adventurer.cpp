@@ -26,6 +26,11 @@
 #include "archetypes.hpp"
 
 #include "spec_adventurer.hpp"
+// Fallback: some builds don't export a ROOM_SOCIALIZE symbol even though "SOCIALIZE!" exists in room_bits[].
+// In constants.cpp, "SOCIALIZE!" is index 32 (0-based). Our bitset helpers take the index, not a mask.
+#ifndef ROOM_SOCIALIZE
+#define ROOM_SOCIALIZE 32
+#endif
 
 // ---------- utils ----------
 static std::string trim(const std::string& s) {
@@ -223,6 +228,11 @@ static void load_class_gear_if_needed() {
     }
     adv_class_gear[tag] = cg;
   }
+}
+
+// Treat SOCIALIZE rooms specially for spawns.
+static inline bool is_room_socialize(struct room_data *room) {
+  return room && ROOM_FLAGGED(room, ROOM_SOCIALIZE);
 }
 
 // ---------- names ----------
@@ -563,6 +573,54 @@ static const Tier* pick_tier() {
   return &adv_tiers.back();
 }
 
+void adventurer_on_pc_login(struct char_data* ch) {
+  if (!ch || IS_NPC(ch)) return;
+  struct room_data* room = get_ch_in_room(ch);
+  if (!room) return;
+  load_config_if_needed();
+
+  int z = room->zone;
+  adv_zone_last_activity[z] = time(0);
+
+// -- SOCIALIZE rooms: force guaranteed spawns on zone entry.
+  {
+    std::vector<struct room_data*> socialize_rooms;
+    for (rnum_t rr = 0; rr <= top_of_world; rr++) {
+      if (!VALID_ROOM_RNUM(rr)) continue;
+      struct room_data* R = &world[rr];
+      if (R->zone != z) continue;
+      if (!is_room_socialize(R)) continue;
+      if (!is_room_ok_for_spawn(R)) continue; // still respect disallowed rooms
+      socialize_rooms.push_back(R);
+    }
+
+    if (!socialize_rooms.empty()) {
+      // Spawn 1–3 adventurers, each in a (potentially) different SOCIALIZE room.
+      int to_spawn = number(1, 3);
+      for (int i = 0; i < to_spawn; ++i) {
+        struct room_data* dest = socialize_rooms[number(0, (int)socialize_rooms.size() - 1)];
+        spawn_one_adventurer_in_room(dest);
+      }
+      return; // We handled the special case; skip the normal random-chance path.
+    }
+  }
+
+  // Fall back to the normal random attempt (but WITHOUT the zone-change guard).
+  if (number(1, 100) > adv_zone_entry_spawn_chance_pct) return;
+
+  std::vector<struct room_data*> candidates;
+  for (rnum_t rr = 0; rr <= top_of_world; rr++) {
+    if (!VALID_ROOM_RNUM(rr)) continue;
+    struct room_data* R = &world[rr];
+    if (R->zone != z) continue;
+    if (!is_room_ok_for_spawn(R)) continue;
+    candidates.push_back(R);
+  }
+  if (candidates.empty()) return;
+  struct room_data* dest = candidates[number(0, (int)candidates.size()-1)];
+  spawn_one_adventurer_in_room(dest);
+}
+
 // Zone-entry hook
 void adventurer_on_pc_enter_room(struct char_data* ch, struct room_data* room) {
   if (!ch || !room) return;
@@ -576,6 +634,29 @@ void adventurer_on_pc_enter_room(struct char_data* ch, struct room_data* room) {
 
   if (last == z) return; // only on zone change
   adv_last_zone_for_pc[id] = z;
+
+    // -- SOCIALIZE rooms: force guaranteed spawns on zone entry.
+  {
+    std::vector<struct room_data*> socialize_rooms;
+    for (rnum_t rr = 0; rr <= top_of_world; rr++) {
+      if (!VALID_ROOM_RNUM(rr)) continue;
+      struct room_data* R = &world[rr];
+      if (R->zone != z) continue;
+      if (!is_room_socialize(R)) continue;
+      if (!is_room_ok_for_spawn(R)) continue; // still respect disallowed rooms
+      socialize_rooms.push_back(R);
+    }
+
+    if (!socialize_rooms.empty()) {
+      // Spawn 1–3 adventurers, each in a (potentially) different SOCIALIZE room.
+      int to_spawn = number(1, 3);
+      for (int i = 0; i < to_spawn; ++i) {
+        struct room_data* dest = socialize_rooms[number(0, (int)socialize_rooms.size() - 1)];
+        spawn_one_adventurer_in_room(dest);
+      }
+      return; // We handled the special case; skip the normal random-chance path.
+    }
+  }
 
   if (number(1, 100) > adv_zone_entry_spawn_chance_pct) return;
 
