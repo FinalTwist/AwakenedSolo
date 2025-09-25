@@ -311,7 +311,7 @@ void save_all_apartments_and_storage_rooms() {
       }
     }
   }
-
+  /*
   // Save all storage rooms.
   for (rnum_t x = 0; x <= top_of_world; x++) {
     struct room_data *room = &world[x];
@@ -333,7 +333,54 @@ void save_all_apartments_and_storage_rooms() {
         mudlog_vfprintf(NULL, LOG_SYSLOG, "SYSERR: Unable to save storage room %ld: Can't get filename!", GET_ROOM_VNUM(room));
       }
     }
+  }+++ room persistence*/
+  // Save all rooms (not just STORAGE). Dirty or occupied rooms get written.
+  for (rnum_t x = 0; x <= top_of_world; x++) {
+    struct room_data *room = &world[x];
+
+    if (!room->dirty_bit && !room->people)
+      continue;
+
+    room->dirty_bit = FALSE;
+
+    char filename[100];
+    if (Storage_get_filename(GET_ROOM_VNUM(room), filename, sizeof(filename))) {
+      Storage_save(filename, room);
+    } else {
+      mudlog_vfprintf(NULL, LOG_SYSLOG, "SYSERR: Unable to save room %ld: Can't get filename!",
+                      GET_ROOM_VNUM(room));
+    }
   }
+}
+
+// NEW: 3% daily litter sweep for non-storage, non-apartment rooms.
+// Clears *ground items* (room->contents) to simulate a busy city.
+void daily_city_litter_sweep() {
+  for (rnum_t x = 0; x <= top_of_world; x++) {
+    struct room_data *room = &world[x];
+
+    // Skip safe places: storage rooms and apartments.
+    if (ROOM_FLAGGED(room, ROOM_STORAGE))
+      continue;
+    if (GET_APARTMENT(room)) // same macro you use to protect apartments elsewhere
+      continue;
+
+    // 3% chance this room gets "cleaned out" today.
+    if (number(1, 100) > 3)
+      continue;
+
+    // Remove all objects on the ground in this room.
+    for (struct obj_data *obj = room->contents, *next; obj; obj = next) {
+      next = obj->next_content;
+      extract_obj(obj);
+    }
+
+    // Mark dirty so the autosaver writes it soon.
+    room->dirty_bit = TRUE;
+  }
+
+  // Optional: force a save now so it survives crashes too.
+  save_all_apartments_and_storage_rooms();
 }
 
 /*********** ApartmentComplex ************/

@@ -9150,7 +9150,7 @@ void set_dropped_by_info(struct obj_data *obj, struct char_data *ch)
     delete[] obj->dropped_by_host;
     obj->dropped_by_host = ch->desc ? str_dup(ch->desc->host) : str_dup("<no desc>");
   }
-
+/*
   // Also set the drop timestamp, provided that it's dropped in a non-storage, non-apartment room; isn't a quest item or workshop; and doesn't have contents (weapons exempt)
   if (obj->in_room && !obj->in_obj && !obj->carried_by && !GET_APARTMENT(obj->in_room) && !ROOM_FLAGGED(obj->in_room, ROOM_STORAGE))
   {
@@ -9158,7 +9158,33 @@ void set_dropped_by_info(struct obj_data *obj, struct char_data *ch)
     {
       GET_OBJ_EXPIRATION_TIMESTAMP(obj) = time(0) + DROPPED_OBJ_EXPIRATION_TIME_IN_SECONDS;
     }
+  }+++ making items persist 
+  */
+  // Only temporary ground items should decay. Everything else persists.
+  if (obj->in_room && !obj->in_obj && !obj->carried_by) {
+    auto is_temporary_ground_obj = [](const obj_data *o) -> bool {
+      if (!o) return false;
+
+      // Corpses (your corpse objects set ITEM_EXTRA_CORPSE and special vnums in fight.cpp)
+      if (IS_OBJ_STAT(o, ITEM_EXTRA_CORPSE)) return true;
+
+      // Anything explicitly flagged temporary or pre-timed should decay normally.
+      if (GET_OBJ_TIMER(o) > 0) return true;
+
+      // Add any other ephemeral types you use for ambience (adjust as needed).
+      // Example: “blood/puddle” props skillfully tagged by builders as temporary.
+      return false;
+    };
+
+    if (is_temporary_ground_obj(obj)) {
+      // Keep your existing short decay for temporary things.
+      GET_OBJ_EXPIRATION_TIMESTAMP(obj) = time(0) + DROPPED_OBJ_EXPIRATION_TIME_IN_SECONDS;
+    } else {
+      // Persistables: no auto-expire just because they’re on the ground.
+      GET_OBJ_EXPIRATION_TIMESTAMP(obj) = 0;
+    }
   }
+
 }
 
 bool ch_can_bypass_edit_lock(struct char_data *ch, struct zone_data *zone)
@@ -9842,7 +9868,14 @@ static void sysart_load(std::vector<sys_art_entry> &out) {
   out.clear(); FILE *fp=fopen(SYS_ART_FILE,"r"); if(!fp) return; char buf[MAX_STRING_LENGTH];
   while (fgets(buf,sizeof(buf),fp)) {
     char *room=strtok(buf,"|"); char *name=strtok(NULL,"|"); char *look=strtok(NULL,"|"); char *rdesc=strtok(NULL,"\r\n");
-    if(!room||!name||!look||!rdesc) continue; sys_art_entry e; e.room_vnum=atol(room); e.name=sysart_unescape(name); e.look=sysart_unescape(look); e.roomdesc=sysart_unescape(rdesc); out.push_back(e);
+    if(!room||!name||!look||!rdesc) 
+      continue; 
+    sys_art_entry e; 
+    e.room_vnum=atol(room); 
+    e.name=sysart_unescape(name); 
+    e.look=sysart_unescape(look); 
+    e.roomdesc=sysart_unescape(rdesc); 
+    out.push_back(e);
   } fclose(fp);
 }
 static void sysart_save(const std::vector<sys_art_entry> &in) {
@@ -9851,7 +9884,15 @@ static void sysart_save(const std::vector<sys_art_entry> &in) {
   } fclose(fp);
 }
 static bool sysart_room_ok(struct room_data *room) {
-  if(!room) return false; if(ROOM_FLAGGED(room, ROOM_DEATH)) return false; if(ROOM_FLAGGED(room, ROOM_NO_DROP)) return false; if(ROOM_FLAGGED(room, ROOM_STORAGE)) return false; return true;
+  if(!room) 
+    return false; 
+  if(ROOM_FLAGGED(room, ROOM_DEATH)) 
+    return false; 
+  if(ROOM_FLAGGED(room, ROOM_NO_DROP)) 
+    return false; 
+  if(ROOM_FLAGGED(room, ROOM_STORAGE)) 
+    return false; 
+  return true;
 }
 static std::string sysart_theme_for_room(struct room_data *room) {
   if(!room||!room->name) return "city"; std::string nm; for(const char*p=room->name;*p;++p) nm+=(char)tolower(*p);

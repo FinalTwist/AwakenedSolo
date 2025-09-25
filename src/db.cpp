@@ -6498,10 +6498,9 @@ void load_consist(void)
     }
   }
 
-  for (int nr = 0; nr <= top_of_world; nr++) {
-    if (ROOM_FLAGGED(&world[nr], ROOM_STORAGE)) {
+    for (int nr = 0; nr <= top_of_world; nr++) {
       snprintf(buf, sizeof(buf), "storage/%ld", world[nr].number);
-      if ((file.Open(buf, "r"))) {
+      if (file.Open(buf, "r")) {
         log_vfprintf("Restoring storage contents for room %ld (%s)...", world[nr].number, buf);
         snprintf(buf3, sizeof(buf3), "storage room %ld (%s)", world[nr].number, buf);
         VTable data;
@@ -6676,6 +6675,8 @@ void load_consist(void)
       }
     }
 
+    // Second pass: verify hack-flagged rooms still have a PC corpse; if not, remove flags and save the zone.
+  for (int nr = 0; nr <= top_of_world; nr++) {
     // Verify that any hack-flagged room has a PC corpse in it. If not, remove the flag and save it.
     if (ROOM_FLAGGED(&world[nr], ROOM_CORPSE_SAVE_HACK)) {
       bool keep_flag = FALSE;

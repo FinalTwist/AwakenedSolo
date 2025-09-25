@@ -41,6 +41,8 @@ extern SPECIAL(landlord_spec);
 
 #define MIN_LEVEL_TO_IGNORE_HOUSEEDIT_EDITOR_STATUS  LVL_ADMIN
 
+void daily_city_litter_sweep();
+
 /* An ApartmentComplex is composed of N Apartments, and has tracking data for landlord info. */
 class ApartmentComplex {
   private:

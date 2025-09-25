@@ -20,6 +20,7 @@
 #include "interpreter.hpp"
 #include "db.hpp"
 #include "newmagic.hpp"
+#include "newhouse.hpp"  // for daily_city_litter_sweep()
 extern struct time_info_data time_info;
 extern struct char_data *character_list;
 extern struct index_data *mob_index;
@@ -156,7 +157,10 @@ void another_hour(void)
         time_info.year++;
       }
     }
+    // NEW: 3% chance to clear ground items in non-storage rooms each in-game day.
+    daily_city_litter_sweep();
   }
+  
   if(time_info.day < 7)
     weather_info.moonphase = MOON_NEW;
   else if(time_info.day > 7 && time_info.day < 14)

@@ -351,6 +351,12 @@ void Storage_save(const char *file_name, struct room_data *room) {
     }
 
     prototype = &obj_proto[real_obj];
+    // Skip temporary ground items (corpses, timed props) so they never persist.
+    // Corpses are flagged with ITEM_EXTRA_CORPSE; anything with a timer should decay instead of saving.
+    if (IS_OBJ_STAT(obj, ITEM_EXTRA_CORPSE) || GET_OBJ_TIMER(obj) > 0) {
+      obj = obj->next_content;
+      continue;
+    }
     if (!OBJ_SHOULD_NOT_SAVE_IN_APTS_AND_VEHS(obj)) {
       obj_string_buf << "\t\tVnum:\t" << GET_OBJ_VNUM(obj) << "\n";
       obj_string_buf << "\t\tInside:\t" << level << "\n";

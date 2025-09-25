@@ -6057,13 +6057,13 @@ void award_pickpocket_loot(struct char_data *ch, struct char_data *vict) {
   if (vnum > 0) {
     int rnum = real_object(vnum);
     if (rnum >= 0) {
-      struct obj_data *obj = read_object(vnum, VIRTUAL, OBJ_LOAD_REASON_STEAL);
+      struct obj_data *obj = read_object(vnum, VIRTUAL, OBJ_LOAD_REASON_MOB_LOOT);
       if (obj) {
-        // If it’s a credstick, fill it using your macros.
+        // If it’s a credstick, fill it with tier-appropriate funds and assign to the victim (locked).
         if (GET_OBJ_TYPE(obj) == ITEM_MONEY && GET_ITEM_MONEY_IS_CREDSTICK(obj)) {
-          // Only fill if currently empty; if your prototype is pre-filled, we’ll keep it.
-          if (GET_ITEM_MONEY_VALUE(obj) <= 0)
-            prepare_credstick_for_loot(obj, tier, ch, vict);  // NEW: victim-aware                                                              we set it to someone else so it’s "stolen".
+          if (GET_ITEM_MONEY_VALUE(obj) <= 0) {
+            prepare_credstick_for_loot(obj, tier, ch, vict);
+          }
         }
 
         obj_to_char(obj, ch);
