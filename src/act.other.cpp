@@ -53,12 +53,14 @@ void award_pickpocket_loot(struct char_data *ch, struct char_data *vict);
 void qol_set_auto_heal_threshold(struct char_data *ch, int pct);
 
 #ifdef GITHUB_INTEGRATION
+
 #include <curl/curl.h>
 #include "github_config.hpp"
 #include "nlohmann/json.hpp"
 using nlohmann::json;
+#endif
+
 #include <boost/filesystem.hpp>
-#include "newshop.hpp"
 // Forward declarations for QoL helpers to satisfy references
 extern int ok_pick(struct char_data *ch, int keynum, int pickproof, int scmd, int lock_level);
 void award_pickpocket_loot(struct char_data *ch, struct char_data *vict);
@@ -76,14 +78,25 @@ static void load_pickpocket_loot() {
   bf::path lootfile = bf::system_complete("lib") / "etc" / "pickpocket_loot.json";
   _json_parse_from_file(lootfile, j);
   try {
-    for (auto v : j["tiers"]["T1"]) g_pickpocket_t1.push_back((int)v);
-    for (auto v : j["tiers"]["T2"]) g_pickpocket_t2.push_back((int)v);
-    for (auto v : j["tiers"]["T3"]) g_pickpocket_t3.push_back((int)v);
-    for (auto v : j["tiers"]["T4"]) g_pickpocket_t4.push_back((int)v);
+    // Your file uses top-level "T1".."T4"
+    for (auto v : j["T1"]) g_pickpocket_t1.push_back((int)v);
+    for (auto v : j["T2"]) g_pickpocket_t2.push_back((int)v);
+    for (auto v : j["T3"]) g_pickpocket_t3.push_back((int)v);
+    for (auto v : j["T4"]) g_pickpocket_t4.push_back((int)v);
+
+    // Optional: validate vnums on boot
+    auto check_vec = [](const std::vector<int>& v, const char* tier){
+      for (int vnum : v) if (real_object(vnum) < 0)
+        mudlog_vfprintf(NULL, LOG_SYSLOG, "Pickpocket: invalid vnum %d in %s", vnum, tier);
+    };
+    check_vec(g_pickpocket_t1, "T1");
+    check_vec(g_pickpocket_t2, "T2");
+    check_vec(g_pickpocket_t3, "T3");
+    check_vec(g_pickpocket_t4, "T4");
+
     g_pickpocket_loaded = true;
   } catch (...) {
-    // leave empty; we'll just not award items on success
-    g_pickpocket_loaded = true;
+    g_pickpocket_loaded = true; // still mark loaded so we don’t keep retrying every time
   }
 }
 
@@ -107,27 +120,45 @@ static int roll_from_table_for_tier(int tier) {
   return (*vec)[idx];
 }
 
-// Post-process credsticks to be: used (contains currency) and locked (owned by someone else).
-static void prepare_credstick_for_loot(struct obj_data *obj, int tier, struct char_data *receiver) {
+// Fills a credstick and assigns ownership to the VICTIM (NPC), not the thief.
+static void prepare_credstick_for_loot(struct obj_data *obj, int tier,
+                                       struct char_data *thief,
+                                       struct char_data *vict)
+{
   if (!obj) return;
   if (GET_OBJ_TYPE(obj) != ITEM_MONEY) return;
   if (!GET_ITEM_MONEY_IS_CREDSTICK(obj)) return;
 
-  // Amount ranges by tier.
-  int amount = 0;
+  // --- Tier-based balance (tune to taste) ---
+  long min_amt = 0, max_amt = 0;
   switch (tier) {
-    case 1: amount = number(10, 100); break;
-    case 2: amount = number(50, 300); break;
-    case 3: amount = number(250, 1000); break;
-    default: amount = number(500, 5000); break;
+    case 1: min_amt =   50; max_amt =   300;  break;
+    case 2: min_amt =  300; max_amt =  1500;  break;
+    case 3: min_amt = 1500; max_amt =  8000;  break;
+    default:           min_amt = 8000; max_amt = 40000; break; // T4
   }
-  GET_OBJ_VAL(obj, 0) = amount;  // value
-  if (GET_OBJ_VAL(obj, 2) <= 0 || GET_OBJ_VAL(obj, 2) > 3) GET_OBJ_VAL(obj, 2) = number(1,3); // grade 1-3
-  GET_OBJ_VAL(obj, 3) = 1;       // is_pc_owned
-  GET_OBJ_VAL(obj, 4) = GET_IDNUM(receiver) + 100000 + number(1, 99999); // someone else (not receiver)
-  GET_OBJ_VAL(obj, 5) = number(1000, 9999); // lockcode set
+  if (max_amt < min_amt) max_amt = min_amt;
+  long amt = number((int)min_amt, (int)max_amt);
+
+  // Fill the stick (use your money macros).
+  if (GET_ITEM_MONEY_VALUE(obj) <= 0)
+    GET_ITEM_MONEY_VALUE(obj) = (int)amt;
+
+  // Grade sanity (1..3 if unset/out of range).
+  if (GET_ITEM_MONEY_CREDSTICK_GRADE(obj) <= 0 || GET_ITEM_MONEY_CREDSTICK_GRADE(obj) > 3)
+    GET_ITEM_MONEY_CREDSTICK_GRADE(obj) = number(1, 3);
+
+  // --- Ownership semantics for immersion ---
+  // We want: "this was the victim's stick", so it's NOT PC-owned-by-thief.
+  GET_ITEM_MONEY_CREDSTICK_IS_PC_OWNED(obj) = FALSE;             // owned by someone else (NPC/corp)
+  GET_ITEM_MONEY_CREDSTICK_OWNER_ID(obj) = vict ? GET_IDNUM(vict) : 0; // attribute to the victim
+
+  // Lock it so it feels hot.
+  if (GET_ITEM_MONEY_CREDSTICK_LOCKCODE(obj) <= 0)
+    GET_ITEM_MONEY_CREDSTICK_LOCKCODE(obj) = number(1000, 9999);
+
+  (void)thief; // reserved for future personalization
 }
-#endif
 
 bool is_reloadable_weapon(struct obj_data *weapon, int ammotype);
 
@@ -5558,12 +5589,29 @@ ACMD(do_changelog) {
 ACMD(do_pickpocket)
 {
   char vict_name[MAX_INPUT_LENGTH];
-  struct char_data *vict = NULL;
-
-  one_argument(argument, vict_name);
+  one_argument(argument, vict_name);          // ← keep this
 
   if (!*vict_name) {
-    send_to_char("Pickpocket who?\r\n", ch);
+    send_to_char(ch, "Pickpocket who?\r\n");
+    return;
+  }
+
+  struct char_data *vict = NULL;
+
+  // 1) Normal resolver (numbers, keywords, proper names).
+  vict = get_char_room_vis(ch, vict_name);
+
+  // 2) Fallback: match tokens in NPC short descriptions (sdesc).
+  if (!vict && ch->in_room) {
+    for (struct char_data *m = ch->in_room->people; m; m = m->next_in_room) {
+      if (!IS_NPC(m) || m == ch) continue;
+      // GET_NAME(m) is the mob's display short desc (e.g., "An ork in a chef's hat").
+      if (isname(vict_name, GET_NAME(m))) { vict = m; break; }
+    }
+  }
+
+  if (!vict) {
+    send_to_char("They're not here.\r\n", ch);
     return;
   }
 
@@ -5999,29 +6047,51 @@ ACMD(do_repairall)
   else send_to_char(ch, "Issued repair requests for %d item(s).\r\n", count);
 }
 
-/* ===== QoL helper implementations (added to resolve missing symbols) ===== */
 void award_pickpocket_loot(struct char_data *ch, struct char_data *vict) {
-/* Repaired body: compute a modest loot amount and transfer nuyen safely. */
-long amt = 0;
-/* Try to derive amount from victim's cash; clamp to sane range */
-if (vict) {
-  long pool = GET_NUYEN(vict);
-  if (pool > 0) {
-    /* take up to 5% of victim's nuyen, max 500, at least 1 */
-    amt = pool / 20;
-    if (amt < 1) amt = 1;
-    if (amt > 500) amt = 500;
+  load_pickpocket_loot();
+
+  int cash = vict ? MAX(0, (int)GET_NUYEN(vict)) : 0;
+  int tier = pickpocket_tier_for_cash(cash);
+  int vnum = roll_from_table_for_tier(tier);
+
+  if (vnum > 0) {
+    int rnum = real_object(vnum);
+    if (rnum >= 0) {
+      struct obj_data *obj = read_object(vnum, VIRTUAL, OBJ_LOAD_REASON_STEAL);
+      if (obj) {
+        // If it’s a credstick, fill it using your macros.
+        if (GET_OBJ_TYPE(obj) == ITEM_MONEY && GET_ITEM_MONEY_IS_CREDSTICK(obj)) {
+          // Only fill if currently empty; if your prototype is pre-filled, we’ll keep it.
+          if (GET_ITEM_MONEY_VALUE(obj) <= 0)
+            prepare_credstick_for_loot(obj, tier, ch, vict);  // NEW: victim-aware                                                              we set it to someone else so it’s "stolen".
+        }
+
+        obj_to_char(obj, ch);
+        send_to_char(ch, "You quietly lift ^c%s^n.\r\n", GET_OBJ_NAME(obj));
+        act("$n deftly palms something from $N.", TRUE, ch, obj, vict, TO_NOTVICT);
+        return;
+      }
+    }
   }
-}
-if (amt <= 0) {
-  send_to_char(ch, "You come up empty-handed.^n\r\n");
-  return;
-}
-/* Transfer */
-GET_NUYEN_RAW(vict) -= amt;
-if (GET_NUYEN_RAW(vict) < 0) GET_NUYEN_RAW(vict) = 0;
-GET_NUYEN_RAW(ch) += amt;
-send_to_char(ch, "You quietly lift ^W%ld^n nuyen.\r\n", amt);
+
+  // Fallback: modest nuyen skim so success never feels empty.
+  long amt = 0;
+  if (vict) {
+    long pool = GET_NUYEN(vict);
+    if (pool > 0) {
+      amt = pool / 20; // 5%
+      if (amt < 1) amt = 1;
+      if (amt > 500) amt = 500;
+    }
+  }
+  if (amt <= 0) {
+    send_to_char(ch, "You come up empty-handed.^n\r\n");
+    return;
+  }
+  // Transfer from victim so money isn’t created from thin air.
+  GET_NUYEN_RAW(vict) -= amt; if (GET_NUYEN_RAW(vict) < 0) GET_NUYEN_RAW(vict) = 0;
+  GET_NUYEN_RAW(ch) += amt;
+  send_to_char(ch, "You quietly lift ^W%ld^n nuyen.\r\n", amt);
 }
 
 void qol_set_auto_heal_threshold(struct char_data *ch, int pct) {

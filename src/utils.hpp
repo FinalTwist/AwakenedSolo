@@ -824,7 +824,7 @@ void clear_mob_alarm(struct char_data *npc, struct char_data *ch);
 bool _mob_is_alarmed_by_ch(struct char_data *npc, idnum_t vict_idnum);
 bool _mob_is_alert(struct char_data *npc);
 
-#define CAN_CARRY_W(ch)       ((GET_STR(ch) * 10) + 30)
+#define CAN_CARRY_W(ch)       ((GET_STR(ch) * 15) + 30)
 #define CAN_CARRY_N(ch)       (8 + GET_QUI(ch) + (GET_REAL_LEVEL(ch)>=LVL_BUILDER?50:0))
 #define AWAKE(ch)             (GET_POS(ch) > POS_SLEEPING && GET_QUI(ch) > 0 && !PLR_FLAGGED(ch, PLR_PROJECT))
 #define IS_RIGGING(ch)        (AFF_FLAGGED(ch, AFF_RIG) || PLR_FLAGGED(ch, PLR_REMOTE))
