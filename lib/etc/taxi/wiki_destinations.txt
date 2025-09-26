@@ -1,1 +1,57 @@
-# add gridguide add lines here
+Seattle	Dante	Dante's Inferno	-65322	32761
+Seattle	Penumbra	Club Penumbra	-65174	32687
+Seattle	Platinum	Club Platinum	-65370	32785
+Seattle	ActionComputers	Action Computers & Electronics	-65300	32750
+Seattle	RapidFire	Rapid Fire Ammunition	-65328	32764
+Seattle	FargoSecurity	Fargo Security	-65506	32853
+Seattle	StufferShack	Stuffer Shack	-65404	32802
+Seattle	DIYDSHardware	DIY & DS Hardware	-65400	32800
+Seattle	DocWagonClinic	DocWagon Clinic	-65376	32788
+Seattle	DocWagonOutlet	DocWagon Outlet	-65388	32794
+Seattle	Nasers	Naser's Restaurant	-65402	32801
+Seattle	StopGap	Stop Gap	-65416	32808
+Seattle	ShoeFly	Shoe Fly	-65360	32780
+Seattle	TopShelfBooks	Top Shelf Books	-65302	32751
+Seattle	VashonBoutique	Vashon Boutique	-65334	32767
+Seattle	ZalenskysElectronics	Zalensky's Electronics	-65342	32771
+Seattle	ZoeBoutique	Zoe Boutique	-65318	32759
+Seattle	SeattleFormal	Seattle Formal Wear	-65492	32846
+Seattle	Silent	Silent Cafe	-65450	32825
+Seattle	CinemaVieux	Cinema Vieux	-65176	32688
+Seattle	Krishnas	Krishna's	-65190	32695
+Seattle	Chiba	Chiba Bar	-65372	32786
+Seattle	Marksman	Marksman Range	-65364	32782
+Seattle	LinguisticsSchool	Linguistics School	-65336	32768
+Seattle	SecondChances	Second Chances	-65502	32851
+Seattle	Yoshis	Yoshi's	-65502	32851
+Seattle	WIZ	WIZ	-65370	32785
+Seattle	Zalenskys	Zalensky's	-65342	32771
+Seattle	SeattleCenter	Seattle Center (Needle)	-65358	32779
+Seattle	Zoo	Woodland Park Zoo	-65156	32678
+Seattle	DSHeliport	Downtown Heliport	-65554	32877
+Seattle	I-5	I-5 Onramp	-65512	32856
+Seattle	I-90	I-90 Onramp	-65428	32814
+Renton	Renton	Renton Center	-60376	30288
+Renton	Italiano	Italiano Restaurant	-60298	30249
+Renton	KETA	KETA	-60250	30225
+Renton	Tao	Tao	-60256	30228
+Council Island	Council	Council Island	-18298	9249
+Council Island	CIHospital	Council Island Hospital	-18322	9261
+Council Island	EAirport	Island Airstrip	-17650	8925
+Tacoma	Satyricon	Satyricon	-29222	14711
+Tacoma	Thomason	Thomason	-29596	14898
+Tacoma	TTBank	TT Bank	-29220	14710
+Tacoma	PCM	PCM	-29208	14704
+Tacoma	Hals	Hal's	-29216	14708
+Tacoma	Toadstool	Toadstool	-29342	14771
+Tacoma	SixthParking	6th Ave Parking	-29340	14770
+Tacoma	Roccos	Rocco's	-29460	14830
+Tacoma	Cave	The Cave	-29246	14723
+Tacoma	PHellhound	Pavement Hellhound	-29398	14799
+Auburn	Auburn	Auburn Center	-58022	29111
+Auburn	Airsoft	Airsoft	-58044	29122
+Auburn	Couriers	Couriers	-58616	29408
+Auburn	OfficeWorks	Office Works	-58600	29400
+Everett	EAirport	Everett Airport	-17650	8925
+Touristville	PuyN	Touristville North	-16216	8208
+Touristville	PuyS	Touristville South	-16222	8211

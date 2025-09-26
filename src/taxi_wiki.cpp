@@ -7,6 +7,7 @@
 #include <vector>
 #include <algorithm>
 
+
 namespace {
 std::vector<TaxiWiki::Entry> g_entries;
 
@@ -14,6 +15,20 @@ static inline std::string strtolower(std::string s) {
   std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return std::tolower(c); });
   return s;
 }
+
+// Allow-list for "SeattleEnvirons"
+static bool allowed_seattle_environs(const std::string& tag_in) {
+  std::string t; t.reserve(tag_in.size());
+  for (char c : tag_in) t.push_back(std::tolower((unsigned char)c));
+  // Accepted region tags for Seattle & environs:
+  static const char* OK[] = {
+    "seattle", "downtown", "auburn", "council island", "council",
+    "everett", "renton", "tacoma", "touristville", "puyallup"
+  };
+  for (const char* s : OK) if (t == s) return true;
+  return false;
+}
+
 static void trim(std::string& s) {
   size_t a = 0;
   while (a < s.size() && std::isspace((unsigned char)s[a])) ++a;
@@ -99,8 +114,15 @@ std::vector<Entry> find(const char* user_c, const char* regionFilter_c, size_t m
   std::string regionFilter = regionFilter_c ? regionFilter_c : "";
   if (user.empty()) return out;
   for (const auto& e : g_entries) {
-    if (!regionFilter.empty() && !e.region.empty()) {
-      if (strtolower(e.region) != strtolower(regionFilter)) continue;
+    if (!regionFilter.empty()) {
+      if (regionFilter == "SeattleEnvirons") {
+        // Only allow entries explicitly tagged as one of our Seattle-area regions.
+        if (e.region.empty() || !allowed_seattle_environs(e.region))
+          continue;
+      } else {
+        if (!e.region.empty() && strtolower(e.region) != strtolower(regionFilter))
+          continue;
+      }
     }
     if (contains_ci(e.keyword, user) || contains_ci(e.display, user)) {
       out.push_back(e);

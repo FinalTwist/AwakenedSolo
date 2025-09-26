@@ -34,6 +34,17 @@
 #include "vehicles.hpp"
 #include "taxi_wiki.hpp"  // Added: wiki fallback destinations
 
+// --- BEGIN: Seattle-environs taxi guard helper ---
+static bool room_has_seattle_taxi_sign(struct room_data* room) {
+  if (!room) return false;
+  for (struct obj_data *obj = room->contents; obj; obj = obj->next_content) {
+    if (GET_OBJ_VNUM(obj) == OBJ_SEATTLE_TAXI_SIGN)  // existing constant in your codebase
+      return true;
+  }
+  return false;
+}
+// --- END: Seattle-environs taxi guard helper ---
+
 extern int calculate_distance_between_rooms(vnum_t start_room_vnum, vnum_t target_room_vnum, bool ignore_roads, const char *origin, struct char_data *caller);
 
 extern int find_first_step(vnum_t src, vnum_t target, bool ignore_roads, const char *call_origin, struct char_data *caller);
@@ -1132,6 +1143,8 @@ SPECIAL(taxi)
 
     if (!found) {
       // === Wiki fallback: try keywords from internal wiki list before requiring coordinates. ===
+      // === Seattle-only gate: run wiki fallback ONLY inside Seattle taxi interiors ===
+      if (room_has_seattle_taxi_sign(ch->in_room)) 
       {
         auto hits = TaxiWiki::find(argument, /*region*/"", /*max_hits*/16);
         if (!hits.empty()) {
