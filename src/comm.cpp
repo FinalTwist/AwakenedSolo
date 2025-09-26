@@ -888,6 +888,8 @@ void copyover_recover()
           load_room = real_room(GET_LOADROOM(d->character));
         char_to_room(d->character, &world[load_room]);
         //look_at_room(d->character, 0, 0);
+        extern void adventurer_on_pc_login(struct char_data* ch);
+        adventurer_on_pc_login(d->character);
       }
     }
   }

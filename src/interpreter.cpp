@@ -3504,6 +3504,9 @@ void nanny(struct descriptor_data * d, char *arg)
       if (!d->character->in_veh)
         char_to_room(d->character, &world[load_room_rnum]);
 
+      extern void adventurer_on_pc_login(struct char_data* ch);
+      adventurer_on_pc_login(d->character);
+
       // Schedule Inner Voice intro if this is the newbie welcome room (60500).
       if (!IS_NPC(d->character) && real_room(60500) == load_room_rnum) {
         InnerVoice::schedule_intro_for_newbie(d->character, 5);

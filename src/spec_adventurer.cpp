@@ -110,9 +110,9 @@ static void load_class_gear_if_needed();
 static const Tier* pick_tier();
 static bool is_room_ok_for_spawn(struct room_data *room) {
   if (!room) return FALSE;
-  if (ROOM_IS_PEACEFUL(room)) return FALSE;
+  //if (ROOM_IS_PEACEFUL(room)) return FALSE;
   if (ROOM_FLAGGED(room, ROOM_NOMOB)) return FALSE;
-  if (ROOM_FLAGGED(room, ROOM_ARENA)) return FALSE;
+  //if (ROOM_FLAGGED(room, ROOM_ARENA)) return FALSE;
   if (ROOM_FLAGGED(room, ROOM_STAFF_ONLY)) return FALSE;
   if (ROOM_FLAGGED(room, ROOM_ELEVATOR_SHAFT)) return FALSE;
   if (ROOM_FLAGGED(room, ROOM_STORAGE)) return FALSE;

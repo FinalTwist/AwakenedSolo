@@ -109,6 +109,19 @@ bool is_ok_char(struct char_data * keeper, struct char_data * ch, vnum_t shop_nr
     do_say(keeper, buf, cmd_say, 0);
     return FALSE;
   }
+
+    // Refuse service to "hot" players: active thievery heat cooldown blocks trade.
+  {
+    time_t now = time(0);
+    if (ch->char_specials.theft_heat_cooldown_end > now) {
+      // You can tune this line however you like.
+      snprintf(buf, sizeof(buf), "%s I don't deal with hot-handed types. Come back when things have cooled off.",
+               GET_CHAR_NAME(ch));
+      do_say(keeper, buf, cmd_say, SCMD_SAYTO);
+      return FALSE;
+    }
+  }
+  
   if (IS_PROJECT(ch)) {
     send_to_char("You're having a hard time getting the shopkeeper's attention.\r\n", ch);
     return FALSE;

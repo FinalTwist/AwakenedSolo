@@ -443,6 +443,19 @@ bool vict_is_valid_guard_target(struct char_data *ch, struct char_data *vict) {
     return FALSE;
   }
 
+  // Aggro on significant thievery heat only (levels 2–3) while heat is active.
+  if (!IS_NPC(vict)) {
+    time_t now = time(0);
+    if (vict->char_specials.theft_heat_cooldown_end > now
+        && vict->char_specials.theft_heat_level >= 2) {
+      // Optional: flavor bark once on aggro.
+      if (!MOB_FLAGGED(ch, MOB_INANIMATE)) {
+        act("$n clocks $N. 'You’re hot. Stand down!'", FALSE, ch, 0, vict, TO_ROOM);
+      }
+      return TRUE;
+    }
+  }
+
   // Guards act on faction enemy status.
   if (faction_leader_says_geef_ze_maar_een_pak_slaag_voor_papa(ch, vict)) {
     return TRUE;
