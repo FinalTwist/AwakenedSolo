@@ -503,8 +503,8 @@ ACMD_DECLARE(do_autostash);
 ACMD_DECLARE(do_helpedit);
 ACMD_DECLARE(do_auto);
 ACMD_DECLARE(do_attack);
-ACMD_DECLARE(do_selljunk);
-ACMD_DECLARE(do_repairall);
+ACMD_DECLARE(do_crapsell);
+ACMD_DECLARE(do_massfix);
 
 #define BLOCKS_IDLE_REWARD  FALSE
 #define ALLOWS_IDLE_REWARD  TRUE
@@ -530,8 +530,8 @@ struct command_info cmd_info[] =
     { "southwest"  , POS_SITTING, do_move     , 0, SCMD_SOUTHWEST, BLOCKS_IDLE_REWARD },
     { "northwest"  , POS_SITTING, do_move     , 0, SCMD_NORTHWEST, BLOCKS_IDLE_REWARD },
 
-    { "repairall"  , POS_STANDING, do_repairall, 0, 0, ALLOWS_IDLE_REWARD },
-    { "selljunk"   , POS_STANDING, do_selljunk , 0, 0, ALLOWS_IDLE_REWARD },
+    { "massfix"  , POS_STANDING, do_massfix, 0, 0, ALLOWS_IDLE_REWARD },
+    { "crapsell"   , POS_STANDING, do_crapsell , 0, 0, ALLOWS_IDLE_REWARD },
     { "a"          , POS_FIGHTING, do_attack   , 0, 0, BLOCKS_IDLE_REWARD },
     { "auto"       , POS_DEAD    , do_auto     , 0, 0, ALLOWS_IDLE_REWARD },
     { "do"         , POS_DEAD    , do_doqueue  , 0, 0, ALLOWS_IDLE_REWARD },

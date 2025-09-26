@@ -25,6 +25,7 @@
 #include <map>
 #include <algorithm>
 #include "npcvoice.hpp"
+#include "taxi_wiki.hpp"  // Added: taxi wiki fallback loader
 
 #if defined(WIN32) && !defined(__CYGWIN__)
 #include <process.h>
@@ -825,6 +826,10 @@ void DBInit()
   boot_escalators();
 
   NPCVoice::init();   // <-- load all category files into g_bank
+
+  log("Loading taxi wiki destinations.");
+  TaxiWiki::load("lib/etc/taxi/wiki_destinations.txt");
+
 
   log("DBInit -- DONE.");
 }

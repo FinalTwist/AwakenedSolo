@@ -29,8 +29,8 @@ static bool maybe_speak_from_file_return(char_data* ch, int skill, const char* s
 // Config
 // ---------------------------
 static const int MIN_COOLDOWN_SECONDS = 30;        // 30s
-static const int MAX_COOLDOWN_SECONDS = 15 * 60;   // 15m
-static const int SKILL_SPEAK_CHANCE_PERCENT = 5;   // 5% chance on use/success/fail events
+static const int MAX_COOLDOWN_SECONDS = 10 * 60;   // 15m
+static const int SKILL_SPEAK_CHANCE_PERCENT = 10;   // 5% chance on use/success/fail events
 static const long ATTITUDE_MAX = 1000000L;
 static const long ATTITUDE_MIN = 0;
 
@@ -633,7 +633,7 @@ static void iv_flush_batched_line(struct char_data *ch) {
   if (PRF_FLAGGED(ch, PRF_SCREENREADER))
     send_to_char(ch, "%s: %s\r\n", g_state[GET_IDNUM(ch)].entity_name, out.c_str());
   else
-    send_to_char(ch, "^m[%s]^n %s\r\n", g_state[GET_IDNUM(ch)].entity_name, out.c_str());
+    send_to_char(ch, "^B[%s]^n ^W%s^n\r\n", g_state[GET_IDNUM(ch)].entity_name, out.c_str());
 
   if (st.cooldown_pending) {
     st.cooldown_pending = false;
@@ -660,7 +660,7 @@ static void speak_line(char_data* ch, const std::string& line) {
   if (PRF_FLAGGED(ch, PRF_SCREENREADER)) {
     send_to_char(ch, "%s: %s\r\n", g_state[GET_IDNUM(ch)].entity_name, out.c_str());
   } else {
-    send_to_char(ch, "^m[%s]^n %s\r\n", g_state[GET_IDNUM(ch)].entity_name, out.c_str());
+    send_to_char(ch, "^B[%s]^n ^W%s^n\r\n", g_state[GET_IDNUM(ch)].entity_name, out.c_str());
   }
 }
 static void speak_line_duplicate_block(char_data* ch, const std::string& line) {
@@ -668,7 +668,7 @@ static void speak_line_duplicate_block(char_data* ch, const std::string& line) {
   if (PRF_FLAGGED(ch, PRF_SCREENREADER)) {
     send_to_char(ch, "%s: %s\r\n", g_state[GET_IDNUM(ch)].entity_name, line.c_str());
   } else {
-    send_to_char(ch, "^m[%s]^n %s\r\n", g_state[GET_IDNUM(ch)].entity_name, line.c_str());
+    send_to_char(ch, "^B[%s]^n ^W%s^n\r\n", g_state[GET_IDNUM(ch)].entity_name, line.c_str());
   }
 }
 
@@ -845,7 +845,8 @@ namespace InnerVoice {
     if (!action) action = "use";
     const long id = GET_IDNUM(ch);
     VoiceState& st = g_state[id];
-    if (!can_speak_now(st) || !chance(5)) return;
+    if (!can_speak_now(st) || !chance(10)) 
+      return;
 
     std::vector<std::string> lines;
     int attitude_bonus = 0;
@@ -877,7 +878,7 @@ namespace InnerVoice {
     if (!ch || IS_NPC(ch)) return;
     const long id = GET_IDNUM(ch);
     VoiceState& st = g_state[id];
-    if (!can_speak_now(st) || !chance(5)) return;
+    if (!can_speak_now(st) || !chance(15)) return;
     std::vector<std::string> lines;
     if (load_lines("lib/etc/innervoice/items/doors.txt", lines)) {
       maybe_speak_item_line(ch, lines);
@@ -929,7 +930,7 @@ namespace InnerVoice {
 const long id = GET_IDNUM(ch);
     VoiceState& st = g_state[id];
     // 5% chance and respect cooldown
-    if (!can_speak_now(st) || !chance(15)) return;
+    if (!can_speak_now(st) || !chance(25)) return;
     long vnum = world[room_rnum].number;
     std::vector<std::string> lines;
     if (load_room_lines_by_prefix(room_file_by_vnum(vnum), lines)) {
@@ -1031,7 +1032,7 @@ namespace InnerVoice {
   void notify_quest_accept(struct char_data* ch, long quest_vnum) {
     if (!ch || IS_NPC(ch)) return;
     VoiceState& st = g_state[GET_IDNUM(ch)];
-    if (!can_speak_now(st) || !chance(50)) return;
+    if (!can_speak_now(st) || !chance(75)) return;
     std::vector<std::string> lines;
     if (!load_quest_lines(quest_vnum, "accept", lines) || lines.empty()) return;
     maybe_speak_item_line(ch, lines);
@@ -1064,6 +1065,16 @@ namespace InnerVoice {
       struct char_data *ch = d->character;
       if (!ch || IS_NPC(ch)) continue;
       VoiceState& st = g_state[GET_IDNUM(ch)];
+
+      // Fire the scheduled newbie intro (if any).
+      if (st.pending_intro_due && now >= st.pending_intro_due) {
+        st.pending_intro_due = 0;
+        // Only play if we haven't shown it yet (introduce_in_chargen checks this too).
+        introduce_in_chargen(ch);
+        // Start a normal cooldown so other lines don’t collide with the intro.
+        set_new_cooldown_entry(st);
+      }
+
       if (st.pending_micro_due && now >= st.pending_micro_due) {
         if (!can_speak_now(st)) continue;
         if (st.pending_micro_path[0] && st.pending_micro_index >= 0) {
@@ -1286,7 +1297,7 @@ namespace InnerVoice {
     if (room_rnum < 0) return;
     VoiceState& st = g_state[GET_IDNUM(ch)];
     // Respect cooldown: only occasionally enqueue micro ambient comments.
-    if (!can_speak_now(st) || !chance(10)) return;
+    if (!can_speak_now(st) || !chance(25)) return;
 
     // Defer to the broader street microevent system for theming and QoL guards.
     maybe_trigger_street_microevent(ch);

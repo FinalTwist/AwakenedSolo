@@ -5962,8 +5962,8 @@ ACMD(do_auto)
   }
 }
 
-// === QoL: selljunk ===
-ACMD(do_selljunk)
+// === QoL: crapsell ===
+ACMD(do_crapsell)
 {
   int max_value = atoi(argument);
   if (max_value <= 0) max_value = 500;
@@ -6003,8 +6003,8 @@ ACMD(do_selljunk)
   send_to_char("There's no shopkeeper here who will buy your stuff.\r\n", ch);
 }
 
-// === QoL: repairall ===
-ACMD(do_repairall)
+// === QoL: massfix ===
+ACMD(do_massfix)
 {
   bool use_credstick = FALSE;
   char arg1[MAX_INPUT_LENGTH];
@@ -6031,7 +6031,7 @@ ACMD(do_repairall)
     if (use_credstick) snprintf(cmd, sizeof(cmd), "repair credstick %s", kw);
     else snprintf(cmd, sizeof(cmd), "repair %s", kw);
 
-    command_interpreter(ch, cmd, "repairall");
+    command_interpreter(ch, cmd, "massfix");
     count++;
   }
   for (int w = 0; w < NUM_WEARS; w++) {
@@ -6042,7 +6042,7 @@ ACMD(do_repairall)
     char cmd[MAX_INPUT_LENGTH];
     if (use_credstick) snprintf(cmd, sizeof(cmd), "repair credstick %s", kw);
     else snprintf(cmd, sizeof(cmd), "repair %s", kw);
-    command_interpreter(ch, cmd, "repairall");
+    command_interpreter(ch, cmd, "massfix");
     count++;
   }
   if (count == 0) send_to_char("No items needed repair.\r\n", ch);

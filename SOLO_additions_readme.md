@@ -463,3 +463,35 @@ That’s it—no room lists or manual VNUM edits required.
 - Try **Steal** → pickpocket succeeds; loot includes cash and (if mapped) a credstick.
 
 Enjoy the company—happy running!
+
+
+Taxi Wiki Fallback Patch
+========================
+
+Files in this patch:
+- src/taxi_wiki.hpp
+- src/taxi_wiki.cpp
+- src/transport_README.txt (how to wire the calls)
+- lib/etc/taxi/wiki_destinations.txt (parsed from the AwakeMUD CE wiki as of 2024-08-15)
+
+How to integrate (summary):
+1) Add `#include "taxi_wiki.hpp"` to src/transport.cpp (or your taxi driver implementation).
+2) Boot-time: call `TaxiWiki::load("lib/etc/taxi/wiki_destinations.txt");` after rooms/grids are ready.
+3) In the taxi driver's `SPECIAL`, when handling passenger speech:
+   a) First line to process confirmations and direct hits:
+      if (TaxiWiki::handle_player_utterance(ch, argument, "Seattle")) return TRUE;
+   b) Only if your normal sign/array lookup fails, call the same line again to let the wiki handle it.
+4) In src/taxi_wiki.cpp, wire `taxi_begin_trip_by_vnum(...)` to the function you already use when a normal sign pick is made.
+
+Behavior:
+- If a *single* wiki hit is found, the driver asks: "Is <NAME> where you want to go?" and waits for yes/ok/sure.
+- If 2–4 hits match, the driver lists them and asks you to be more precise.
+- If >4 hits, the driver asks you to narrow it down.
+- If the player's next utterance is a confirmation ("yes"/"ok"/"sure"), the code resolves coords -> room vnum and calls your taxi trip starter.
+
+Color:
+- Prompts are lightly colored (^c for the driver lead-in, ^W for names, ^n reset). Adjust to taste.
+
+Region filtering:
+- The third argument to `handle_player_utterance` can be "" to search all, or a region string ("Seattle", "Tacoma", "CAS", etc.).
+  The provided wiki file does not tag regions; searching across all is fine.

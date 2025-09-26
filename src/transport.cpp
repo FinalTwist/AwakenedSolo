@@ -32,6 +32,7 @@
 #include "constants.hpp"
 #include "config.hpp"
 #include "vehicles.hpp"
+#include "taxi_wiki.hpp"  // Added: wiki fallback destinations
 
 extern int calculate_distance_between_rooms(vnum_t start_room_vnum, vnum_t target_room_vnum, bool ignore_roads, const char *origin, struct char_data *caller);
 
@@ -1130,6 +1131,54 @@ SPECIAL(taxi)
       }
 
     if (!found) {
+      // === Wiki fallback: try keywords from internal wiki list before requiring coordinates. ===
+      {
+        auto hits = TaxiWiki::find(argument, /*region*/"", /*max_hits*/16);
+        if (!hits.empty()) {
+          if (hits.size() == 1) {
+            // Single hit: treat like a gridguide destination using its coordinates.
+            const auto& e = hits[0];
+            dest_vnum = vnum_from_gridguide_coordinates(e.x, e.y, ch);
+            if (dest_vnum <= 0) {
+              // Invalid or non-drivable coords from wiki; tell rider and stop.
+              do_say(driver, "Those coordinates don't look valid from here.", 0, 0);
+              return TRUE;
+            }
+            // Cross-jurisdiction?
+            if (!cab_jurisdiction_matches_destination(GET_ROOM_VNUM(ch->in_room), dest_vnum)) {
+              do_say(driver, "How exactly am I supposed to get there?", 0, 0);
+              return TRUE;
+            }
+            // Path connectivity: find attached exterior room and verify path.
+            temp_room = NULL;
+            for (int dir = NORTH; dir < UP; dir++)
+              if (ch->in_room->dir_option[dir]) {
+                temp_room = ch->in_room->dir_option[dir]->to_room;
+                break;
+              }
+            if (temp_room && find_first_step(real_room(temp_room->number), real_room(dest_vnum), FALSE, "cab request", ch) < 0) {
+              do_say(driver, "The GridGuide network doesn't connect through to there.", 0, 0);
+              return TRUE;
+            }
+            // Success: proceed as if coordinates were spoken.
+            comm = CMD_TAXI_DEST_GRIDGUIDE;
+          } else if (hits.size() <= 4) {
+            // Ambiguous: list choices and ask for precision.
+            do_say(driver, "Do you mean:", 0, 0);
+            for (const auto& e : hits) {
+              char line[MAX_STRING_LENGTH];
+              snprintf(line, sizeof(line), "%s", e.display.c_str());
+              do_say(driver, line, 0, 0);
+            }
+            do_say(driver, "Tell me the precise name.", 0, 0);
+            return TRUE;
+          } else {
+            do_say(driver, "I found a bunch of places by that—be more specific.", 0, 0);
+            return TRUE;
+          }
+        }
+      }
+      // === end wiki fallback ===
       if (GET_ACTIVE(driver) == ACT_AWAIT_YESNO) {
         if (str_str(argument, "yes") || str_str(argument, "sure") || str_str(argument, "alright") ||
             str_str(argument, "yeah") || str_str(argument, "okay") || str_str(argument, "yup") || str_str(argument, "OK")) {

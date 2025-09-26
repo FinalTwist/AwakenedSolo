@@ -49,14 +49,14 @@ static bool word_match_ci(const std::string& hay, const std::string& needle) {
 bool contains_greeting(const char* said) {
   if (!said || !*said) return false;
   std::string s(said);
-  static const char* TOK[] = {"hello","hi","hey","yo","greetings"};
+  static const char* TOK[] = {"hello","hi","hey","yo","greetings","salutations","heya"};
   for (auto t : TOK) if (word_match_ci(s, t)) return true;
   return false;
 }
 
 static bool contains_any_greet_token(const std::string& s) {
   // keep this list tight to avoid false positives
-  static const char* TOK[] = {"hello","hi","hey","yo","greetings"};
+  static const char* TOK[] = {"hello","hi","hey","yo","greetings","salutations","heya"};
   for (auto t : TOK) if (word_match_ci(s, t)) return true;
   return false;
 }
@@ -194,11 +194,7 @@ static void speak_to_room_or_char(struct char_data* mob, struct char_data* ch, c
   if (!mob || !msg || !*msg) return;
   char buf[MAX_STRING_LENGTH];
   snprintf(buf, sizeof(buf), "%s", msg);
-  if (ch) {
-    do_say(mob, buf, cmd_say, SCMD_SAYTO);
-  } else {
-    do_say(mob, buf, cmd_say, 0);
-  }
+  do_say(mob, buf, cmd_say, 0);
 }
 
 // -----------------------
