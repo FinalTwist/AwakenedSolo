@@ -81,7 +81,6 @@
 #include "gmcp.hpp"
 #include "spec_adventurer.hpp"
 
-
 const unsigned perfmon::kPulsePerSecond = PASSES_PER_SEC;
 
 /* externs */
@@ -887,6 +886,7 @@ void copyover_recover()
         else
           load_room = real_room(GET_LOADROOM(d->character));
         char_to_room(d->character, &world[load_room]);
+        InnerVoice::on_login(d->character);    // << add this line
         //look_at_room(d->character, 0, 0);
         extern void adventurer_on_pc_login(struct char_data* ch);
         adventurer_on_pc_login(d->character);
@@ -921,6 +921,7 @@ void copyover_recover()
   }
 
   log("COPYOVERLOG: Copyover complete. Have a nice day!");
+
 }
 
 
@@ -1496,6 +1497,7 @@ void game_loop(int mother_desc)
 
     // Every 5 MUD minutes
     if (!(pulse % (5 * SECS_PER_MUD_MINUTE * PASSES_PER_SEC))) {
+      //log_vfprintf("A"); +++
       if (!(pulse % (SECS_PER_MUD_HOUR * PASSES_PER_SEC)))
         process_regeneration(1);
       else
@@ -1584,8 +1586,9 @@ void game_loop(int mother_desc)
       }
     }
     // Every 70 MUD minutes
-    if (!(pulse % (70 * SECS_PER_MUD_MINUTE * PASSES_PER_SEC)))
+    if (!(pulse % (70 * SECS_PER_MUD_MINUTE * PASSES_PER_SEC))){
       save_all_apartments_and_storage_rooms();
+    }
 
     // Every MUD day
     if (!(pulse % (24 * SECS_PER_MUD_HOUR * PASSES_PER_SEC)))

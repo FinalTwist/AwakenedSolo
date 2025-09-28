@@ -9839,10 +9839,10 @@ void maybe_trigger_street_microevent(struct char_data *ch) {
 
 
 // --- System-generated creative works seeding (persisted) ---
-#define SYS_ART_FILE "lib/etc/system_art_spawns.txt"
+#define SYS_ART_FILE "etc/system_art_spawns.txt"
 #define SYS_ART_MARKER 424242
-#define SYS_ART_TARGET_TOTAL 120
-#define SYS_ART_MAX_NEW_PER_RESEED 20
+#define SYS_ART_TARGET_TOTAL 800
+#define SYS_ART_MAX_NEW_PER_RESEED 50
 
 struct sys_art_entry {
   long room_vnum;
@@ -9865,7 +9865,10 @@ static std::string sysart_unescape(const char *src) {
   return out;
 }
 static void sysart_load(std::vector<sys_art_entry> &out) {
-  out.clear(); FILE *fp=fopen(SYS_ART_FILE,"r"); if(!fp) return; char buf[MAX_STRING_LENGTH];
+  out.clear(); 
+  FILE *fp=fopen(SYS_ART_FILE,"r"); 
+  if(!fp) return; 
+  char buf[MAX_STRING_LENGTH];
   while (fgets(buf,sizeof(buf),fp)) {
     char *room=strtok(buf,"|"); char *name=strtok(NULL,"|"); char *look=strtok(NULL,"|"); char *rdesc=strtok(NULL,"\r\n");
     if(!room||!name||!look||!rdesc) 
@@ -9879,7 +9882,9 @@ static void sysart_load(std::vector<sys_art_entry> &out) {
   } fclose(fp);
 }
 static void sysart_save(const std::vector<sys_art_entry> &in) {
-  FILE *fp=fopen(SYS_ART_FILE,"w"); if(!fp) return; for (auto &e: in) {
+  FILE *fp=fopen(SYS_ART_FILE,"w"); 
+  if(!fp) return; 
+  for (auto &e: in) {
     std::string n=e.name,l=e.look,r=e.roomdesc; sysart_escape(n); sysart_escape(l); sysart_escape(r); fprintf(fp,"%ld|%s|%s|%s\n", e.room_vnum,n.c_str(),l.c_str(),r.c_str());
   } fclose(fp);
 }
@@ -9895,13 +9900,38 @@ static bool sysart_room_ok(struct room_data *room) {
   return true;
 }
 static std::string sysart_theme_for_room(struct room_data *room) {
-  if(!room||!room->name) return "city"; std::string nm; for(const char*p=room->name;*p;++p) nm+=(char)tolower(*p);
-  auto has=[&](const char*k){ return nm.find(k)!=std::string::npos; };
-  if(has("park")||has("garden")) return "park"; if(has("dock")||has("pier")||has("harbor")||has("harbour")||has("waterfront")||has("beach")) return "waterfront";
-  if(has("market")||has("bazaar")||has("mall")||has("plaza")) return "market"; if(has("warehouse")||has("factory")||has("plant")||has("yard")) return "industrial";
-  if(has("alley")||has("slum")||has("barrens")||has("tenement")) return "slum"; if(has("corporate")||has("tower")||has("lobby")||has("atrium")) return "corporate";
-  if(has("sewer")) return "sewer"; if(has("subway")||has("metro")||has("tunnel")) return "subway"; if(has("bridge")) return "bridge";
-  if(has("apartment")||has("residential")||has("condo")) return "residential"; if(has("arcology")) return "arcology"; return "city";
+  if(!room||!room->name) 
+    return "city"; 
+  std::string nm; 
+  for(const char*p=room->name;*p;++p) 
+    nm+=(char)tolower(*p);
+  auto has=[&](const char*k){ 
+    return nm.find(k)!=std::string::npos; 
+  };
+  if(has("park")||has("garden")) 
+    return "park"; 
+  if(has("dock")||has("pier")||has("harbor")||has("harbour")||has("waterfront")||has("beach")) 
+    return "waterfront";
+  if(has("market")||has("bazaar")||has("mall")||has("plaza")) 
+    return "market"; 
+  if(has("warehouse")||has("factory")||has("plant")||has("yard")) 
+    return "industrial";
+  if(has("alley")||has("slum")||has("barrens")||has("tenement")) 
+    return "slum"; 
+  if(has("corporate")||has("tower")||has("lobby")||has("atrium")) 
+    return "corporate";
+  if(has("sewer")) 
+    return "sewer"; 
+  if(has("subway")||has("metro")||has("tunnel")) 
+    return "subway"; 
+  if(has("bridge")) 
+    return "bridge";
+  if(has("apartment")||has("residential")||has("condo")) 
+    return "residential"; 
+  if(has("arcology")) 
+    return "arcology"; 
+  
+  return "city";
 }
 /*static void sysart_spawn_in_room(long room_vnum, const char *name, const char *look, const char *roomdesc) {
   int rnum=real_room(room_vnum); if(rnum<0) return; struct obj_data *art=read_object(OBJ_CUSTOM_ART, VIRTUAL, OBJ_LOAD_REASON_CREATE_ART); if(!art) return;
@@ -9910,46 +9940,37 @@ static std::string sysart_theme_for_room(struct room_data *room) {
   extern struct room_data *world; obj_to_room(art, &world[rnum]);
 }+++ may have crashed when run*/
 
-static void sysart_spawn_in_room(long room_vnum, const char *name, const char *look, const char *roomdesc) {
+static void sysart_spawn_in_room(long room_vnum,
+                                 const char *name,
+                                 const char *look,
+                                 const char *roomdesc)
+{
   int rnum = real_room(room_vnum);
   if (rnum < 0) return;
 
-  // Create the art object (your existing create call).
-  struct obj_data *art = create_obj();
+  // Use the real art prototype so VNUM/extra/values are consistent.
+  // If your read_object signature doesn’t take the 3rd param, use the 2-arg form.
+  struct obj_data *art = read_object(OBJ_CUSTOM_ART, VIRTUAL
+  #ifdef OBJ_LOAD_REASON_CREATE_ART
+    , OBJ_LOAD_REASON_CREATE_ART
+  #endif
+  );
   if (!art) return;
 
-  GET_OBJ_TYPE(art) = ITEM_OTHER;                    // or whichever generic type your code expects
-  GET_OBJ_TIMER(art) = 0;
-  GET_OBJ_RNUM(art) = -1;  
+  // System-authored, and mark this as sysart for duplicate/persistence checks.
   GET_ART_AUTHOR_IDNUM(art) = 0;
-  GET_OBJ_VAL(art, 1) = SYS_ART_MARKER;
+  GET_OBJ_VAL(art, 1) = SYS_ART_MARKER;      // keep index 1 (your checks use it)
+
+  // Prevent sales/renting of sysart (matches your policy elsewhere).
   GET_OBJ_EXTRA(art).SetBit(ITEM_EXTRA_NOSELL);
   GET_OBJ_EXTRA(art).SetBit(ITEM_EXTRA_NORENT);
 
-  // >>>>>> BEGIN SAFE STRING SETS (no freeing of proto strings) <<<<<<
-  int pr = GET_OBJ_RNUM(art);                      // prototype index of this object
-  const char *proto_restring  = (pr >= 0 ? obj_proto[pr].restring            : NULL);
-  const char *proto_look_desc = (pr >= 0 ? obj_proto[pr].text.look_desc      : NULL);
-  const char *proto_room_desc = (pr >= 0 ? obj_proto[pr].text.room_desc      : NULL);
+  // Override the strings safely (your helpers handle ownership correctly).
+  safe_set_obj_restring(art,   name);        // keywords/title
+  safe_set_obj_look(art,       look);        // look at <obj>
+  safe_set_obj_roomdesc(art,   roomdesc);    // seen in room
 
-  // Only delete if the instance already owns a distinct allocation (never delete proto strings)
-  if (art->restring && art->restring != proto_restring) {
-    delete [] art->restring;
-  }
-  art->restring = str_dup(name);
-
-  if (art->text.look_desc && art->text.look_desc != proto_look_desc) {
-    delete [] art->text.look_desc;
-  }
-  art->text.look_desc = str_dup(look);
-
-  if (art->text.room_desc && art->text.room_desc != proto_room_desc) {
-    delete [] art->text.room_desc;
-  }
-  art->text.room_desc = str_dup(roomdesc);
-  // <<<<<< END SAFE STRING SETS >>>>>>
-
-  extern struct room_data *world;
+  // Place it in the room (only once!)
   obj_to_room(art, &world[rnum]);
 }
 
@@ -9959,144 +9980,13 @@ static bool sysart_exists_in_room(long room_vnum, const char *name, const char *
     const char*nm=GET_OBJ_NAME(obj)?GET_OBJ_NAME(obj):""; const char*lk=obj->text.look_desc?obj->text.look_desc:""; if(!str_cmp(nm,name)&&!str_cmp(lk,look)) return true; }
   return false;
 }
-// Compose randomized “system art” text (name, look-desc, room-desc) using BRAG/MOCK/DECO templates.
-static void sysart_compose(const std::string &theme, std::string &out_name, std::string &out_look, std::string &out_room) {
-  static const char* types[]={
-    "graffito","stencil","paste-up","projection","holo-sticker","fiberlight scrawl","AR tag","microprint mural"
-  };
-  static const char* adjs[]={
-    "neon","glitched","holographic","spray-splattered","handmade","augmented","pixel-bled","datastream","chrome-edged","UV-reactive"
-  };
-  static const char* signoffs[]={
-    "— no fear","— stay chromed","— no gods, no grids","— trust the run","— frag luck","— optics on","— zero traces"
-  };
-  static const char* corpnames[]={
-    "Renraku","Ares","Aztechnology","Shiawase","Mitsuhama","Saeder-Krupp","Evo","NeoNET","Horizon"
-  };
-  static const char* rivals[]={
-    "NullCat","ChromeWitch","VectorKid","Bytegeist","SilkRazor","GhostShift","NovaFlux","PixeLich","ZephyrJack","GlitchVandal"
-  };
-  static const char* hp[]={
-    "Zero","Nano","Glitch","Chrome","Neon","Ghost","Cipher","Razor","Byte","Phantom","Nova","Static","Zephyr","Viper","Pixel","Flux","Wraith","Echo","Grim","Shock"
-  };
-  static const char* hs[]={
-    "runner","jack","blade","witch","smith","hacker","kid","queen","king","vandal","flux","shift","geist","wolf","cat","spider","rider","shade","mancer","net"
-  };
 
-  auto pick = [&](const char* const* arr, int n){ return arr[number(0, n-1)]; };
-  auto make_handle = [&](){
-    std::string h = std::string(pick(hp, (int)(sizeof(hp)/sizeof(hp[0]))))
-                  + pick(hs, (int)(sizeof(hs)/sizeof(hs[0])));
-    if (!number(0,2)) { char b[8]; snprintf(b, sizeof(b), "%d", number(0,99)); h += b; }
-    return h;
-  };
+// sysart adapter used by maybe_seed_system_art (theme -> strings)
+void sysart_compose(const std::string& theme,
+                    std::string& out_name,
+                    std::string& out_look,
+                    std::string& out_roomdesc);
 
-  std::string type   = pick(types,   (int)(sizeof(types)/sizeof(types[0])));
-  std::string adj    = pick(adjs,    (int)(sizeof(adjs)/sizeof(adjs[0])));
-  std::string handle = make_handle();
-  std::string rival  = pick(rivals,  (int)(sizeof(rivals)/sizeof(rivals[0])));
-  std::string corp   = pick(corpnames,(int)(sizeof(corpnames)/sizeof(corpnames[0])));
-
-  int mode_roll = number(1,100);  // BRAG 35%, MOCK 25%, DECO 40%
-
-  if (mode_roll <= 35) { // -------- BRAG --------
-    static const char* brag[] = {
-      "Stencil reads: 'Soloed a %s blacksite. Ask @%s.'",                              // (corp, handle)
-      "Holo-spray boasts: '@%s ghosted %s HQ—first try, no trace.'",                   // (handle, corp)
-      "Projection flickers: 'Gridrunner @%s cracked a %s vault and left a smile.'",    // (handle, corp)
-      "Paste-up lists bounties crossed out—last line: '@%s walked away.'",             // (handle)
-      "Fiberlight scrawl: 'Frag your ICE, %s. @%s was here.'",                         // (corp, handle)
-      // PREVIOUS additions:
-      "AR confetti rains: '@%s speedran a %s killbox and streamed it live.'",          // (handle, corp)
-      "Chrome stencil: '@%s patched prod on %s while security was still brewing coffee.'", // (handle, corp)
-      // NEW +5:
-      "Projection burn: '@%s hotwired a %s drone swarm mid-flight.'",                  // (handle, corp)
-      "Paste-up ledger: '@%s rerouted %s payroll with three keystrokes.'",             // (handle, corp)
-      "Fiberlight flex: '@%s jailbroke a %s arcology turnstile—no alarms.'",           // (handle, corp)
-      "Holo tag boasts: '@%s walked out of %s R&D with coffee and root.'",             // (handle, corp)
-      "Microprint stamp: '@%s owned %s testnet before the NDA ink dried.'"             // (handle, corp)
-    };
-    const int n = (int)(sizeof(brag)/sizeof(brag[0]));
-    const char* fmt = brag[number(0, n-1)];
-    char buf[MAX_STRING_LENGTH];
-
-    // Parameter mapping for legacy lines:
-    if (strstr(fmt, "%s blacksite") || strstr(fmt, "your ICE"))
-      snprintf(buf, sizeof(buf), fmt, corp.c_str(), handle.c_str());  // (corp, handle)
-    else if (strstr(fmt, "%s HQ") || strstr(fmt, "cracked a %s") || strstr(fmt, "speedran") || strstr(fmt, "prod on %s"))
-      snprintf(buf, sizeof(buf), fmt, handle.c_str(), corp.c_str());  // (handle, corp)
-    else if (strstr(fmt, "%s R&D") || strstr(fmt, "drone swarm") || strstr(fmt, "payroll") || strstr(fmt, "turnstile") || strstr(fmt, "testnet"))
-      snprintf(buf, sizeof(buf), fmt, handle.c_str(), corp.c_str());  // (handle, corp)
-    else
-      snprintf(buf, sizeof(buf), fmt, handle.c_str());                // (handle) only
-
-    out_name = std::string("^C") + type + "^n by @" + handle;
-    out_look = buf;
-    out_room = std::string("A ") + adj + " " + type + " signed by @" + handle + " glows with loud confidence.";
-  }
-  else if (mode_roll <= 60) { // -------- MOCK --------
-    static const char* mock[] = {
-      "Spray tag jeers: '@%s still sandboxing hello world.'",                         // (rival)
-      "Stencil jab: 'Hey @%s, your deck throttles like a toaster.'",                  // (rival)
-      "AR tag tracks you and snickers: 'Looking for @%s? They faceplanted on %s ICE.'", // (rival, corp)
-      "Holo-sticker: '@%s, patch your rig before you brag.'",                         // (rival)
-      "Paste-up meme shows @%s getting bounced by a %s receptionist.",                 // (rival, corp)
-      // PREVIOUS additions:
-      "Projection gag: '@%s rage-quit a %s onboarding wizard.'",                      // (rival, corp)
-      "Fiberlight doodle: '@%s uses default creds on %s and calls it \"red team\".'", // (rival, corp)
-      // NEW +5:
-      "Stencil roast: '@%s can't even grep their own logs.'",                         // (rival)
-      "AR pointer: 'PSA: @%s thinks 2FA is two fingers.'",                            // (rival)
-      "Projection snark: '@%s got locked out by a %s coffee machine.'",               // (rival, corp)
-      "Paste-up clown: '@%s pushed to prod on %s—on a Friday.'",                      // (rival, corp)
-      "Fiberlight meme: '@%s copies stackoverflow into %s firmware and hopes.'"       // (rival, corp)
-    };
-    const int n = (int)(sizeof(mock)/sizeof(mock[0]));
-    const char* fmt = mock[number(0, n-1)];
-    char buf[MAX_STRING_LENGTH];
-
-    if (strstr(fmt, "faceplanted") || strstr(fmt, "receptionist") || strstr(fmt, "onboarding") ||
-        strstr(fmt, "default creds") || strstr(fmt, "coffee machine") || strstr(fmt, "on %s") || strstr(fmt, "firmware"))
-      snprintf(buf, sizeof(buf), fmt, rival.c_str(), corp.c_str());   // (rival, corp)
-    else
-      snprintf(buf, sizeof(buf), fmt, rival.c_str());                 // (rival)
-
-    out_name = std::string("^C") + type + "^n by @" + handle;
-    out_look = buf;
-    out_room = "A cheeky " + type + " needles a rival handle—runner drama made permanent.";
-  }
-  else { // -------- DECO --------
-    static const char* deco[] = {
-      "A %s koi loops in AR, scales flickering like code.",                             // (theme)
-      "A stenciled cherry blossom drifts across a chrome skull.",                       // ()
-      "A glitch-art skyline overlays the real one, half a beat out of sync.",           // ()
-      "Microprint poetry crawls along the wall if you squint just right.",              // ()
-      "A neon fox chases its tail around a pillar, leaving light trails.",              // ()
-      // PREVIOUS additions:
-      "A lattice of PCB vines climbs the wall, blooming %s petals.",                    // (theme)
-      "A ribbon of white noise twists into a serpent; its teeth spell %s.",             // (theme)
-      // NEW +5:
-      "A %s mandala blooms, petals tessellated into microchips.",                       // (theme)
-      "Hologrid rain falls upward, each drop a tiny %s glyph.",                          // (theme)
-      "A mural of wandering vectors resolves into a %s mask, then dissolves.",          // (theme)
-      "A swarm of voxel butterflies flutters by; their wings whisper '%s'.",            // (theme)
-      "A ribbon of %s calligraphy wraps a pillar in luminous strokes."                  // (theme)
-    };
-    const int n = (int)(sizeof(deco)/sizeof(deco[0]));
-    const char* fmt = deco[number(0, n-1)];
-    char buf[MAX_STRING_LENGTH];
-
-    // Count %s to decide how many args to pass (0/1). We avoid 2+ in DECO on purpose.
-    int placeholders = 0; for (const char* p = fmt; (p = strstr(p, "%s")); p += 2) ++placeholders;
-    if (placeholders >= 1) snprintf(buf, sizeof(buf), fmt, theme.c_str());
-    else                   snprintf(buf, sizeof(buf), fmt);
-
-    out_name = std::string("^C") + type + "^n by @" + handle;
-    out_look = buf;
-    if (!number(0,1)) { out_look += " "; out_look += pick(signoffs, (int)(sizeof(signoffs)/sizeof(signoffs[0]))); }
-    out_room = std::string("A ") + adj + " " + type + " by @" + handle + " brightens the " + theme + " here.";
-  }
-}
 void maybe_seed_system_art() {
   static time_t next=0; time_t now=time(0);
   if (!next || now>=next) {

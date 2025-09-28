@@ -7,26 +7,13 @@
 #include <vector>
 #include <algorithm>
 
-
 namespace {
+
 std::vector<TaxiWiki::Entry> g_entries;
 
 static inline std::string strtolower(std::string s) {
   std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return std::tolower(c); });
   return s;
-}
-
-// Allow-list for "SeattleEnvirons"
-static bool allowed_seattle_environs(const std::string& tag_in) {
-  std::string t; t.reserve(tag_in.size());
-  for (char c : tag_in) t.push_back(std::tolower((unsigned char)c));
-  // Accepted region tags for Seattle & environs:
-  static const char* OK[] = {
-    "seattle", "downtown", "auburn", "council island", "council",
-    "everett", "renton", "tacoma", "touristville", "puyallup"
-  };
-  for (const char* s : OK) if (t == s) return true;
-  return false;
 }
 
 static void trim(std::string& s) {
@@ -36,13 +23,27 @@ static void trim(std::string& s) {
   while (b>a && std::isspace((unsigned char)s[b-1])) --b;
   s = s.substr(a, b-a);
 }
+
 static bool contains_ci(const std::string& hay, const std::string& needle) {
   if (needle.empty()) return false;
   auto H = strtolower(hay);
   auto N = strtolower(needle);
   return H.find(N) != std::string::npos;
 }
+
+// Allow-list for "SeattleEnvirons"
+static bool allowed_seattle_environs(const std::string& tag_in) {
+  std::string t; t.reserve(tag_in.size());
+  for (char c : tag_in) t.push_back(std::tolower((unsigned char)c));
+  static const char* OK[] = {
+    "seattle", "downtown", "auburn", "council island", "council",
+    "everett", "renton", "tacoma", "touristville", "puyallup"
+  };
+  for (const char* s : OK) if (t == s) return true;
+  return false;
 }
+
+} // anon
 
 namespace TaxiWiki {
 
@@ -58,7 +59,8 @@ int load(const char* path) {
     if (s.empty() || s[0] == '#') continue;
 
     if (s.rfind("gridguide add", 0) == 0) {
-      auto rest = s.substr(std::strlen("gridguide add"));
+      // parse: gridguide add <Keyword> <X>, <Y>
+      std::string rest = s.substr(std::strlen("gridguide add"));
       trim(rest);
       size_t sp = rest.find(' ');
       if (sp == std::string::npos) continue;
@@ -72,7 +74,7 @@ int load(const char* path) {
       e.display = key;
       e.x = gx;
       e.y = gy;
-      e.region = "";
+      e.region = ""; // untagged
       g_entries.push_back(e);
       ++n;
     } else {
@@ -108,15 +110,17 @@ int load(const char* path) {
   return n;
 }
 
+// Case-insensitive substring match against keyword/display.
+// regionFilter: "" for all; "SeattleEnvirons" to allow-list specific regions.
 std::vector<Entry> find(const char* user_c, const char* regionFilter_c, size_t max_hits) {
   std::vector<Entry> out;
-  std::string user = user_c ? user_c : "";
-  std::string regionFilter = regionFilter_c ? regionFilter_c : "";
-  if (user.empty()) return out;
+  if (!user_c) return out;
+  std::string user(user_c);
+  std::string regionFilter = regionFilter_c ? std::string(regionFilter_c) : std::string();
+
   for (const auto& e : g_entries) {
     if (!regionFilter.empty()) {
       if (regionFilter == "SeattleEnvirons") {
-        // Only allow entries explicitly tagged as one of our Seattle-area regions.
         if (e.region.empty() || !allowed_seattle_environs(e.region))
           continue;
       } else {

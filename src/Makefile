@@ -47,7 +47,8 @@ MYFLAGS = -DDEBUG_CRYPTO -DDEBUG -DSELFADVANCE -DIDLEDELETE_DRYRUN -Dlinux -I /u
 #LIBS = -L/usr/local/lib $(COMMON_FLAGS) -lsodium -lcrypt
 #MYFLAGS = -DDEBUG -DSELFADVANCE -DIDLEDELETE_DRYRUN -DWIN32 -I /usr/local/include/ -Wall -Wextra -Wno-unused-parameter -DSUPPRESS_MOB_SKILL_ERRORS -std=c++11
 
-CPPFLAGS = $(MYFLAGS) $(PROFILE)
+#CPPFLAGS = $(MYFLAGS) $(PROFILE)
+CPPFLAGS = $(MYFLAGS) $(PROFILE) 
 
 sourcefiles = $(wildcard *.cpp)
 objfiles = $(sourcefiles:.cpp=.o)

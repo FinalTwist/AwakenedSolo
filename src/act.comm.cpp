@@ -34,6 +34,11 @@
 #include "moderation.hpp"
 #include "npcvoice.hpp"
 
+// +++ DEBUGPOSIX + backtrace for SAY tracing
+#include <fcntl.h>     // O_CREAT, O_WRONLY, O_APPEND
+#include <unistd.h>    // open, close, dprintf
+#include <execinfo.h>  // backtrace, backtrace_symbols_fd
+
 /* extern variables */
 extern struct skill_data skills[];
 
@@ -55,7 +60,23 @@ ACMD_CONST(do_say) {
 
 ACMD(do_say)
 {
-  InnerVoice::maybe_parse_rename_from_speech(ch, argument);
+  // +++ debug
+  {
+  int fd = open("say_trace.log", O_CREAT | O_WRONLY | O_APPEND, 0644);
+  if (fd >= 0) {
+    dprintf(fd, "do_say: ch=%p is_npc=%d arg='%.*s'\n",
+            (void*)ch, IS_NPC(ch) ? 1 : 0,
+            120, argument ? argument : "<null>");
+    close(fd);
+    log_vfprintf("do_say: ch=%p is_npc=%d arg='%.*s'\n",
+            (void*)ch, IS_NPC(ch) ? 1 : 0,
+            120, argument ? argument : "<null>");
+  }
+  }
+
+  // Only parse rename from player speech (never from NPC/debug/timed SAYs).
+  if (ch && !IS_NPC(ch) && argument && *argument)
+    InnerVoice::maybe_parse_rename_from_speech(ch, argument);
 
   struct char_data *tmp, *to = NULL;
 
@@ -147,7 +168,7 @@ ACMD(do_say)
     }
      // NPCVoice: addressed greetings (100% reply). If player said "hello <NPC>", that NPC replies.
   bool __nv_handled_greet = false;
-  if (ch->in_room) {
+  if (!NPCVoice::in_speaking() && ch->in_room) {
     for (struct char_data* mob = ch->in_room->people; mob; mob = mob->next_in_room) {
       if (!IS_NPC(mob) || mob == ch) continue;
       if (NPCVoice::is_addressed_greeting(argument, mob)) {
@@ -177,8 +198,10 @@ ACMD(do_say)
     ch->char_specials.last_social_action = LAST_SOCIAL_ACTION_REQUIREMENT_FOR_CONGREGATION_BONUS - SOCIAL_ACTION_GRACE_PERIOD_GRANTED_BY_SPEECH;
 
     // NPCVoice: if player used say-to and it’s a greeting, force a greeting reply.
-    if (to && IS_NPC(to) && *argument && NPCVoice::contains_greeting(argument)) {
-      NPCVoice::addressed_greet(ch, to);
+    if (!NPCVoice::in_speaking()) {
+      if (to && IS_NPC(to) && *argument && NPCVoice::contains_greeting(argument)) {
+        NPCVoice::addressed_greet(ch, to);
+      }
     }
 
     for (tmp = ch->in_room ? ch->in_room->people : ch->in_veh->people; tmp; tmp = ch->in_room ? tmp->next_in_room : tmp->next_in_veh) {
@@ -194,28 +217,31 @@ ACMD(do_say)
                   : GET_NAME(to)) : "someone");
       }
        // NPCVoice: addressed greetings (100% reply). If player said "hello <NPC>", that NPC replies.
-  bool __nv_handled_greet = false;
-  if (ch->in_room) {
-    for (struct char_data* mob = ch->in_room->people; mob; mob = mob->next_in_room) {
-      if (!IS_NPC(mob) || mob == ch) continue;
-      if (NPCVoice::is_addressed_greeting(argument, mob) || NPCVoice::contains_greeting(argument)) {
-        NPCVoice::addressed_greet(ch, mob);
-        __nv_handled_greet = true;
+      bool __nv_handled_greet = false;
+      if (!NPCVoice::in_speaking() && ch->in_room) {
+        for (struct char_data* mob = ch->in_room->people; mob; mob = mob->next_in_room) {
+          if (!IS_NPC(mob) || mob == ch) continue;
+          if (NPCVoice::is_addressed_greeting(argument, mob) || NPCVoice::contains_greeting(argument)) {
+            NPCVoice::addressed_greet(ch, mob);
+            __nv_handled_greet = true;
+          }
+        }
       }
-    }
-  }
 
-  // NPCVoice: generic "listen" reactions only if nothing was explicitly addressed
-  if (!__nv_handled_greet && ch->in_room) {
-    for (struct char_data *mob = ch->in_room->people; mob; mob = mob->next_in_room) {
-      if (!IS_NPC(mob) || mob == ch) continue;
-      NPCVoice::maybe_listen(ch, mob, argument);
-    }
-  }
-        // NPCVoice: nearby NPCs react to what was said.
-      for (struct char_data *mob = ch->in_room ? ch->in_room->people : NULL; mob; mob = mob->next_in_room) {
-        if (!IS_NPC(mob) || mob == ch) continue;
-        NPCVoice::maybe_listen(ch, mob, argument);
+      // NPCVoice: generic "listen" reactions only if nothing was explicitly addressed
+      if (!NPCVoice::in_speaking() && !__nv_handled_greet && ch->in_room) {
+        for (struct char_data *mob = ch->in_room->people; mob; mob = mob->next_in_room) {
+          if (!IS_NPC(mob) || mob == ch) continue;
+          NPCVoice::maybe_listen(ch, mob, argument);
+        }
+      }
+
+      // NPCVoice: nearby NPCs react to what was said.
+      if (!NPCVoice::in_speaking()) {
+        for (struct char_data *mob = ch->in_room ? ch->in_room->people : NULL; mob; mob = mob->next_in_room) {
+          if (!IS_NPC(mob) || mob == ch) continue;
+          NPCVoice::maybe_listen(ch, mob, argument);
+        }
       }
 
       snprintf(buf, sizeof(buf), "$z^n says%s in %s, \"%s%s%s^n\"",
@@ -233,35 +259,37 @@ ACMD(do_say)
     // NPCVoice: addressed greetings (100% reply)
     bool __nv_handled_greet = false;
 
-    // If the text contains a greeting and mentions an NPC by name, that NPC replies.
-    if (ch->in_room && *argument) {
-      for (struct char_data* mob = ch->in_room->people; mob; mob = mob->next_in_room) {
-        if (!IS_NPC(mob) || mob == ch) continue;
-        if (NPCVoice::is_addressed_greeting(argument, mob)) {
-          NPCVoice::addressed_greet(ch, mob);
+    if (!NPCVoice::in_speaking()) {
+      // If the text contains a greeting and mentions an NPC by name, that NPC replies.
+      if (ch->in_room && *argument) {
+        for (struct char_data* mob = ch->in_room->people; mob; mob = mob->next_in_room) {
+          if (!IS_NPC(mob) || mob == ch) continue;
+          if (NPCVoice::is_addressed_greeting(argument, mob)) {
+            NPCVoice::addressed_greet(ch, mob);
+            __nv_handled_greet = true;
+          }
+        }
+      }
+
+      // If no name used but it's a greeting and exactly one NPC is here, reply anyway.
+      if (!__nv_handled_greet && ch->in_room && NPCVoice::contains_greeting(argument)) {
+        struct char_data* only = NULL; int count = 0;
+        for (struct char_data* mob = ch->in_room->people; mob; mob = mob->next_in_room) {
+          if (!IS_NPC(mob) || mob == ch) continue;
+          only = mob; ++count; if (count > 1) break;
+        }
+        if (count == 1 && only) {
+          NPCVoice::addressed_greet(ch, only);
           __nv_handled_greet = true;
         }
       }
-    }
 
-    // If no name used but it's a greeting and exactly one NPC is here, reply anyway.
-    if (!__nv_handled_greet && ch->in_room && NPCVoice::contains_greeting(argument)) {
-      struct char_data* only = NULL; int count = 0;
-      for (struct char_data* mob = ch->in_room->people; mob; mob = mob->next_in_room) {
-        if (!IS_NPC(mob) || mob == ch) continue;
-        only = mob; ++count; if (count > 1) break;
-      }
-      if (count == 1 && only) {
-        NPCVoice::addressed_greet(ch, only);
-        __nv_handled_greet = true;
-      }
-    }
-
-    // If nothing was handled explicitly, allow generic listen reactions.
-    if (!__nv_handled_greet && ch->in_room) {
-      for (struct char_data *mob = ch->in_room->people; mob; mob = mob->next_in_room) {
-        if (!IS_NPC(mob) || mob == ch) continue;
-        NPCVoice::maybe_listen(ch, mob, argument);
+      // If nothing was handled explicitly, allow generic listen reactions.
+      if (!NPCVoice::in_speaking() && !__nv_handled_greet && ch->in_room) {
+        for (struct char_data *mob = ch->in_room->people; mob; mob = mob->next_in_room) {
+          if (!IS_NPC(mob) || mob == ch) continue;
+          NPCVoice::maybe_listen(ch, mob, argument);
+        }
       }
     }
 

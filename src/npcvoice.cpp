@@ -19,6 +19,10 @@ ACMD_DECLARE(do_say);
 
 namespace NPCVoice {
 
+// Reentrancy guard so NPCVoice-generated speech doesn't trigger NPCVoice reactions.
+static bool g_in_speaking = false;
+bool in_speaking() { return g_in_speaking; }
+
 // -----------------------
 // Personality resolution
 // -----------------------
@@ -129,7 +133,7 @@ static std::unordered_map<string, std::vector<string>> g_bank;
 
 static void load_one(const char* pers, const char* ev) {
   char path[256];
-  snprintf(path, sizeof(path), "lib/etc/npcvoice/categories/%s/%s.txt", pers, ev);
+  snprintf(path, sizeof(path), "etc/npcvoice/categories/%s/%s.txt", pers, ev);
   std::vector<string> lines;
   if (FILE* fp = fopen(path, "r")) {
     char buf[2048];
@@ -194,7 +198,10 @@ static void speak_to_room_or_char(struct char_data* mob, struct char_data* ch, c
   if (!mob || !msg || !*msg) return;
   char buf[MAX_STRING_LENGTH];
   snprintf(buf, sizeof(buf), "%s", msg);
+  bool prev = g_in_speaking;
+  g_in_speaking = true;            // NPCVoice is speaking: suppress same-tick re-reactions
   do_say(mob, buf, cmd_say, 0);
+  g_in_speaking = prev;            // restore previous state
 }
 
 // -----------------------
@@ -319,6 +326,7 @@ void receive_item(struct char_data *ch, struct char_data *mob, struct obj_data *
 
 void addressed_greet(struct char_data* ch, struct char_data* mob) {
   if (!ch || !mob) return;
+  if (!cooldown_ok(mob, "greet", 120)) return;
 
   const char* pers = pers_name(get_personality(mob));
   const auto& vec = lines_for(pers, "greet");
@@ -327,11 +335,13 @@ void addressed_greet(struct char_data* ch, struct char_data* mob) {
     const std::string& s = pick_nonrepeating(vec, mob, "greet_forced");
     if (!s.empty()) {
       speak_to_room_or_char(mob, ch, s.c_str());
+      arm_cooldown(mob, "greet", 120);   // <-- add this
       return;
     }
   }
   // Fallback if file empty
   speak_to_room_or_char(mob, ch, "Hello.");
+  arm_cooldown(mob, "greet", 120);       // <-- add this too
 }
 
 } // namespace NPCVoice

@@ -574,6 +574,7 @@ static const Tier* pick_tier() {
 }
 
 void adventurer_on_pc_login(struct char_data* ch) {
+  //log_vfprintf("adventureronpclogin1");
   if (!ch || IS_NPC(ch)) return;
   struct room_data* room = get_ch_in_room(ch);
   if (!room) return;

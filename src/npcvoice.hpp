@@ -38,6 +38,7 @@ void addressed_greet(struct char_data* ch, struct char_data* mob);
   void set_personality(struct char_data* mob, Personality p);
   Personality get_personality(struct char_data* mob);
 
-  bool contains_greeting(const char* said);
 
+  bool contains_greeting(const char* said);
+  bool in_speaking();  // <-- add this
 } // namespace NPCVoice

@@ -20,19 +20,14 @@
 #include <random>
 #include <cstring>
 #include <cctype>
+#include <cstdarg>
 
-void perform_remove(struct char_data *ch, int pos);
 
-static bool maybe_speak_from_file_return(char_data* ch, int skill, const char* suffix);
+// External functions from the core, referenced here.
+extern void perform_remove(struct char_data *ch, int pos);
+extern void do_sneak(struct char_data *ch, char *argument, int cmd, int subcmd);
+extern const char * a_an(char *);
 
-// ---------------------------
-// Config
-// ---------------------------
-static const int MIN_COOLDOWN_SECONDS = 30;        // 30s
-static const int MAX_COOLDOWN_SECONDS = 10 * 60;   // 15m
-static const int SKILL_SPEAK_CHANCE_PERCENT = 10;   // 5% chance on use/success/fail events
-static const long ATTITUDE_MAX = 1000000L;
-static const long ATTITUDE_MIN = 0;
 
 // ---------------------------
 // Internal state
@@ -70,34 +65,65 @@ int pending_micro_index = -1;
   long last_target_id = 0;
 };
 
+
+static std::unordered_map<long, VoiceState> g_state; // keyed by GET_IDNUM(ch)
+
+static bool maybe_speak_from_file_return(char_data* ch, int skill, const char* suffix);
+
+// ---- early forward decls needed by maybe_speak_from_file_return ----
+struct VoiceState;
+static bool can_speak_entry_now(VoiceState& st);
+static void set_new_cooldown_entry(VoiceState& st);
+static void speak_line(struct char_data* ch, const std::string& line);
+static std::string skill_file_base(int skill, const char* suffix);
+static bool load_lines(const std::string& path, std::vector<std::string>& out);
+static int irand(int lo, int hi);
+
+static bool maybe_speak_from_file_return(char_data* ch, int skill, const char* suffix) {
+  if (!ch || IS_NPC(ch)) return false;
+  const long id = GET_IDNUM(ch);
+  VoiceState& st = g_state[id];
+  if (!can_speak_entry_now(st)) return false;
+  std::vector<std::string> lines;
+  const std::string path = skill_file_base(skill, suffix);
+  if (!load_lines(path, lines)) {
+    load_lines(std::string("lib/etc/innervoice/skills/000-skill-generic-") + (suffix ? suffix : "use") + ".txt", lines);
+  }
+  if (!lines.empty()) {
+    const int idx = irand(0, (int)lines.size()-1);
+    speak_line(ch, lines[idx]);
+    set_new_cooldown_entry(st);
+    return true;
+  }
+  return false;
+}
+
+static bool load_quest_lines(long vnum, const char *suffix, std::vector<std::string>& out) {
+  out.clear();
+  char filename[256];
+  snprintf(filename, sizeof(filename), "lib/etc/innervoice/quests/%ld-%s.txt", vnum, suffix);
+  return load_lines(filename, out);
+}
+
+// ---------------------------
+// Config
+// ---------------------------
+static const int MIN_COOLDOWN_SECONDS = 30;        // 30s
+static const int MAX_COOLDOWN_SECONDS = 10 * 60;   // 15m
+static const int SKILL_SPEAK_CHANCE_PERCENT = 10;   // 5% chance on use/success/fail events
+static const long ATTITUDE_MAX = 1000000L;
+static const long ATTITUDE_MIN = 0;
+
 /* Forward declarations for helpers used before definition. */
 static bool can_speak_entry_now(VoiceState& st);
 static void set_new_cooldown_entry(VoiceState& st);
 static void speak_line(char_data* ch, const std::string& line);
-void do_sneak(struct char_data *ch, char *argument, int cmd, int subcmd);
-extern const char *a_an(char *);
-
-
-
-
-static std::unordered_map<long, VoiceState> g_state; // keyed by GET_IDNUM(ch)
 
 // RNG helpers
 
-static bool iv_local_cd(time_t last, int seconds) {
-  time_t now = time(0);
-  if (last && now - last < seconds) return true;
-  return false;
-}
 
-static bool strcasestr_simple(const char* hay, const char* needle) {
-  if (!hay || !needle) return false;
-  size_t nlen = strlen(needle);
-  for (const char* p = hay; *p; ++p) {
-    if (strncasecmp(p, needle, nlen) == 0) return true;
-  }
-  return false;
-}
+
+
 
 static int irand(int lo, int hi) {
   if (hi <= lo) return lo;
@@ -231,12 +257,6 @@ if (reported >= 2) break;
 
 // Tier 2 (stealth): auto-sneak and dim light sources.
 ACMD_DECLARE(do_sneak);
-extern void perform_remove(struct char_data *ch, int pos);
-
-
-
-
-
 
 }
 }
@@ -385,56 +405,8 @@ static void iv_tier2_unlock_doors_or_chests(struct char_data *ch) {
   }
 }
 
-static void iv_tier2_weaken_current_target(struct char_data *ch) {
-  if (!ch || !FIGHTING(ch)) return;
-  VoiceState& st = g_state[GET_IDNUM(ch)];
-  if (!can_speak_entry_now(st)) return;
-  if (!iv_tier2_roll(ch)) return;
 
-  struct char_data *t = FIGHTING(ch);
-  // record for path ping
-  if (t) { VoiceState& st2 = g_state[GET_IDNUM(ch)]; st2.last_target_id = IS_NPC(t) ? GET_MOB_VNUM(t) : GET_IDNUM(t); const char *tn=GET_NAME(t); if (tn) strlcpy(st2.last_target_name, tn, sizeof(st2.last_target_name)); }
-  if (!t || !t->in_room || t->in_room != ch->in_room) return;
-  if (IS_NPC(t)) {
-    // Skip protected / plot-important targets.
-    if (MOB_FLAGGED(t, MOB_NOKILL) || MOB_FLAGGED(t, MOB_GUARD) || MOB_FLAGGED(t, MOB_SNIPER))
-      return;
-    const char *tn = GET_NAME(t);
-    if (tn && (str_str(tn, "BOSS") || str_str(tn, "Boss") || str_str(tn, "[BOSS]")))
-      return;
-  }
 
-  struct obj_data *wield = NULL;
-  if (GET_EQ(t, WEAR_WIELD) && GET_OBJ_TYPE(GET_EQ(t, WEAR_WIELD)) == ITEM_WEAPON)
-    wield = GET_EQ(t, WEAR_WIELD);
-  else if (GET_EQ(t, WEAR_HOLD) && GET_OBJ_TYPE(GET_EQ(t, WEAR_HOLD)) == ITEM_WEAPON)
-    wield = GET_EQ(t, WEAR_HOLD);
-
-  bool acted = false;
-  if (wield && WEAPON_IS_GUN(wield) && wield->contains) {
-    struct obj_data *mag = wield->contains;
-    if (GET_MAGAZINE_AMMO_COUNT(mag) > 0) {
-      GET_MAGAZINE_AMMO_COUNT(mag) = 0;
-      acted = true;
-      std::ostringstream line;
-      line << "^C*TCHAK*^n I spiked " << (IS_NPC(t) ? GET_NAME(t) : "their") << " gun—enjoy the silence.";
-      speak_line(ch, line.str());
-    }
-  }
-
-  if (!acted) {
-    WAIT_STATE(t, PULSE_VIOLENCE);
-    acted = true;
-    std::ostringstream line;
-    line << "^CZap.^n " << (IS_NPC(t) ? GET_NAME(t) : "Your target") << " just lost a beat—keep hitting.";
-    speak_line(ch, line.str());
-  }
-  if (acted) { set_new_cooldown_entry(st); st.attitude = MAX(0, st.attitude - number(1,5)); }
-}
-
-void innervoice_tier2_combat_assist(struct char_data *ch) {
-  iv_tier2_weaken_current_target(ch);
-}
 
 static void iv_tier2_autoresneak(struct char_data *ch) {
   if (!ch) return;
@@ -470,40 +442,14 @@ static void iv_tier2_autodim(struct char_data *ch) {
   }
 }
 
-void innervoice_tier2_combat_assist_duplicate(struct char_data *ch) {
-  iv_tier2_weaken_current_target(ch);
-}
-
-static void __iv_unused_block(struct char_data* ch, struct obj_data* o, const std::vector<std::string>& names) {
-    if (names.empty()) return;
-
-    std::ostringstream line;
-    line << "^cIntel:^n " << CAP(a_an((char *) GET_OBJ_NAME(o))) << " here holds ";
-    // join names with comma and 'and'
-    if (names.size() == 1) line << names[0];
-    else if (names.size() == 2) line << names[0] << " and " << names[1];
-    else {
-      for (size_t i = 0; i < names.size(); ++i) {
-        if (i == names.size() - 1) line << "and " << names[i];
-        else line << names[i] << ", ";
-      }
-    }
-    line << ".";
-    speak_line(ch, line.str());
-    VoiceState& st = g_state[GET_IDNUM(ch)];
-    set_new_cooldown_entry(st);
-    static int __reported_dummy = 0; if (++__reported_dummy >= 2) {/* no-op */}
-  }
 
 
 
 
-static void set_new_cooldown(VoiceState& st) {
-  // legacy/global fallback
-  st.next_ok_at = time(0) + irand(MIN_COOLDOWN_SECONDS, MAX_COOLDOWN_SECONDS);
-  st.next_ok_at_entry = st.next_ok_at;
-  st.next_ok_at_combat = st.next_ok_at;
-}
+
+
+
+
 
 static void set_new_cooldown_entry(VoiceState& st) {
   if (st.batch_on_entry) { st.cooldown_pending = true; return; }
@@ -511,10 +457,7 @@ static void set_new_cooldown_entry(VoiceState& st) {
   st.next_ok_at = st.next_ok_at_entry;
 }
 
-static void set_new_cooldown_combat(VoiceState& st) {
-  st.next_ok_at_combat = time(0) + irand(MIN_COOLDOWN_SECONDS, MAX_COOLDOWN_SECONDS);
-  st.next_ok_at = st.next_ok_at_combat;
-}
+
 
 static bool can_speak_now(VoiceState& st) {
   return time(0) >= st.next_ok_at;
@@ -524,9 +467,7 @@ static bool can_speak_entry_now(VoiceState& st) {
   return time(0) >= st.next_ok_at_entry;
 }
 
-static bool can_speak_combat_now(VoiceState& st) {
-  return time(0) >= st.next_ok_at_combat;
-}
+
 
 
 
@@ -663,14 +604,7 @@ static void speak_line(char_data* ch, const std::string& line) {
     send_to_char(ch, "^B[%s]^n ^W%s^n\r\n", g_state[GET_IDNUM(ch)].entity_name, out.c_str());
   }
 }
-static void speak_line_duplicate_block(char_data* ch, const std::string& line) {
-  if (!ch) return;
-  if (PRF_FLAGGED(ch, PRF_SCREENREADER)) {
-    send_to_char(ch, "%s: %s\r\n", g_state[GET_IDNUM(ch)].entity_name, line.c_str());
-  } else {
-    send_to_char(ch, "^B[%s]^n ^W%s^n\r\n", g_state[GET_IDNUM(ch)].entity_name, line.c_str());
-  }
-}
+
 
 static void maybe_speak_from_file(char_data* ch, int skill, const char* suffix) {
   if (!ch || IS_NPC(ch)) return;
@@ -731,9 +665,9 @@ void notify_vehicle_travel_tick(char_data* ch, veh_data* veh) {
 
     if (chance(SKILL_SPEAK_CHANCE_PERCENT)) {
       if (botched || total_successes <= 0) {
-        if (maybe_speak_from_file_return(ch, skill, "fail")) { adjust_attitude(ch, -number(1,4)); }
+        if (maybe_speak_from_file_return(ch, skill, "fail")) { InnerVoice::adjust_attitude(ch, -number(1,4)); }
       } else {
-        if (maybe_speak_from_file_return(ch, skill, "success")) { adjust_attitude(ch, number(1,5)); }
+        if (maybe_speak_from_file_return(ch, skill, "success")) { InnerVoice::adjust_attitude(ch, number(1,5)); }
       }
     }
   }
@@ -778,30 +712,7 @@ void notify_vehicle_travel_tick(char_data* ch, veh_data* veh) {
 // ---------------------------
 // Item content helpers
 // ---------------------------
-static bool parse_attitude_header(const std::string& path, int& out_att) {
-  out_att = 0;
-  std::ifstream f(path.c_str());
-  if (!f.good()) return false;
-  std::string line;
-  while (std::getline(f, line)) {
-    if (!line.empty() && line.back()=='\r') line.pop_back();
-    if (line.rfind("#",0)==0) {
-      std::string low = line;
-      std::transform(low.begin(), low.end(), low.begin(), ::tolower);
-      size_t pos = low.find("attitude");
-      if (pos != std::string::npos) {
-        int val = 0;
-        if (sscanf(low.c_str(), "# attitude : %d", &val) == 1 || sscanf(low.c_str(), "#attitude:%d", &val)==1 || sscanf(low.c_str(), "# attitude=%d", &val)==1) {
-          out_att = val;
-          return true;
-        }
-      }
-      continue;
-    }
-    break;
-  }
-  return false;
-}
+
 
 static std::string obj_item_file(int vnum) {
   char buf[64]; snprintf(buf, sizeof(buf), "%d", vnum);
@@ -860,7 +771,7 @@ namespace InnerVoice {
         maybe_speak_item_line(ch, lines);
         set_new_cooldown_entry(st);
         if (attitude_bonus > 0 && chance(50)) {
-          adjust_attitude(ch, attitude_bonus);
+          InnerVoice::adjust_attitude(ch, attitude_bonus);
         }
         return;
       }
@@ -869,7 +780,7 @@ namespace InnerVoice {
     std::string generic = std::string("lib/etc/innervoice/items/generic-") + action + ".txt";
     if (load_lines(generic, lines)) {
       maybe_speak_item_line(ch, lines);
-      adjust_attitude(ch, number(1,5));
+      InnerVoice::adjust_attitude(ch, number(1,5));
       set_new_cooldown_entry(st);
     }
   }
@@ -882,7 +793,7 @@ namespace InnerVoice {
     std::vector<std::string> lines;
     if (load_lines("lib/etc/innervoice/items/doors.txt", lines)) {
       maybe_speak_item_line(ch, lines);
-      adjust_attitude(ch, number(1,5));
+      InnerVoice::adjust_attitude(ch, number(1,5));
       set_new_cooldown_entry(st);
     }
   }
@@ -922,7 +833,7 @@ static bool load_room_lines_by_prefix(const std::string& prefix, std::vector<std
 
 namespace InnerVoice {
   void notify_room_move(char_data* ch, int room_rnum) {
-  InnerVoice::notify_room_ambient(ch, room_rnum);
+  notify_room_ambient(ch, room_rnum);
 
     if (!ch || IS_NPC(ch)) return;
     if (room_rnum < 0) return;
@@ -935,7 +846,7 @@ const long id = GET_IDNUM(ch);
     std::vector<std::string> lines;
     if (load_room_lines_by_prefix(room_file_by_vnum(vnum), lines)) {
       maybe_speak_item_line(ch, lines);
-      adjust_attitude(ch, number(1,5));
+      InnerVoice::adjust_attitude(ch, number(1,5));
       set_new_cooldown_entry(st);
     }
   
@@ -1019,16 +930,7 @@ namespace InnerVoice {
     set_new_cooldown_entry(st);
     st.veh_trip_spoken++;
   }
-}
 
-static bool load_quest_lines(long vnum, const char *suffix, std::vector<std::string>& out) {
-  out.clear();
-  char filename[256];
-  snprintf(filename, sizeof(filename), "lib/etc/innervoice/quests/%ld-%s.txt", vnum, suffix);
-  return load_lines(filename, out);
-}
-
-namespace InnerVoice {
   void notify_quest_accept(struct char_data* ch, long quest_vnum) {
     if (!ch || IS_NPC(ch)) return;
     VoiceState& st = g_state[GET_IDNUM(ch)];
@@ -1047,9 +949,8 @@ namespace InnerVoice {
     maybe_speak_item_line(ch, lines);
     set_new_cooldown_entry(st);
   }
-}
 
-namespace InnerVoice {
+
   void queue_micro_comment(struct char_data* ch, const char* theme, const char* variant_suffix, int line_index) {
     if (!ch || IS_NPC(ch)) return;
     VoiceState& st = g_state[GET_IDNUM(ch)];
@@ -1093,9 +994,7 @@ namespace InnerVoice {
       }
     }
   }
-}
 
-namespace InnerVoice {
   void schedule_intro_for_newbie(struct char_data* ch, int delay_seconds) {
     if (!ch || IS_NPC(ch)) return;
     VoiceState& st = g_state[GET_IDNUM(ch)];
@@ -1113,7 +1012,7 @@ namespace InnerVoice {
     if (load_lines("lib/etc/innervoice/combat/lowhealth.txt", lines)) {
       if (lines.size() > 100) lines.resize(100);
       maybe_speak_item_line(ch, lines);
-      adjust_attitude(ch, number(1,5));
+      InnerVoice::adjust_attitude(ch, number(1,5));
       set_new_cooldown_entry(st);
     }
   }
@@ -1127,7 +1026,7 @@ namespace InnerVoice {
     std::vector<std::string> lines;
     if (!load_item_lines_by_prefix(std::string(buf), lines, nullptr)) return;
     maybe_speak_item_line(killer, lines);
-    adjust_attitude(killer, number(1,5));
+    InnerVoice::adjust_attitude(killer, number(1,5));
     set_new_cooldown_entry(st);
   }
 
@@ -1145,21 +1044,18 @@ namespace InnerVoice {
       st.last_emote_award_ts = now;
     }
   }
-}
 
-
-static bool iv_is_valid_name(const char* s) {
-  if (!s || !*s) return false;
-  int len = 0;
-  for (const char* p = s; *p; p++) {
-    if (!(isalpha(*p) || *p=='-' || *p=='_' )) return false;
-    len++;
-    if (len > 20) return false;
+  static bool iv_is_valid_name(const char* s) {
+    if (!s || !*s) return false;
+    int len = 0;
+    for (const char* p = s; *p; p++) {
+      if (!(isalpha(*p) || *p=='-' || *p=='_' )) return false;
+      len++;
+      if (len > 20) return false;
+    }
+    return len >= 2;
   }
-  return len >= 2;
-}
 
-namespace InnerVoice {
   void maybe_parse_rename_from_speech(struct char_data* ch, const char* said) {
     if (!ch || IS_NPC(ch) || !said) return;
     VoiceState& st = g_state[GET_IDNUM(ch)];
@@ -1190,10 +1086,8 @@ namespace InnerVoice {
     st.entity_name[sizeof(st.entity_name)-1] = '\0';
     speak_line(ch, "i have a name now. i like it. i hope it likes me back.");
   }
-}
 
 
-namespace InnerVoice {
   void introduce_in_chargen(struct char_data* ch) {
     if (!ch || IS_NPC(ch)) return;
     VoiceState& st = g_state[GET_IDNUM(ch)];
@@ -1205,17 +1099,14 @@ namespace InnerVoice {
     speak_line(ch, "in return, i’ll whisper helpful things. sometimes even do them. i’m new at ‘human’, but i’m eager.");
     st.intro_shown = true;
   }
-}
 
-
-namespace InnerVoice {
   static const char *IV_NAME_DIR = "lib/etc/innervoice/names";
   static void iv_ensure_dir_exists() {
-#ifdef _WIN32
+  #ifdef _WIN32
     _mkdir(IV_NAME_DIR);
-#else
+  #else
     mkdir(IV_NAME_DIR, 0775);
-#endif
+  #endif
   }
   void persist_state(struct char_data* ch) {
     if (!ch || IS_NPC(ch)) return;
@@ -1246,61 +1137,228 @@ namespace InnerVoice {
     }
     fclose(f);
   }
-}
 
+  // ============================================================================
+  // InnerVoice: on-login one-liners (cooldown-protected)
+  // ============================================================================
 
-static bool maybe_speak_from_file_return(char_data* ch, int skill, const char* suffix) {
-  if (!ch || IS_NPC(ch)) return false;
-  const long id = GET_IDNUM(ch);
-  VoiceState& st = g_state[id];
-  if (!can_speak_entry_now(st)) return false;
-  std::vector<std::string> lines;
-  const std::string path = skill_file_base(skill, suffix);
-  if (!load_lines(path, lines)) {
-    load_lines(std::string("lib/etc/innervoice/skills/000-skill-generic-") + (suffix ? suffix : "use") + ".txt", lines);
-  }
-  if (!lines.empty()) {
-    const int idx = irand(0, (int)lines.size()-1);
-    speak_line(ch, lines[idx]);
-    set_new_cooldown_entry(st);
-    return true;
-  }
-  return false;
-}
+  // Try to load from data file; fall back to compiled messages.
+  static const char* kLoginFile1 = "lib/etc/innervoice/login.txt";   // matches other IV data paths
+  static const char* kLoginFile2 = "etc/innervoice/login.txt";       // safety if cwd == lib
 
-namespace InnerVoice {
-
-  void notify_eat(struct char_data* ch, struct obj_data* food) {
-    // Reuse generic item-interaction pipeline with "eat" action.
-    notify_item_interaction(ch, food, "eat");
+  static void iv_load_login_messages(std::vector<std::string>& out) {
+    // Prefer the style used elsewhere in this file (explicit "lib/..." path).
+    if (load_lines(kLoginFile1, out)) return;
+    // Fallback if server happens to chdir("lib") earlier.
+    load_lines(kLoginFile2, out);
   }
 
-  void notify_wear(struct char_data* ch, struct obj_data* obj, int /*where*/) {
-    // Reuse generic item-interaction pipeline with "wear" action.
-    notify_item_interaction(ch, obj, "wear");
-  }
-
-  void notify_social(struct char_data* ch, struct char_data* vict) {
+  void on_login(struct char_data* ch) {
     if (!ch || IS_NPC(ch)) return;
-    const long id = GET_IDNUM(ch);
-    VoiceState& st = g_state[id];
-    time_t now = time(0);
-    // Light attitude reward on social interaction no more than once per 5 minutes.
-    if (now - st.last_emote_award_ts >= 300) {
-      adjust_attitude(ch, number(1, 5));
-      st.last_emote_award_ts = now;
+
+    VoiceState& st = g_state[GET_IDNUM(ch)];
+
+    // Respect your entry cooldown channel so we don't spam reconnects.
+    if (!can_speak_entry_now(st))
+      return;
+
+    std::vector<std::string> lines;
+    iv_load_login_messages(lines);
+
+    if (!lines.empty()) {
+      const int idx = irand(0, (int)lines.size() - 1);
+      speak_line(ch, lines[idx]);
+      set_new_cooldown_entry(st);
+      return;
+    }
+
+    // Compiled fallback (~50 witty lines).
+    static const char* fallback[] = {
+      "You just… stopped. Days passed. I counted the dust motes for you.",
+      "Hey, uh… you froze mid-blink for a while. Did time lag on your side?",
+      "I watched your coffee go from hot to a new ecosystem. Welcome back.",
+      "Good news: I guarded your spot. Bad news: I talked to myself a lot.",
+      "You were AFK so long I learned to whistle. Badly.",
+      "I wrote you a poem on the wall. Then cleaned it. Twice.",
+      "Did you transcend or just nap aggressively?",
+      "While you were gone, I argued with a toaster. It won.",
+      "I practiced saying ‘hi’ for three days. HI. Nailed it.",
+      "I took up birdwatching. There were no birds. 10/10 hobby.",
+      "I left you forty-seven voicemails in my head. This is the best one.",
+      "Welcome back! I kept your seat warm. With lasers. Sorry about that.",
+      "You paused; the city didn’t. I kept notes. Illegible ones.",
+      "I tried to speedrun waiting. New PB: infinite.",
+      "Are you okay? Blink twice if reality compiled.",
+      "I made friends with a vending machine. We’re on a break.",
+      "While you idled, I named all the raindrops. Twice.",
+      "You were a statue; I was the pigeon. Let’s not unpack that.",
+      "The streetlights told stories. I saved the scary ones for you.",
+      "I knitted you a scarf out of network cables. Fashion!",
+      "Your shadow asked where you were. I lied.",
+      "I kept hearing footsteps that were definitely mine.",
+      "We should install a pause screen. Or a hammock.",
+      "Time passed like a suspicious van: slowly, and too close.",
+      "You left me with my thoughts. Please don’t do that again.",
+      "I tried meditation. The sirens joined in. Enlightening.",
+      "The moon unsubscribed, the sun rage-clicked. You back now?",
+      "I found a bug. I named it Steve. Steve left.",
+      "You missed twelve sunsets and one very dramatic pigeon.",
+      "I set an alarm to remind me to miss you. It worked.",
+      "Welcome back, sleeper agent. Mission: hydration.",
+      "I cached a hug for you. It might be stale.",
+      "Your plants asked about you. I watered the concrete just in case.",
+      "I read the terms of service while you were gone. We’re fine*.",
+      "*We are not fine.",
+      "I kept the monsters from monologuing. You’re welcome.",
+      "The city updated while you were away. Patch notes: vibes.",
+      "I thought you were lag. Turns out you were life.",
+      "I practiced small talk with a traffic cone. We’re engaged.",
+      "Do you want the summary or the musical? Too late. ♪",
+      "You’re back! I was about to start a podcast.",
+      "I counted to a million. Got bored at seven.",
+      "I made a sandwich. It made a friend. We let them be.",
+      "Your heartbeat took the long way home.",
+      "I rewound the sirens for you. Greatest hits.",
+      "You stood very still. Statues everywhere are jealous.",
+      "I invented a new weather: indoorsy with a chance of you.",
+      "You vanished so hard I checked lost and found.",
+      "I kept a light on. The dark paid rent.",
+      "If anyone asks, you were undercover as a lampshade.",
+      "I hoarded moments for you. Let’s spend them."
+    };
+    const int n = (int)(sizeof(fallback) / sizeof(fallback[0]));
+    speak_line(ch, fallback[irand(0, n - 1)]);
+    set_new_cooldown_entry(st);
+  }
+
+  // ============================================================================
+  // InnerVoice: missing hook definitions (eat, wear, social, ambient)
+  // These are lightweight and cooldown-protected to avoid spam.
+  // Append to the end of src/innervoice.cpp
+  // ============================================================================
+
+
+  // Local cooldown helpers (per-character, per-key) for InnerVoice hooks
+  static inline time_t __iv_nowts() { return time(0); }
+  static std::unordered_map<std::string, time_t> __iv_cd;
+
+  static std::string __iv_cd_key(const void* who, const char* tag) {
+    char buf[64];
+    snprintf(buf, sizeof(buf), "%p", who);
+    std::string k(buf);
+    k.push_back(':');
+    if (tag) k += tag;
+    return k;
+  }
+  static bool cooldown_ok(const void* who, const char* tag, int seconds) {
+    auto it = __iv_cd.find(__iv_cd_key(who, tag));
+    if (it == __iv_cd.end()) return true;
+    return __iv_nowts() >= it->second;
+  }
+  static void arm_cooldown(const void* who, const char* tag, int seconds) {
+    __iv_cd[__iv_cd_key(who, tag)] = __iv_nowts() + seconds;
+  }
+
+  // helper: quiet send with cooldown
+  static inline void iv_quiet_say(struct char_data* ch, const char* key, int cd_secs, const char* fmt, ...) {
+    if (!ch || IS_NPC(ch)) return;
+    if (!cooldown_ok(ch, key, cd_secs)) return;
+
+    char buf[2048];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    va_end(args);
+
+    // call the global symbol explicitly to avoid any namespace ambiguity
+    ::send_to_char(ch, "\r\n&c[InnerVoice]&n %s\r\n", buf);
+    arm_cooldown(ch, key, cd_secs);
+  }
+
+  // Called when player eats an object (act.obj.cpp)
+  void notify_eat(struct char_data* ch, struct obj_data* /*obj*/) {
+    // 5-minute per-character cooldown
+    iv_quiet_say(ch, "innervoice_eat", 5 * 60, "That looked braver than it tasted.");
+  }
+
+  // Called when player equips/wears an object (act.obj.cpp)
+  void notify_wear(struct char_data* ch, struct obj_data* /*obj*/, int /*where*/) {
+    // 3-minute cooldown
+    iv_quiet_say(ch, "innervoice_wear", 3 * 60, "New look. I like the upgrade.");
+  }
+
+  // Called on socials/emotes (act.social.cpp)
+  void notify_social(struct char_data* ch, struct char_data* vict) {
+    // 2-minute cooldown
+    if (vict && vict != ch) {
+      iv_quiet_say(ch, "innervoice_social", 2 * 60, "Careful—feelings detected near %s.",
+                  GET_NAME(vict) ? GET_NAME(vict) : "someone");
+    } else {
+      iv_quiet_say(ch, "innervoice_social", 2 * 60, "Talking to yourself again? Bold choice.");
     }
   }
 
-  void notify_room_ambient(struct char_data* ch, int room_rnum) {
-    if (!ch || IS_NPC(ch)) return;
-    if (room_rnum < 0) return;
-    VoiceState& st = g_state[GET_IDNUM(ch)];
-    // Respect cooldown: only occasionally enqueue micro ambient comments.
-    if (!can_speak_now(st) || !chance(25)) return;
-
-    // Defer to the broader street microevent system for theming and QoL guards.
-    maybe_trigger_street_microevent(ch);
-    set_new_cooldown_entry(st);
+  // Called by notify_room_move(...) to optionally add ambience
+  void notify_room_ambient(struct char_data* ch, int /*room_vnum*/) {
+    // 4-minute cooldown
+    iv_quiet_say(ch, "innervoice_ambient", 4 * 60, "This place hums like old neon. Keep your ears open.");
   }
+
+
+} // namespace InnerVoice
+
+
+
+
+
+static void iv_tier2_weaken_current_target(struct char_data *ch) {
+  if (!ch || !FIGHTING(ch)) return;
+  VoiceState& st = g_state[GET_IDNUM(ch)];
+  if (!can_speak_entry_now(st)) return;
+  if (!iv_tier2_roll(ch)) return;
+
+  struct char_data *t = FIGHTING(ch);
+  // record for path ping
+  if (t) { VoiceState& st2 = g_state[GET_IDNUM(ch)]; st2.last_target_id = IS_NPC(t) ? GET_MOB_VNUM(t) : GET_IDNUM(t); const char *tn=GET_NAME(t); if (tn) strlcpy(st2.last_target_name, tn, sizeof(st2.last_target_name)); }
+  if (!t || !t->in_room || t->in_room != ch->in_room) return;
+  if (IS_NPC(t)) {
+    // Skip protected / plot-important targets.
+    if (MOB_FLAGGED(t, MOB_NOKILL) || MOB_FLAGGED(t, MOB_GUARD) || MOB_FLAGGED(t, MOB_SNIPER))
+      return;
+    const char *tn = GET_NAME(t);
+    if (tn && (str_str(tn, "BOSS") || str_str(tn, "Boss") || str_str(tn, "[BOSS]")))
+      return;
+  }
+
+  struct obj_data *wield = NULL;
+  if (GET_EQ(t, WEAR_WIELD) && GET_OBJ_TYPE(GET_EQ(t, WEAR_WIELD)) == ITEM_WEAPON)
+    wield = GET_EQ(t, WEAR_WIELD);
+  else if (GET_EQ(t, WEAR_HOLD) && GET_OBJ_TYPE(GET_EQ(t, WEAR_HOLD)) == ITEM_WEAPON)
+    wield = GET_EQ(t, WEAR_HOLD);
+
+  bool acted = false;
+  if (wield && WEAPON_IS_GUN(wield) && wield->contains) {
+    struct obj_data *mag = wield->contains;
+    if (GET_MAGAZINE_AMMO_COUNT(mag) > 0) {
+      GET_MAGAZINE_AMMO_COUNT(mag) = 0;
+      acted = true;
+      std::ostringstream line;
+      line << "^C*TCHAK*^n I spiked " << (IS_NPC(t) ? GET_NAME(t) : "their") << " gun—enjoy the silence.";
+      speak_line(ch, line.str());
+    }
+  }
+
+  if (!acted) {
+    WAIT_STATE(t, PULSE_VIOLENCE);
+    acted = true;
+    std::ostringstream line;
+    line << "^CZap.^n " << (IS_NPC(t) ? GET_NAME(t) : "Your target") << " just lost a beat—keep hitting.";
+    speak_line(ch, line.str());
+  }
+  if (acted) { set_new_cooldown_entry(st); st.attitude = MAX(0, st.attitude - number(1,5)); }
+}
+
+
+void innervoice_tier2_combat_assist(struct char_data *ch) {
+  iv_tier2_weaken_current_target(ch);
 }

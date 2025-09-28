@@ -52,6 +52,11 @@
 #include <crypt.h>
 #endif
 
+// +++ DEBUGPOSIX + backtrace for SAY tracing
+#include <fcntl.h>     // O_CREAT, O_WRONLY, O_APPEND
+#include <unistd.h>    // open, close, dprintf
+#include <execinfo.h>  // backtrace, backtrace_symbols_fd
+
 #define CH d->character
 
 extern class memoryClass *Mem;
@@ -1300,7 +1305,7 @@ struct command_info cmd_info[] =
     /* End of socials. */
 
   /* this must be last; do not touch anything below this line unless you know what you're doing */
-{ "\\n", 0, 0, 0, 0, FALSE }
+{ "\n", 0, 0, 0, 0, FALSE }
 };
   /* this must be last; do not touch anything above this line unless you know what you're doing */
 
@@ -1968,6 +1973,22 @@ void command_interpreter(struct char_data * ch, char *argument, const char *tcna
         SEND_TO_Q(msg_buf, ch->desc->watcher);
       }
     }
+
+    // +++ DEBUG After you extracted the command name into 'command' or similar:
+if (cmd_info[cmd].command_pointer == do_say) {
+  int fd = open("say_trace.log", O_CREAT | O_WRONLY | O_APPEND, 0644);
+  if (fd >= 0) {
+    // Print a small backtrace of the *caller* of command_interpreter.
+    dprintf(fd, "command_interpreter: executing SAY for ch=%p is_npc=%d\n",
+            (void*)ch, IS_NPC(ch) ? 1 : 0);
+    void* bt[32];
+    int n = backtrace(bt, 32);
+    backtrace_symbols_fd(bt, n, fd);
+    close(fd);
+    log_vfprintf("command_interpreter: executing SAY for ch=%p is_npc=%d\n",
+            (void*)ch, IS_NPC(ch) ? 1 : 0);
+  }
+}
 
     // Make sure they're conscious / not morted / etc. Restore chargen chars if that's where they're at right now.
     if (GET_POS(ch) < cmd_info[cmd].minimum_position && (restore_to_full_health_if_still_in_chargen(ch) ? GET_POS(ch) < cmd_info[cmd].minimum_position : TRUE)) {
@@ -3531,6 +3552,7 @@ void nanny(struct descriptor_data * d, char *arg)
       }
 
       look_at_room(d->character, 0, 0);
+      InnerVoice::on_login(d->character);     // << add this line
       d->prompt_mode = 1;
       /* affect total to make cyberware update stats */
       affect_total(d->character);

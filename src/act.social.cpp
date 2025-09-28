@@ -339,7 +339,6 @@ void boot_social_messages(void)
   FILE *fl;
   int nr, hide, min_pos, curr_soc = -1;
   char next_soc[250];
-
   /* open social file */
   if (!(fl = fopen(SOCMESS_FILE, "r"))) {
     snprintf(buf, sizeof(buf), "Can't open socials file '%s'", SOCMESS_FILE);
@@ -348,9 +347,11 @@ void boot_social_messages(void)
   }
   /* count socials & allocate space */
   for (nr = 0; *cmd_info[nr].command != '\n'; nr++)
-    if (cmd_info[nr].command_pointer == do_action)
+  {
+    if (cmd_info[nr].command_pointer == do_action){
       list_top++;
-
+    }
+  }
   soc_mess_list = new struct social_messg[list_top+6];
 
   /* now read 'em */
