@@ -6491,7 +6491,7 @@ void load_consist(void)
       rnum_t rnum = real_room(vnum);
 
       // If the room doesn't exist, or if it's not storage-flagged, this is an orphaned file.
-      if (rnum < 0 || !ROOM_FLAGGED(&world[rnum], ROOM_STORAGE)) {
+      if (rnum < 0) {
         log_vfprintf(" - Marking storage file %s as orphaned: %s.",
                       itr->path().c_str(),
                       rnum < 0 ? "No matching vnum" : "Room not flagged storage");

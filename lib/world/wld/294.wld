@@ -1,6 +1,6 @@
 #29400
 Name:	Along Middlefield past the church
-Desc:$
+	Desc:$
    Traveling down along Middlefield, the run-down and ramshackled buildings
 that dot the landscape become fewer and fewer. The ganger presence that
 permeates most of the barrens has been qwelled for some odd reason, and most
@@ -21,28 +21,28 @@ Y:	12
 Z:	2.50
 RoomType:	0
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT east]
-	ToVnum:	45167
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	45167
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29401
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29401
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29401
 Name:	A small turn in the road
-Desc:$
+	Desc:$
    Beyond the subtle curves of the road, a gated cemetary begins to appear in
 the distance. It begins becoming very apparent why there are so few squatters
 and gangers down towards this end of Middlefield, and it certainly was because
@@ -62,28 +62,28 @@ Y:	12
 Z:	2.50
 RoomType:	0
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	6
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	6
+Background:	0
+BackgroundType:	0
 [EXIT east]
-	ToVnum:	29400
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29400
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT northwest]
-	ToVnum:	29402
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29402
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29402
 Name:	At the cemetary gates
-Desc:$
+	Desc:$
    Large wrought iron gates, atleast a hundred or two years old, stand in
 relative disrepair, acting as a marker for the point of no return. Aside from
 the old mason work slabs of stone that form walls equally as old and just as
@@ -104,33 +104,33 @@ Y:	15
 Z:	2.50
 RoomType:	0
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	6
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	6
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	Keywords:	gate iron wrought
+Keywords:	gate iron wrought
 	Desc:$
 A massive, rust stained wrought iron gate stands to the north, blocking off
 all access into the graveyard. 
 ~
-	ToVnum:	29403
-	Flags:	1
-	Material:	metal
-	Barrier:	12
-	KeyVnum:	0
+ToVnum:	29403
+Flags:	1
+Material:	metal
+Barrier:	12
+KeyVnum:	0
 [EXIT southeast]
-	ToVnum:	29401
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29401
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29403
 Name:	Entrance of the cemetary
-Desc:$
+	Desc:$
    Whatever misconceptions or notions of an over active imagination one might
 have had at the gates, is multiplied ten fold once you actually step foot
 inside of the cemetary. An inch or two of fog covers the stone work pathway,
@@ -153,45 +153,45 @@ Y:	20
 Z:	2.50
 RoomType:	0
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	7
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	7
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	ToVnum:	29404
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29404
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT east]
-	ToVnum:	29408
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29408
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT south]
-	Keywords:	gate wrought iron
+Keywords:	gate wrought iron
 	Desc:$
 A massive, rust stained wrought iron gate seals the entrance to the south,
 blocking off all escape out of the graveyard. 
 ~
-	ToVnum:	29402
-	Flags:	1
-	Material:	metal
-	Barrier:	12
-	KeyVnum:	0
+ToVnum:	29402
+Flags:	1
+Material:	metal
+Barrier:	12
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29406
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29406
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29404
 Name:	Before the angel statue
-Desc:$
+	Desc:$
    In the center of this small clearing, the stone and gravel pathways
 converge at the feet of a beautifully crafted marble angel, most likely a
 grave marker for some affluent or important person. Foliage of various sorts
@@ -213,64 +213,64 @@ Y:	18
 Z:	2.50
 RoomType:	0
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	0
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	0
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT north]
-	ToVnum:	29405
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29405
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT northeast]
-	ToVnum:	29411
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29411
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT east]
-	ToVnum:	29412
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29412
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT southeast]
-	ToVnum:	29408
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29408
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT south]
-	ToVnum:	29403
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29403
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT southwest]
-	ToVnum:	29406
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29406
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29413
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29413
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT northwest]
-	ToVnum:	29414
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29414
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29405
 Name:	Stumbling across cobblestones
-Desc:$
+	Desc:$
    Smoothly polished cobblestones, now loosely fitted due to the vegetation
 attempting to pry them apart as they break up through the earth beneath, have
 altered and warped the landscape to quite a degree. Keeping a steady footing
@@ -291,45 +291,45 @@ Y:	20
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	7
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	7
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	Keywords:	door wooden ragged
+Keywords:	door wooden ragged
 	Desc:$
 A ragged looking wooden door stands to the north, threatening to fall off its
 hinges at the slightest breeze. 
 ~
-	ToVnum:	29428
-	Flags:	1
-	Material:	wood
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29428
+Flags:	1
+Material:	wood
+Barrier:	4
+KeyVnum:	0
 [EXIT east]
-	ToVnum:	29411
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29411
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT south]
-	ToVnum:	29404
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29404
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29414
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29414
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29406
 Name:	Along the western foot path
-Desc:$
+	Desc:$
    The western foot path consists of loose gravel, with masses of graves and
 headstones adorning the sides of it. The gnarled branches of large trees
 covering most of the southern edge along the outer cemetary wall stretch out
@@ -349,40 +349,40 @@ Y:	5
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	7
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	7
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	ToVnum:	29413
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29413
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT northeast]
-	ToVnum:	29404
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29404
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT east]
-	ToVnum:	29403
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29403
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29407
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29407
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29407
 Name:	A dark stretch on the gravel pathway
-Desc:$
+	Desc:$
    This stretch of the loose gravel foot path is almost overwhelmed from
 above, since the tree branches that were only an occasional nuisance were now
 attempting to block any traffic that tries to make its way through the area.
@@ -404,34 +404,34 @@ Y:	6
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	7
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	7
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	ToVnum:	29417
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29417
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT east]
-	ToVnum:	29406
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29406
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT northwest]
-	ToVnum:	29418
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29418
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29408
 Name:	Along the eastern footpath
-Desc:$
+	Desc:$
    Scattered in an almost random array along each side of this loose gravel
 footpath are multitudes of graves. Almost all of them are overgrown with
 vegetation to some extent, but most manage to peer up from beneath to make
@@ -452,40 +452,40 @@ Y:	5
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	7
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	7
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	ToVnum:	29412
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29412
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT northeast]
-	ToVnum:	29409
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29409
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29403
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29403
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT northwest]
-	ToVnum:	29404
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29404
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29409
 Name:	Continuing along the eastern path
-Desc:$
+	Desc:$
    The loose gravel pathway continues along, each step crunching and shifting
 beneath the weight of them. The fog here here is thick, and cold to the touch,
 making it hard to see even a few feet beyond where you're standing. The
@@ -506,34 +506,34 @@ Y:	15
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	7
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	7
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	ToVnum:	29410
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29410
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT southwest]
-	ToVnum:	29408
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29408
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29412
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29412
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29410
 Name:	Infront of a sealed off masoleum
-Desc:$
+	Desc:$
    A set of foot paths converge infront of several sets of masterfully
 constructed and decorated masoleums, which one can only hope are empty and
 devoid of anything still capable of movement. The masoleum directly to the
@@ -556,39 +556,39 @@ Y:	20
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	7
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	7
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	Keywords:	slab stone
+Keywords:	slab stone
 	Desc:$
 A massive slab of stone has fallen infront of the crypt to the north, blocking
 off any hopes of getting inside. 
 ~
-	ToVnum:	29430
-	Flags:	2
-	Material:	stone
-	Barrier:	32
-	KeyVnum:	0
+ToVnum:	29430
+Flags:	2
+Material:	stone
+Barrier:	32
+KeyVnum:	0
 [EXIT south]
-	ToVnum:	29409
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29409
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29411
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29411
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29411
 Name:	Infront of the masoleums
-Desc:$
+	Desc:$
    The cobblestone foot path quickly gives way to loose gravel, although its
 hard to tell without a good long look down, since the treacherous footing both
 offer is quite the same. A pair of masoleums crafted from what was probably
@@ -610,50 +610,50 @@ Y:	20
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	7
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	7
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	Keywords:	gate iron door
+Keywords:	gate iron door
 	Desc:$
 An iron gate with several broken chains hanging from it stands to the north. 
 ~
-	ToVnum:	29429
-	Flags:	1
-	Material:	metal
-	Barrier:	12
-	KeyVnum:	0
+ToVnum:	29429
+Flags:	1
+Material:	metal
+Barrier:	12
+KeyVnum:	0
 [EXIT east]
-	ToVnum:	29410
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29410
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT south]
-	ToVnum:	29412
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29412
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT southwest]
-	ToVnum:	29404
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29404
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29405
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29405
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29412
 Name:	Moving through the grave markers
-Desc:$
+	Desc:$
    The path itself has almost disappear under foot, having grown over with
 grasses and other small plantlife, which has been threatening to encroach and
 devour it for atleast a handful of years. Larger stone markers and gravestones
@@ -673,51 +673,51 @@ Y:	20
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	7
-	Background:	3
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	7
+Background:	3
+BackgroundType:	7
 [EXIT north]
-	ToVnum:	29411
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29411
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT east]
-	ToVnum:	29409
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29409
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT south]
-	ToVnum:	29408
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29408
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29404
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29404
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT down]
-	Keywords:	grave
+Keywords:	grave
 	Desc:$
 An open grave lies underneath the rolling fog here. 
 ~
-	ToVnum:	29438
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
-	HiddenRating:	8
+ToVnum:	29438
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
+HiddenRating:	8
 BREAK
 #29413
 Name:	Moving through the grave markers
-Desc:$
+	Desc:$
    The path itself has almost disappear under foot, having grown over with
 grasses and other small plantlife, which has been threatening to encroach and
 devour it for atleast a handful of years. Larger stone markers and gravestones
@@ -737,51 +737,51 @@ Y:	20
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	7
-	Background:	3
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	7
+Background:	3
+BackgroundType:	7
 [EXIT north]
-	ToVnum:	29414
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29414
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT east]
-	ToVnum:	29404
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29404
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT south]
-	ToVnum:	29406
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29406
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29417
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29417
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT down]
-	Keywords:	grave
+Keywords:	grave
 	Desc:$
 An open grave lies below, obfuscated by the rolling fog. 
 ~
-	ToVnum:	29437
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
-	HiddenRating:	8
+ToVnum:	29437
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
+HiddenRating:	8
 BREAK
 #29414
 Name:	A solitary path of darkness
-Desc:$
+	Desc:$
    All of the pathways the converge here now move along into a single,
 solitary line of smoothly polished slabs of stone, heading off towards the
 north, down an increasingly darker tunnel of trees and bushes that spring up
@@ -801,40 +801,40 @@ Y:	18
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	7
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	7
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	ToVnum:	29415
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29415
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT east]
-	ToVnum:	29405
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29405
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT southeast]
-	ToVnum:	29404
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29404
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT south]
-	ToVnum:	29413
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29413
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29415
 Name:	Along a dark tunnel of trees
-Desc:$
+	Desc:$
    Traveling along this pathway is sure to make even the most brave of
 adventurers atleast a bit uneasy. The trees and bushes on each side have
 closed in, almost threatening to over take the path itself, slimming the foot
@@ -855,39 +855,39 @@ Y:	4
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	3
-	Smoke:	7
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	3
+Smoke:	7
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	ToVnum:	29416
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29416
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT south]
-	ToVnum:	29414
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29414
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	Keywords:	bushes trees gnarled
+Keywords:	bushes trees gnarled
 	Desc:$
 A gnarled thicket of bushes and trees lines the western edge of the path. 
 ~
-	ToVnum:	29439
-	Flags:	1
-	Material:	wood
-	Barrier:	6
-	KeyVnum:	0
-	HiddenRating:	8
+ToVnum:	29439
+Flags:	1
+Material:	wood
+Barrier:	6
+KeyVnum:	0
+HiddenRating:	8
 BREAK
 #29416
 Name:	At the weeping willow tree
-Desc:$
+	Desc:$
    Struggling free from the tangles of trees and branches that reach out and
 claw at travelers that make their way through these sections of pathways,
 suddenly come to a clearing in the center of the cemetary. There are no graves
@@ -912,46 +912,46 @@ Y:	20
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	8
-	Background:	1
-	BackgroundType:	10
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	8
+Background:	1
+BackgroundType:	10
 [EXIT northeast]
-	ToVnum:	29424
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29424
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT south]
-	ToVnum:	29415
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29415
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT northwest]
-	ToVnum:	29423
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29423
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT down]
-	Keywords:	slab stone
+Keywords:	slab stone
 	Desc:$
 A large, heavy slab of stone lies on the ground here, covering some sort of
 hole in the ground. 
 ~
-	ToVnum:	29446
-	Flags:	1
-	Material:	stone
-	Barrier:	16
-	KeyVnum:	0
-	HiddenRating:	4
+ToVnum:	29446
+Flags:	1
+Material:	stone
+Barrier:	16
+KeyVnum:	0
+HiddenRating:	4
 BREAK
 #29417
 Name:	Along a dirt path
-Desc:$
+	Desc:$
    A set of stone work masoleums are set off to the northern edge of this
 mostly compacted dirt pathway, acting as markers for travelers as they journey
 their way deeper into the heart of this god forsaken cemetary. Stone markers
@@ -974,44 +974,44 @@ Y:	5
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	7
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	7
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	Keywords:	gate iron old
+Keywords:	gate iron old
 	Desc:$
 An old iron gate seals off the crypt to the north. 
 ~
-	ToVnum:	29427
-	Flags:	1
-	Material:	metal
-	Barrier:	6
-	KeyVnum:	0
+ToVnum:	29427
+Flags:	1
+Material:	metal
+Barrier:	6
+KeyVnum:	0
 [EXIT east]
-	ToVnum:	29413
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29413
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT south]
-	ToVnum:	29407
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29407
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29418
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29418
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29418
 Name:	A fork in the paths
-Desc:$
+	Desc:$
    Various routes converge infront of this particular masoleum, crafted from
 marble which has long since become darkened, its surfaces refusing to reflect
 light as they did during their first few years of life. The gate set into the
@@ -1031,45 +1031,45 @@ Y:	12
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	7
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	7
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	Keywords:	gate iron lopsided
+Keywords:	gate iron lopsided
 	Desc:$
 A lopsided iron gate barely manages to keep intruders out of the crypt north
 of here. 
 ~
-	ToVnum:	29426
-	Flags:	1
-	Material:	metal
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29426
+Flags:	1
+Material:	metal
+Barrier:	4
+KeyVnum:	0
 [EXIT east]
-	ToVnum:	29417
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29417
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT southeast]
-	ToVnum:	29407
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29407
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT northwest]
-	ToVnum:	29419
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29419
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29419
 Name:	Wading through branches
-Desc:$
+	Desc:$
    From here, it would almost seem as if you're headed deeper into a forest,
 since it was becoming harder and harder to make out the scenery on either
 sides of the path. The trees weren't just overgrown, they seemed to be
@@ -1089,28 +1089,28 @@ Y:	5
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	6
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	6
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	ToVnum:	29420
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29420
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT southeast]
-	ToVnum:	29418
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29418
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29420
 Name:	Climbing up along the path
-Desc:$
+	Desc:$
    This stretch of cemetary is free of the usual gravemarkers that seem to be
 dotting most of the scenery down at the foot of the hill, and instead, has
 been set aside from the others. The plots most likely belonged to those
@@ -1130,39 +1130,39 @@ Y:	5
 Z:	2.50
 RoomType:	3
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	0
-	Smoke:	0
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	0
+Smoke:	0
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	ToVnum:	29421
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29421
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT south]
-	ToVnum:	29419
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29419
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	Keywords:	gate iron old vines
+Keywords:	gate iron old vines
 	Desc:$
 An old iron gate drapes with tendrils of vines and moss seals off the western
 crypt. 
 ~
-	ToVnum:	29431
-	Flags:	1
-	Material:	metal
-	Barrier:	6
-	KeyVnum:	0
+ToVnum:	29431
+Flags:	1
+Material:	metal
+Barrier:	6
+KeyVnum:	0
 BREAK
 #29421
 Name:	Along a turn on the hillside
-Desc:$
+	Desc:$
    The foot path continues along, curving off towards the northeast gradually
 as it climbs up sections of flattened stone steps, helping ease the burden of
 any who travel along it. A plot containing more above ground crypts sits off
@@ -1183,39 +1183,39 @@ Y:	5
 Z:	2.50
 RoomType:	3
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	0
-	Smoke:	0
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	0
+Smoke:	0
+Background:	1
+BackgroundType:	7
 [EXIT northeast]
-	ToVnum:	29422
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29422
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT south]
-	ToVnum:	29420
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29420
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	Keywords:	gate old iron vines
+Keywords:	gate old iron vines
 	Desc:$
 An old iron gate drapes with tendrils of vines and moss seals off the western
 crypt. 
 ~
-	ToVnum:	29432
-	Flags:	1
-	Material:	metal
-	Barrier:	6
-	KeyVnum:	0
+ToVnum:	29432
+Flags:	1
+Material:	metal
+Barrier:	6
+KeyVnum:	0
 BREAK
 #29422
 Name:	On the western side of the hilltop
-Desc:$
+	Desc:$
    The hillside has been excavated here to allow for these masoleums to be
 built, and at one point, the view from up here was probably pretty nice.
 However, thats no longer the case, as can be seen from this vantage point. The
@@ -1237,38 +1237,38 @@ Y:	8
 Z:	2.50
 RoomType:	3
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	0
-	Smoke:	0
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	0
+Smoke:	0
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	Keywords:	gate iron old
+Keywords:	gate iron old
 	Desc:$
 An old iron gate seals off the crypt the north. 
 ~
-	ToVnum:	29433
-	Flags:	1
-	Material:	metal
-	Barrier:	6
-	KeyVnum:	0
+ToVnum:	29433
+Flags:	1
+Material:	metal
+Barrier:	6
+KeyVnum:	0
 [EXIT east]
-	ToVnum:	29423
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29423
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT southwest]
-	ToVnum:	29421
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29421
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29423
 Name:	Climbing the cemetary hill
-Desc:$
+	Desc:$
    Traveling up along a fairly steep incline, the gravel gives way to stepped
 platforms of stone, which help make the climb a bit easier. The higher up one
 goes, the more of the cemetary can be made out below. Unfortunately, its looks
@@ -1288,38 +1288,38 @@ Y:	8
 Z:	2.50
 RoomType:	3
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	6
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	6
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	Keywords:	gate iron old
+Keywords:	gate iron old
 	Desc:$
 An old iron gate seals off the crypt the north. 
 ~
-	ToVnum:	29434
-	Flags:	1
-	Material:	metal
-	Barrier:	6
-	KeyVnum:	0
+ToVnum:	29434
+Flags:	1
+Material:	metal
+Barrier:	6
+KeyVnum:	0
 [EXIT southeast]
-	ToVnum:	29416
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29416
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29422
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29422
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29424
 Name:	Infront of a small plot of masoleums
-Desc:$
+	Desc:$
    This small stretch of gravel strewn pathway is free of the usual gravestone
 markers that dot the landscape almost everywhere else. Instead, only a few
 choice plots of land have taken up residence here, taking form of intricately
@@ -1339,38 +1339,38 @@ Y:	5
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	6
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	6
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	Keywords:	gate iron old
+Keywords:	gate iron old
 	Desc:$
 An old iron gate keeps intruders out of the masoleum north of here. 
 ~
-	ToVnum:	29435
-	Flags:	1
-	Material:	metal
-	Barrier:	6
-	KeyVnum:	0
+ToVnum:	29435
+Flags:	1
+Material:	metal
+Barrier:	6
+KeyVnum:	0
 [EXIT east]
-	ToVnum:	29425
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29425
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT southwest]
-	ToVnum:	29416
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29416
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29425
 Name:	Infront of a busted up masoleum
-Desc:$
+	Desc:$
    This shortened foot path ends abruptly at the eastern wall of the cemetary,
 its stone walls higher along its side than it was in the front, most likely to
 help keep tresspassers and graverobbers from easily scaling. This plot is set
@@ -1390,32 +1390,32 @@ Y:	5
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	0
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	0
+Background:	1
+BackgroundType:	7
 [EXIT north]
-	Keywords:	rubble chunks
+Keywords:	rubble chunks
 	Desc:$
 A few chunks of rubble block the way into the masoleum north of here. 
 ~
-	ToVnum:	29436
-	Flags:	1
-	Material:	stone
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29436
+Flags:	1
+Material:	stone
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29424
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29424
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29426
 Name:	Inside a half flooded crypt
-Desc:$
+	Desc:$
    Water damage seems to be the name of the game here, as murky pools of it
 have leaked in and collected all along the floor, covering it in at least a
 few inches. Dead leaves, half-rotten animal carcasses and fistfulls of fur
@@ -1435,26 +1435,26 @@ Y:	6
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	3
-	Smoke:	0
-	Background:	1
-	BackgroundType:	10
+SpecIdx:	0
+Rating:	0
+Light:	3
+Smoke:	0
+Background:	1
+BackgroundType:	10
 [EXIT south]
-	Keywords:	gate iron lopsided
+Keywords:	gate iron lopsided
 	Desc:$
 A lopsided iron gate barely manages to keep itself upon its hinges. 
 ~
-	ToVnum:	29418
-	Flags:	1
-	Material:	metal
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29418
+Flags:	1
+Material:	metal
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29427
 Name:	Inside a messy crypt
-Desc:$
+	Desc:$
    Wildlife seems to have taken over this particular crypt, as the old nests
 stand testament to. The ceiling has a large crack down its center, allowing a
 bit of light to spill in, along with rain water and plantlife that thrives in
@@ -1473,26 +1473,26 @@ Y:	6
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	3
-	Smoke:	0
-	Background:	1
-	BackgroundType:	10
+SpecIdx:	0
+Rating:	0
+Light:	3
+Smoke:	0
+Background:	1
+BackgroundType:	10
 [EXIT south]
-	Keywords:	gate iron old
+Keywords:	gate iron old
 	Desc:$
 An old iron gate to the south seals off the crypt from the elements. 
 ~
-	ToVnum:	29417
-	Flags:	1
-	Material:	metal
-	Barrier:	6
-	KeyVnum:	0
+ToVnum:	29417
+Flags:	1
+Material:	metal
+Barrier:	6
+KeyVnum:	0
 BREAK
 #29428
 Name:	Inside the groundkeepers shack
-Desc:$
+	Desc:$
    This heavily delapidated shack is covered in vines and other plant growth,
 which constricts and threatens to bring the building down to its foundation.
 Half-rotten planks of wood make up what were once floor boards, but have been
@@ -1514,26 +1514,26 @@ Y:	6
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	3
-	Smoke:	0
-	Background:	2
-	BackgroundType:	10
+SpecIdx:	0
+Rating:	0
+Light:	3
+Smoke:	0
+Background:	2
+BackgroundType:	10
 [EXIT south]
-	Keywords:	door wooden ragged
+Keywords:	door wooden ragged
 	Desc:$
 A ragged looking wooden door leads back out into the cemetary. 
 ~
-	ToVnum:	29405
-	Flags:	1
-	Material:	wood
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29405
+Flags:	1
+Material:	wood
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29429
 Name:	Inside a graffiti covered crypt
-Desc:$
+	Desc:$
    The inside of this crypt is an absolute mess, mostly due to its new
 occupant. Its old occupant is still here, albeit in pieces, along with the
 shattered and broken bits and pieces that still remain of the old stone
@@ -1554,39 +1554,39 @@ Y:	6
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	3
-	Smoke:	0
-	Background:	3
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	3
+Smoke:	0
+Background:	3
+BackgroundType:	7
 [EXIT east]
-	Keywords:	plywood plank wood
+Keywords:	plywood plank wood
 	Desc:$
 A plank of plywood covered in graffiti has been slapped up against the eastern
 wall here. 
 ~
-	ToVnum:	29430
-	Flags:	1
-	Material:	wood
-	Barrier:	4
-	KeyVnum:	0
-	HiddenRating:	6
+ToVnum:	29430
+Flags:	1
+Material:	wood
+Barrier:	4
+KeyVnum:	0
+HiddenRating:	6
 [EXIT south]
-	Keywords:	gate iron door
+Keywords:	gate iron door
 	Desc:$
 An iron gate with several broken chains hanging from it seals off the way out
 of the crypt. 
 ~
-	ToVnum:	29411
-	Flags:	1
-	Material:	metal
-	Barrier:	12
-	KeyVnum:	0
+ToVnum:	29411
+Flags:	1
+Material:	metal
+Barrier:	12
+KeyVnum:	0
 BREAK
 #29430
 Name:	Inside the sealed off crypt
-Desc:$
+	Desc:$
    The flimsy sheet of graffiti covered plywood that covers a hole in the
 western wall conceals access into this particular masoleum. The front entrance
 is impassable, since aside from the decorative wrought iron gate still wrapped
@@ -1608,43 +1608,43 @@ Y:	6
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	2
-	Smoke:	0
-	Background:	3
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	2
+Smoke:	0
+Background:	3
+BackgroundType:	7
 [EXIT south]
-	Keywords:	slab stone
+Keywords:	slab stone
 	Desc:$
 A massive slab of stone has fallen infront of the crypt entrance to the south,
 blocking off any hopes of getting out. 
 ~
-	ToVnum:	29410
-	Flags:	2
-	Material:	stone
-	Barrier:	32
-	KeyVnum:	0
+ToVnum:	29410
+Flags:	2
+Material:	stone
+Barrier:	32
+KeyVnum:	0
 [EXIT west]
-	Keywords:	plywood plank wood
+Keywords:	plywood plank wood
 	Desc:$
 A plank of plywood covered in graffiti blocks the hole in the western wall. 
 ~
-	ToVnum:	29429
-	Flags:	1
-	Material:	wood
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29429
+Flags:	1
+Material:	wood
+Barrier:	4
+KeyVnum:	0
 [EXIT down]
-	ToVnum:	29454
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29454
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29431
 Name:	Inside a destroyed masoleum
-Desc:$
+	Desc:$
    Once inside, its pretty easy to tell why nobody would bother breaking into
 this particular crypt. Almost the entire roof, and a good chunk of the back
 wall have collapsed in, their pieces of fitted stone now strew in a wreck
@@ -1663,26 +1663,26 @@ Y:	5
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	2
-	Smoke:	0
-	Background:	3
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	2
+Smoke:	0
+Background:	3
+BackgroundType:	7
 [EXIT east]
-	Keywords:	gate iron old vines
+Keywords:	gate iron old vines
 	Desc:$
 An old iron gate drapes with tendrils of vines and moss seals off the way out.
 ~
-	ToVnum:	29420
-	Flags:	1
-	Material:	metal
-	Barrier:	6
-	KeyVnum:	0
+ToVnum:	29420
+Flags:	1
+Material:	metal
+Barrier:	6
+KeyVnum:	0
 BREAK
 #29432
 Name:	Inside a crypt strewn with trash
-Desc:$
+	Desc:$
    Aside from the stack of old food wrappers and other bits and pieces of
 trash strewn about, everything inside this particular crypt is intact, albeit
 all overdue for a good scrubbing. The stone coffin sits in the center of the
@@ -1700,26 +1700,26 @@ Y:	6
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	2
-	Smoke:	0
-	Background:	1
-	BackgroundType:	6
+SpecIdx:	0
+Rating:	0
+Light:	2
+Smoke:	0
+Background:	1
+BackgroundType:	6
 [EXIT east]
-	Keywords:	gate old iron vines
+Keywords:	gate old iron vines
 	Desc:$
 An old iron gate drapes with tendrils of vines and moss seals off the way out.
 ~
-	ToVnum:	29421
-	Flags:	1
-	Material:	metal
-	Barrier:	6
-	KeyVnum:	0
+ToVnum:	29421
+Flags:	1
+Material:	metal
+Barrier:	6
+KeyVnum:	0
 BREAK
 #29433
 Name:	Inside a dirty little crypt
-Desc:$
+	Desc:$
    Someone has obviously taken up residence within this particular crypt, as
 the makeshift bed cobbled together from a stained futon stuffed with old
 newspaper parked against the far wall may attest to. A small hand-held radio
@@ -1739,26 +1739,26 @@ Y:	6
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	2
-	Smoke:	0
-	Background:	3
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	2
+Smoke:	0
+Background:	3
+BackgroundType:	7
 [EXIT south]
-	Keywords:	gate iron old
+Keywords:	gate iron old
 	Desc:$
 An old iron gate blocks the way out of the crypt. 
 ~
-	ToVnum:	29422
-	Flags:	1
-	Material:	metal
-	Barrier:	6
-	KeyVnum:	0
+ToVnum:	29422
+Flags:	1
+Material:	metal
+Barrier:	6
+KeyVnum:	0
 BREAK
 #29434
 Name:	Inside a crypt caked with gore
-Desc:$
+	Desc:$
    While this crypt may have been quite beautiful back in its hay day, that
 time has certainly passed. A mixture of dirt, grime and blood is spattered
 across the stone floor slabs, and the coffin itself is nowhere to be found. In
@@ -1780,26 +1780,26 @@ Y:	6
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	2
-	Smoke:	0
-	Background:	1
-	BackgroundType:	10
+SpecIdx:	0
+Rating:	0
+Light:	2
+Smoke:	0
+Background:	1
+BackgroundType:	10
 [EXIT south]
-	Keywords:	gate iron old
+Keywords:	gate iron old
 	Desc:$
 An old iron gate blocks the way out of the crypt. 
 ~
-	ToVnum:	29423
-	Flags:	1
-	Material:	metal
-	Barrier:	6
-	KeyVnum:	0
+ToVnum:	29423
+Flags:	1
+Material:	metal
+Barrier:	6
+KeyVnum:	0
 BREAK
 #29435
 Name:	A crypt in good shape
-Desc:$
+	Desc:$
    Aside from the bits and pieces of trash and other unmentionables scattered
 across its surfaces, this crypt is in relatively good shape, especially when
 compared to the others. The stone coffin is still intact, for starters, and
@@ -1819,26 +1819,26 @@ Y:	6
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	2
-	Smoke:	0
-	Background:	1
-	BackgroundType:	10
+SpecIdx:	0
+Rating:	0
+Light:	2
+Smoke:	0
+Background:	1
+BackgroundType:	10
 [EXIT south]
-	Keywords:	gate iron old
+Keywords:	gate iron old
 	Desc:$
 An old iron gate blocks the way out of the masoleum. 
 ~
-	ToVnum:	29424
-	Flags:	1
-	Material:	metal
-	Barrier:	6
-	KeyVnum:	0
+ToVnum:	29424
+Flags:	1
+Material:	metal
+Barrier:	6
+KeyVnum:	0
 BREAK
 #29436
 Name:	Inside of a ransacked crypt
-Desc:$
+	Desc:$
    Lavish. Thats the word that would have been used, perhaps years ago when
 this crypt was first constructed. Its just a mere shadow of its former glory
 these days, since damn near everything has been either broken, ripped off at
@@ -1860,26 +1860,26 @@ Y:	6
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	2
-	Smoke:	0
-	Background:	1
-	BackgroundType:	10
+SpecIdx:	0
+Rating:	0
+Light:	2
+Smoke:	0
+Background:	1
+BackgroundType:	10
 [EXIT south]
-	Keywords:	rubble chunks
+Keywords:	rubble chunks
 	Desc:$
 A few chunks of rubble block the way back out. 
 ~
-	ToVnum:	29425
-	Flags:	1
-	Material:	stone
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29425
+Flags:	1
+Material:	stone
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29437
 Name:	Inside an open grave
-Desc:$
+	Desc:$
    Obscured beneath the thick blanket of fog lies an open grave, its edges
 still hidden as it spills in from above. Old roots protrude out from the walls
 in places, most of which have their ends hacked off when the grave was
@@ -1897,27 +1897,27 @@ Y:	2
 Z:	2.00
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	6
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	6
+Background:	1
+BackgroundType:	7
 [EXIT up]
 Keywords:	grave
 	Desc:$
 The sky can be seen above, offering a glimpse out of this open grave. 
 ~
-	ToVnum:	29413
-	Flags:	1
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
-	HiddenRating:	8
+ToVnum:	29413
+Flags:	1
+Material:	brick
+Barrier:	4
+KeyVnum:	0
+HiddenRating:	8
 BREAK
 #29438
 Name:	Inside an open grave
-Desc:$
+	Desc:$
    Obscured beneath the thick blanket of fog lies an open grave, its edges
 still hidden as it spills in from above. Old roots protrude out from the walls
 in places, most of which have their ends hacked off when the grave was
@@ -1935,38 +1935,38 @@ Y:	2
 Z:	2.00
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	6
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	6
+Background:	1
+BackgroundType:	7
 [EXIT up]
 Keywords:	grave
 	Desc:$
 The sky can be seen above as one peers out from this open grave. 
 ~
-	ToVnum:	29412
-	Flags:	1
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
-	HiddenRating:	8
+ToVnum:	29412
+Flags:	1
+Material:	brick
+Barrier:	4
+KeyVnum:	0
+HiddenRating:	8
 [EXIT down]
 Keywords:	grave
 	Desc:$
 The bottom of the grave seems to go deeper. 
 ~
-	ToVnum:	29441
-	Flags:	1
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
-	HiddenRating:	8
+ToVnum:	29441
+Flags:	1
+Material:	brick
+Barrier:	4
+KeyVnum:	0
+HiddenRating:	8
 BREAK
 #29439
 Name:	Wading through the pond
-Desc:$
+	Desc:$
    Wading through this brackish body of water kicks up all sorts of sediment
 from below, causing its murky colour to become even darker. The footing
 offered is loose at best, and in some spots, non-existent. The mud is dotted
@@ -1986,34 +1986,34 @@ Y:	12
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	7
-	Background:	1
-	BackgroundType:	7
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	7
+Background:	1
+BackgroundType:	7
 [EXIT east]
-	Keywords:	bushes trees gnarled
+Keywords:	bushes trees gnarled
 	Desc:$
 A gnarled thicket of bushes and trees blocks the way back to the path east of
 here. 
 ~
-	ToVnum:	29415
-	Flags:	1
-	Material:	wood
-	Barrier:	6
-	KeyVnum:	0
-	HiddenRating:	8
+ToVnum:	29415
+Flags:	1
+Material:	wood
+Barrier:	6
+KeyVnum:	0
+HiddenRating:	8
 [EXIT west]
-	ToVnum:	29440
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29440
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29440
 Name:	On a murky patch of land
-Desc:$
+	Desc:$
    After wading through and pushing aside low hanging branches, the terrain
 opens up, albeit only slightly. There seems to be a patch of land pushing
 itself up above the surface of the pond, which, by the looks of it, was an old
@@ -2037,22 +2037,22 @@ Y:	12
 Z:	2.50
 RoomType:	4
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	1
-	Smoke:	0
-	Background:	2
-	BackgroundType:	13
+SpecIdx:	0
+Rating:	0
+Light:	1
+Smoke:	0
+Background:	2
+BackgroundType:	13
 [EXIT east]
-	ToVnum:	29439
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29439
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29441
 Name:	Beneath the open grave
-Desc:$
+	Desc:$
    Even from down here, the sky above is obscured by the steadily rolling and
 flowing fog, which continues to pour down into the grave above, and from there
 trickles into this portion of the underground. Roots of all sizes and shapes
@@ -2071,28 +2071,28 @@ Y:	10
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	3
-	Smoke:	6
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	3
+Smoke:	6
+Background:	0
+BackgroundType:	0
 [EXIT west]
-	ToVnum:	29442
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29442
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT up]
-	ToVnum:	29438
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29438
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29442
 Name:	Infront of a hole in the wall
-Desc:$
+	Desc:$
    The only thing of remote interest along this stretch of tunnel, aside from
 the funky smell and lack of suitable lighting, is the large hole in the
 eastern wall. It looks as if someone cracked the concrete foundation and kept
@@ -2112,34 +2112,34 @@ Y:	8
 Z:	3.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	3
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	3
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT east]
-	ToVnum:	29441
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29441
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT south]
-	ToVnum:	29443
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29443
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT northwest]
-	ToVnum:	29444
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29444
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29443
 Name:	Approaching a sudden drop
-Desc:$
+	Desc:$
    The tunnel drops off suddenly after only a few meters around the bend,
 which is where the spill-way pours all of its content into a lower section of
 collection tunnels and the like. A group of pipes sticks down out of the
@@ -2158,28 +2158,28 @@ Y:	6
 Z:	3.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	2
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	2
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT north]
-	ToVnum:	29442
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29442
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT down]
-	ToVnum:	29458
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29458
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29444
 Name:	Along the run-off tunnel
-Desc:$
+	Desc:$
    The tunnel begins to turn off, slowly and subtly at first, until it becomes
 more and more apparent of a bend. Almost every inch of the concrete surfaces
 are covered with grime, and the pipes sticking out of the walls show signs of
@@ -2198,28 +2198,28 @@ Y:	20
 Z:	3.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	2
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	2
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT north]
-	ToVnum:	29445
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29445
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT southeast]
-	ToVnum:	29442
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29442
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29445
 Name:	A portion of sewer tunnel
-Desc:$
+	Desc:$
    The pre-existing structure of reinforced concrete still stands intact for
 the most part as the tunnel continues along, a few pipes protruding and
 spilling out small trickles of disturbingly brackish water on the floor,
@@ -2238,40 +2238,40 @@ Y:	8
 Z:	3.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	2
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	2
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT north]
-	ToVnum:	29446
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29446
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT east]
-	ToVnum:	29450
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29450
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT south]
-	ToVnum:	29444
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29444
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29447
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29447
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29446
 Name:	Heading down the ladder
-Desc:$
+	Desc:$
    An old metal ladder is loosely bolted into what looks to be a stretch of
 cement wall, which wobbles and shakes whenever any weight is shifted on it,
 and a few of the rungs have all but rusted into nothingness at this point. The
@@ -2292,32 +2292,32 @@ Y:	10
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	3
-	Smoke:	6
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	3
+Smoke:	6
+Background:	0
+BackgroundType:	0
 [EXIT south]
-	ToVnum:	29445
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29445
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT up]
-	Keywords:	slab stone
+Keywords:	slab stone
 	Desc:$
 A large, heavy slab of stone sits above, sealing off the way out. 
 ~
-	ToVnum:	29416
-	Flags:	1
-	Material:	stone
-	Barrier:	16
-	KeyVnum:	0
+ToVnum:	29416
+Flags:	1
+Material:	stone
+Barrier:	16
+KeyVnum:	0
 BREAK
 #29447
 Name:	Beyond the hole in the wall
-Desc:$
+	Desc:$
    The knocked out section of concrete along the eastern wall has spilled out
 onto the floor, though most of it has been pushed aside and cleared away,
 allowing for relatively easy passage. The roots hanging down from the ceiling
@@ -2336,28 +2336,28 @@ Y:	6
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	2
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	2
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT east]
-	ToVnum:	29445
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29445
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT northwest]
-	ToVnum:	29448
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29448
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29448
 Name:	Along a murky path
-Desc:$
+	Desc:$
    The scenery takes a turn into muddy territory, as the water thats seeped
 down into the earth has saturated and turned it into little more than random
 pools, some of which are more than ankle deep. The footing is a bit more than
@@ -2376,28 +2376,28 @@ Y:	10
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	3
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	3
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT southeast]
-	ToVnum:	29447
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29447
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT south]
-	ToVnum:	29449
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29449
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29449
 Name:	A hole lined with uneven rocks
-Desc:$
+	Desc:$
    Rough, unhewn slates of rock line the walls here unevenly as they descend
 down into a fairly steep drop, and to make it worse their surfaces covered
 mostly by water loving algae and mosses, making them even harder to climb up
@@ -2415,28 +2415,28 @@ Y:	10
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	3
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	3
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT north]
-	ToVnum:	29448
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29448
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT down]
-	ToVnum:	29455
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29455
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29450
 Name:	At a hole in the wall
-Desc:$
+	Desc:$
    Portions of this clawed out tunnel are nothing more than roughly cut
 sections, where dirt spills down off the walls and the ceiling looks
 suspiciously weak. Some small attempts to clear away the rubble and debris
@@ -2456,28 +2456,28 @@ Y:	6
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	2
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	2
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT north]
-	ToVnum:	29451
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29451
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29445
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29445
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29451
 Name:	Along a patchwork section of tunnel
-Desc:$
+	Desc:$
    The traveling becomes even more treacherous along this stretch of tunnel,
 since some of the sections of wall and floor have all but sunk in on
 themselves, threatening to bring down even more of the cleared area with it.
@@ -2496,39 +2496,39 @@ Y:	8
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	0
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	0
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT east]
-	ToVnum:	29452
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29452
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT south]
-	ToVnum:	29450
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29450
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT down]
 Keywords:	plywood plank wood
 	Desc:$
 A rotten plank of plywood threatens to give way underfoot here. 
 ~
-	ToVnum:	29461
-	Flags:	1
-	Material:	wood
-	Barrier:	4
-	KeyVnum:	0
-	HiddenRating:	8
+ToVnum:	29461
+Flags:	1
+Material:	wood
+Barrier:	4
+KeyVnum:	0
+HiddenRating:	8
 BREAK
 #29452
 Name:	Winding through the tunnel
-Desc:$
+	Desc:$
    The ceiling consists mostly of old root tips growing down in from above,
 along with a thick post of old wood pressed into service as load bearing
 beams, with a little bit of help from cinderblocks to keep their bases from
@@ -2547,28 +2547,28 @@ Y:	6
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	2
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	2
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT southeast]
-	ToVnum:	29453
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29453
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29451
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29451
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29453
 Name:	Approaching a blind turn
-Desc:$
+	Desc:$
    This portion of the underground tunnel has seen its fair share of traffic,
 as the numerous sets of overlaying foot prints and scuff marks of both boots
 and bare feet mar the floor. A bit of plywood and the occasional two by four
@@ -2588,28 +2588,28 @@ Y:	10
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	2
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	2
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT south]
-	ToVnum:	29454
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29454
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT northwest]
-	ToVnum:	29452
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29452
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29454
 Name:	Down into the unknown
-Desc:$
+	Desc:$
    The cracked and broken stones above jut out to line the descent down this
 little hole in the ground, offering limited hand and foot holds for anyone
 brave (or stupid) enough to venture down here. The walls are covered in
@@ -2629,28 +2629,28 @@ Y:	10
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	3
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	3
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT north]
-	ToVnum:	29453
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29453
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT up]
-	ToVnum:	29430
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29430
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29455
 Name:	The bottom of a rough climb
-Desc:$
+	Desc:$
    Murky droplets of water spill down from the rock ledges above, which are
 scattered about along each side of the walls, jutting out to offer slippery
 hand and foot holds for anyone brave enough to attempt the climb. An inch or
@@ -2669,28 +2669,28 @@ Y:	10
 Z:	3.00
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	3
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	3
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT east]
-	ToVnum:	29456
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29456
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT up]
-	ToVnum:	29449
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29449
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29456
 Name:	Climbing over dirt mounds
-Desc:$
+	Desc:$
    The loose dirt walls and ceiling here threatens to collapse, and even has
 in some places, spilling down to create uneven mounds that have to be climbed
 over. Small holes, some more than large enough to snag a foot, dot the
@@ -2709,28 +2709,28 @@ Y:	10
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	3
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	3
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT southeast]
-	ToVnum:	29457
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29457
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	ToVnum:	29455
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29455
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29457
 Name:	At an underground crossroad
-Desc:$
+	Desc:$
    While originally a dead end section of the tunnel system, the walls on
 either side have been broken through and excavated quite a deal, more than
 enough to offer passage to anyone wanting to do a bit of crawling and
@@ -2748,34 +2748,34 @@ Y:	10
 Z:	3.00
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	3
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	3
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT northeast]
-	ToVnum:	29459
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29459
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT south]
-	ToVnum:	29458
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29458
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT northwest]
-	ToVnum:	29456
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29456
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29458
 Name:	Amongst a variety of pipes
-Desc:$
+	Desc:$
    An assortment of various sized pipes drape down from the ceiling and along
 the walls, most of which delve down into the floor, which consists mostly of
 metal grating, allowing small glimpses of what lies under foot. The sound of
@@ -2796,28 +2796,28 @@ Y:	10
 Z:	3.00
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	0
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	0
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT north]
-	ToVnum:	29457
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29457
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 [EXIT up]
-	ToVnum:	29443
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29443
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29459
 Name:	Before a busted doorway
-Desc:$
+	Desc:$
    The walls in this short section of tunnel is composed mostly of dirt, which
 has been compacted and pressed tightly into place inbetween lines of wooden
 posts spaced every meter or so, to keep the ceiling and walls from caving in
@@ -2838,32 +2838,32 @@ Y:	10
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	3
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	3
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT north]
-	Keywords:	door wooden wood busted
+Keywords:	door wooden wood busted
 	Desc:$
 A half busted door made of wood scraps blocks the way into the northern room.
 ~
-	ToVnum:	29460
-	Flags:	1
-	Material:	wood
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29460
+Flags:	1
+Material:	wood
+Barrier:	4
+KeyVnum:	0
 [EXIT southwest]
-	ToVnum:	29457
-	Flags:	0
-	Material:	brick
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29457
+Flags:	0
+Material:	brick
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29460
 Name:	A spacious dining hall
-Desc:$
+	Desc:$
    The walls here consist of little more than compacted dirt, with beams of
 wood crossing along their length, as well as the ceiling, with slats of metal
 nailed and screwed together in a mix-mash of construction. Several wooden
@@ -2884,37 +2884,37 @@ Y:	10
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	0
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	0
+Smoke:	0
+Background:	0
+BackgroundType:	0
 [EXIT south]
-	Keywords:	door wooden wood busted
+Keywords:	door wooden wood busted
 	Desc:$
 A half busted door made of wood scraps blocks the way back out to the south. 
 ~
-	ToVnum:	29459
-	Flags:	1
-	Material:	wood
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29459
+Flags:	1
+Material:	wood
+Barrier:	4
+KeyVnum:	0
 [EXIT west]
-	Keywords:	door plywood wood
+Keywords:	door plywood wood
 	Desc:$
 A door that is little more than flimsy pieces of plywood nailed together
 blocks the way west. 
 ~
-	ToVnum:	29461
-	Flags:	1
-	Material:	wood
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29461
+Flags:	1
+Material:	wood
+Barrier:	4
+KeyVnum:	0
 BREAK
 #29461
 Name:	An unkempt cellar of sorts
-Desc:$
+	Desc:$
    This is obivously a storage area of some kind, indicated by the masses of
 half-rotten crates and boxes that are stacked across its expanse. A small
 gasoline generator is stuffed into one of the corners, with cords and wires
@@ -2937,38 +2937,38 @@ Y:	10
 Z:	2.50
 RoomType:	6
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	0
-	Smoke:	0
-	Background:	1
-	BackgroundType:	10
+SpecIdx:	0
+Rating:	0
+Light:	0
+Smoke:	0
+Background:	1
+BackgroundType:	10
 [EXIT east]
-	Keywords:	door plywood wood
+Keywords:	door plywood wood
 	Desc:$
 A door that is little more than flimsy pieces of plywood nailed together
 blocks the way east. 
 ~
-	ToVnum:	29460
-	Flags:	1
-	Material:	wood
-	Barrier:	4
-	KeyVnum:	0
+ToVnum:	29460
+Flags:	1
+Material:	wood
+Barrier:	4
+KeyVnum:	0
 [EXIT up]
-	Keywords:	plywood plank wood
+Keywords:	plywood plank wood
 	Desc:$
 A rotten plank of plywood blocks the hole in the ceiling above. 
 ~
-	ToVnum:	29451
-	Flags:	0
-	Material:	wood
-	Barrier:	4
-	KeyVnum:	0
-	HiddenRating:	8
+ToVnum:	29451
+Flags:	0
+Material:	wood
+Barrier:	4
+KeyVnum:	0
+HiddenRating:	8
 BREAK
 #29499
 Name:	Cramped jail cell
-Desc:$
+	Desc:$
    You are in a small jail cell, there is a small bed in the corner and a
 toilet on the other side. it smells really bad in here..like someone has died
 and rotted away in here 
@@ -2983,11 +2983,11 @@ Y:	20
 Z:	2.50
 RoomType:	0
 [POINTS]
-	SpecIdx:	0
-	Rating:	0
-	Light:	0
-	Smoke:	0
-	Background:	0
-	BackgroundType:	0
+SpecIdx:	0
+Rating:	0
+Light:	0
+Smoke:	0
+Background:	0
+BackgroundType:	0
 BREAK
 END

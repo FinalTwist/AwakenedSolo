@@ -1150,13 +1150,8 @@ SPECIAL(taxi)
         // strip ONE trailing punctuation mark that commonly appears in speech
         if (!query.empty() && (query.back() == '.' || query.back() == ',' || query.back() == '!' || query.back() == '?')) query.pop_back();
 
-        {
-          char logbuf[256];
-          snprintf(logbuf, sizeof(logbuf),
-                  "TaxiWiki: hits=%d for query='%s'",
-                  (int)hits.size(), query.c_str());
-          mudlog(logbuf, ch, LOG_SYSLOG, TRUE);
-        }
+        auto hits = TaxiWiki::find(query.c_str(), /*region*/"", /*max_hits*/16);
+        
         if (!hits.empty()) {
           if (hits.size() == 1) {
             // Single hit: treat like a gridguide destination using its coordinates.

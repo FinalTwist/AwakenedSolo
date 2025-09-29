@@ -295,6 +295,13 @@ void validate_in_obj_pointers(struct obj_data *obj, struct obj_data *in_obj) {
 }
 #define FILEBUF_SIZE 8192
 
+
+// System-generated art should persist even when !RENT.
+static inline bool is_system_art(const obj_data *obj) {
+  return GET_OBJ_VNUM(obj) == 125;
+}
+
+
 void Storage_save(const char *file_name, struct room_data *room) {
   int level = 0;
   struct obj_data *obj = NULL;
@@ -353,11 +360,15 @@ void Storage_save(const char *file_name, struct room_data *room) {
     prototype = &obj_proto[real_obj];
     // Skip temporary ground items (corpses, timed props) so they never persist.
     // Corpses are flagged with ITEM_EXTRA_CORPSE; anything with a timer should decay instead of saving.
+    // Skip temporary ground items (corpses, timed props) so they never persist.
     if (IS_OBJ_STAT(obj, ITEM_EXTRA_CORPSE) || GET_OBJ_TIMER(obj) > 0) {
       obj = obj->next_content;
       continue;
     }
-    if (!OBJ_SHOULD_NOT_SAVE_IN_APTS_AND_VEHS(obj)) {
+
+    const bool allow_persist = is_system_art(obj) || !OBJ_SHOULD_NOT_SAVE_IN_APTS_AND_VEHS(obj);
+
+    if (allow_persist) {
       obj_string_buf << "\t\tVnum:\t" << GET_OBJ_VNUM(obj) << "\n";
       obj_string_buf << "\t\tInside:\t" << level << "\n";
       if (GET_OBJ_TYPE(obj) == ITEM_PHONE) {
@@ -396,17 +407,14 @@ void Storage_save(const char *file_name, struct room_data *room) {
       obj_strings.push_back(obj_string_buf.str());
       obj_string_buf.str(std::string());
 
-      if (obj->contains && !OBJ_SHOULD_NOT_SAVE_IN_APTS_AND_VEHS(obj) && GET_OBJ_TYPE(obj) != ITEM_PART) {
+    if (obj->contains && (is_system_art(obj) || !OBJ_SHOULD_NOT_SAVE_IN_APTS_AND_VEHS(obj)) && GET_OBJ_TYPE(obj) != ITEM_PART) {
         obj = obj->contains;
         level++;
-
         continue;
       }
     } else {
       log_vfprintf("Discarding house item %s (%ld) from %s because it is !RENT. [house_error_grep_string]",
-                   GET_OBJ_NAME(obj),
-                   GET_OBJ_VNUM(obj),
-                   file_name);
+                  GET_OBJ_NAME(obj), GET_OBJ_VNUM(obj), file_name);
     }
 
     if (obj->next_content) {
