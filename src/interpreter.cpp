@@ -1973,7 +1973,7 @@ void command_interpreter(struct char_data * ch, char *argument, const char *tcna
         SEND_TO_Q(msg_buf, ch->desc->watcher);
       }
     }
-
+/*
     // +++ DEBUG After you extracted the command name into 'command' or similar:
 if (cmd_info[cmd].command_pointer == do_say) {
   int fd = open("say_trace.log", O_CREAT | O_WRONLY | O_APPEND, 0644);
@@ -1988,7 +1988,7 @@ if (cmd_info[cmd].command_pointer == do_say) {
     log_vfprintf("command_interpreter: executing SAY for ch=%p is_npc=%d\n",
             (void*)ch, IS_NPC(ch) ? 1 : 0);
   }
-}
+}*/
 
     // Make sure they're conscious / not morted / etc. Restore chargen chars if that's where they're at right now.
     if (GET_POS(ch) < cmd_info[cmd].minimum_position && (restore_to_full_health_if_still_in_chargen(ch) ? GET_POS(ch) < cmd_info[cmd].minimum_position : TRUE)) {

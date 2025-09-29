@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include "awake.hpp"   // for LOG_* and TRUE/FALSE
+#include "utils.hpp"   // for mudlog(...)
 
 namespace {
 
@@ -24,11 +26,67 @@ static void trim(std::string& s) {
   s = s.substr(a, b-a);
 }
 
+// Normalize: lowercase and remove non-alphanumeric chars.
+static std::string alnum_lower(std::string s) {
+  std::string out; out.reserve(s.size());
+  for (unsigned char c : s) {
+    if (std::isalnum(c)) out.push_back(std::tolower(c));
+  }
+  return out;
+}
+
+// Fuzzy contains: case-insensitive, tolerant of punctuation and simple plural/possessive variants.
 static bool contains_ci(const std::string& hay, const std::string& needle) {
   if (needle.empty()) return false;
-  auto H = strtolower(hay);
-  auto N = strtolower(needle);
-  return H.find(N) != std::string::npos;
+
+  // Normalize both sides (strip punctuation, make lowercase).
+  const std::string H = alnum_lower(hay);
+  std::string N = alnum_lower(needle);
+  if (N.empty()) return false;
+
+  auto direct_hit = (H.find(N) != std::string::npos);
+  if (direct_hit) return true;
+
+  // Try to singularize simple plural/possessive forms: 's, s, es
+  auto try_forms = [&](std::string n) -> bool {
+    if (n.empty()) return false;
+    if (H.find(n) != std::string::npos) return true;
+    // 's -> ''
+    if (n.size() > 2 && n.substr(n.size()-2) == "s") {
+      // case: "'s" already removed by alnum_lower, so just 's -> s
+      // handled by the next branch
+      ;
+    }
+    // trailing 's'
+    if (n.size() > 1 && n.back() == 's') {
+      n.pop_back();
+      if (!n.empty() && H.find(n) != std::string::npos) return true;
+    }
+    // trailing "es"
+    if (n.size() > 2 && n.substr(n.size()-2) == "es") {
+      n.erase(n.size()-2);
+      if (!n.empty() && H.find(n) != std::string::npos) return true;
+    }
+    return false;
+  };
+
+  if (try_forms(N)) return true;
+
+  // Token-wise check (lets "collection agency" match on "collection" or "agency")
+  // Split the *original* needle on non-alnum and check tokens >= 3 chars.
+  {
+    std::string tok;
+    for (char c : needle) {
+      if (std::isalnum((unsigned char)c)) tok.push_back(std::tolower((unsigned char)c));
+      else {
+        if (tok.size() >= 3 && (H.find(tok) != std::string::npos || try_forms(tok))) return true;
+        tok.clear();
+      }
+    }
+    if (tok.size() >= 3 && (H.find(tok) != std::string::npos || try_forms(tok))) return true;
+  }
+
+  return false;
 }
 
 // Allow-list for "SeattleEnvirons"

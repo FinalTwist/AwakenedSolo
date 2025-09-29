@@ -1,57 +1,199 @@
-Seattle	Dante	Dante's Inferno	-65322	32761
-Seattle	Penumbra	Club Penumbra	-65174	32687
-Seattle	Platinum	Club Platinum	-65370	32785
+Auburn	Airsoft	Airsoft	-58044	29122
+Auburn	Auburn	Auburn Center	-58022	29111
+Auburn	AuburnCenter	Auburn Center	-79430	39815
+Auburn	Couriers	Couriers	-58616	29408
+Auburn	OfficeWorks	Office Works	-58600	29400
+Auburn	Paint	Auburn Paint and Panel	-75036	37618
+Council Island	CIHospital	Council Island Hospital	-18322	9261
+Council Island	Council	Council Island	-18298	9249
+Council Island	EAirport	Island Airstrip	-17650	8925
+Docks District	Docks	Entrance	-25000	12600
+Docks District	UStorIt	U-Stor-It	-23000	11600
+Everett	BeaconMall	Everett Beacon Mall	-78506	39353
+Everett	Bicson	Bicson Biomedical	-78570	39385
+Everett	BPAutos	Beverly Park Automotives	-78448	39324
+Everett	CRLimos	Casino Road Limousines	-78564	39382
+Everett	Dadson	Dadson Vision Entertainment	-78488	39344
+Everett	EAirport	Everett Airport	-17650	8925
+Everett	Ebeys	Ebey's Bar	-78544	39372
+Everett	Gravity	Gravity Bar North	-78414	39307
+Everett	Jasons	Jason's Bar & Grill	-78472	39336
+Everett	Lore	The Lore Store	-78422	39311
+Everett	Rubber	Rubber Suit	-78672	39436
+Everett	SRGAE	Stanley's RGA Emporium	-78540	39370
+Everett	TripleTree	Triple Tree	-24802	12501
+Highway Onramps	I-5	I-5 at Seattle NE	-65512	32856
+Highway Onramps	I-90	I-90 at Seattle SE	-65428	32814
+Highway Onramps	Redmond	I-90 near Redmond	-39726	19963
+Renton	Italiano	Italiano Restaurant	-60298	30249
+Renton	KETA	KETA	-60250	30225
+Renton	Mime	Murdered Mime	-60298	30249
+Renton	Renton	Renton Center	-60376	30288
+Renton	Tao	Tao	-60256	30228
+SeaTAC International Airport	SeaTAC	SeaTAC	-38820	19510
 Seattle	ActionComputers	Action Computers & Electronics	-65300	32750
-Seattle	RapidFire	Rapid Fire Ammunition	-65328	32764
-Seattle	FargoSecurity	Fargo Security	-65506	32853
-Seattle	StufferShack	Stuffer Shack	-65404	32802
+Seattle	Chiba	Chiba Bar	-65372	32786
+Seattle	CinemaVieux	Cinema Vieux	-65176	32688
+Seattle	Dante	Dante's Inferno	-65322	32761
 Seattle	DIYDSHardware	DIY & DS Hardware	-65400	32800
 Seattle	DocWagonClinic	DocWagon Clinic	-65376	32788
 Seattle	DocWagonOutlet	DocWagon Outlet	-65388	32794
-Seattle	Nasers	Naser's Restaurant	-65402	32801
-Seattle	StopGap	Stop Gap	-65416	32808
-Seattle	ShoeFly	Shoe Fly	-65360	32780
-Seattle	TopShelfBooks	Top Shelf Books	-65302	32751
-Seattle	VashonBoutique	Vashon Boutique	-65334	32767
-Seattle	ZalenskysElectronics	Zalensky's Electronics	-65342	32771
-Seattle	ZoeBoutique	Zoe Boutique	-65318	32759
-Seattle	SeattleFormal	Seattle Formal Wear	-65492	32846
-Seattle	Silent	Silent Cafe	-65450	32825
-Seattle	CinemaVieux	Cinema Vieux	-65176	32688
-Seattle	Krishnas	Krishna's	-65190	32695
-Seattle	Chiba	Chiba Bar	-65372	32786
-Seattle	Marksman	Marksman Range	-65364	32782
-Seattle	LinguisticsSchool	Linguistics School	-65336	32768
-Seattle	SecondChances	Second Chances	-65502	32851
-Seattle	Yoshis	Yoshi's	-65502	32851
-Seattle	WIZ	WIZ	-65370	32785
-Seattle	Zalenskys	Zalensky's	-65342	32771
-Seattle	SeattleCenter	Seattle Center (Needle)	-65358	32779
-Seattle	Zoo	Woodland Park Zoo	-65156	32678
 Seattle	DSHeliport	Downtown Heliport	-65554	32877
+Seattle	FargoSecurity	Fargo Security	-65506	32853
 Seattle	I-5	I-5 Onramp	-65512	32856
 Seattle	I-90	I-90 Onramp	-65428	32814
-Renton	Renton	Renton Center	-60376	30288
-Renton	Italiano	Italiano Restaurant	-60298	30249
-Renton	KETA	KETA	-60250	30225
-Renton	Tao	Tao	-60256	30228
-Council Island	Council	Council Island	-18298	9249
-Council Island	CIHospital	Council Island Hospital	-18322	9261
-Council Island	EAirport	Island Airstrip	-17650	8925
-Tacoma	Satyricon	Satyricon	-29222	14711
-Tacoma	Thomason	Thomason	-29596	14898
-Tacoma	TTBank	TT Bank	-29220	14710
-Tacoma	PCM	PCM	-29208	14704
-Tacoma	Hals	Hal's	-29216	14708
-Tacoma	Toadstool	Toadstool	-29342	14771
-Tacoma	SixthParking	6th Ave Parking	-29340	14770
-Tacoma	Roccos	Rocco's	-29460	14830
+Seattle	Krishnas	Krishna's	-65190	32695
+Seattle	LinguisticsSchool	Linguistics School	-65336	32768
+Seattle	Marksman	Marksman Range	-65364	32782
+Seattle	Nasers	Naser's Restaurant	-65402	32801
+Seattle	Penumbra	Club Penumbra	-65174	32687
+Seattle	Platinum	Club Platinum	-65370	32785
+Seattle	RapidFire	Rapid Fire Ammunition	-65328	32764
+Seattle	SeattleCenter	Seattle Center (Needle)	-65358	32779
+Seattle	SeattleFormal	Seattle Formal Wear	-65492	32846
+Seattle	SecondChances	Second Chances	-65502	32851
+Seattle	ShoeFly	Shoe Fly	-65360	32780
+Seattle	Silent	Silent Cafe	-65450	32825
+Seattle	StopGap	Stop Gap	-65416	32808
+Seattle	StufferShack	Stuffer Shack	-65404	32802
+Seattle	TopShelfBooks	Top Shelf Books	-65302	32751
+Seattle	VashonBoutique	Vashon Boutique	-65334	32767
+Seattle	WIZ	WIZ	-65370	32785
+Seattle	Yoshis	Yoshi's	-65502	32851
+Seattle	Zalenskys	Zalensky's	-65342	32771
+Seattle	ZalenskysElectronics	Zalensky's Electronics	-65342	32771
+Seattle	ZoeBoutique	Zoe Boutique	-65318	32759
+Seattle	Zoo	Woodland Park Zoo	-65156	32678
+Seattle NE	7thPlaza	7th Street Plaza	-61242	30721
+Seattle NE	Aztech	Aztechnology Pyramid	-14802	7501
+Seattle NE	CEAuto	Cutting Edge Auto	-75018	37609
+Seattle NE	Espanoza	Espanoza Shopping Center	-76002	38101
+Seattle NE	Herbies	Herbie's Herbals	-61006	30603
+Seattle NE	Mitsuhama	Mitsuhama Tower	-65444	32822
+Seattle NE	MMagik	Modern Magik	-61028	30614
+Seattle NE	Opera	Seattle Opera House	-1410002	705101
+Seattle NE	Rokhalla	Rokhalla	-22820	11510
+Seattle NE	SeattleFormal	Seattle Formal Wear	-65492	32846
+Seattle NE	SeattleParking	Seattle Parking Garage	-45340	22770
+Seattle NE	Silent	Silent Cafe	-65450	32825
+Seattle NE	Syberspace	Syberspace	-61224	30712
+Seattle NE	UCASBank	UCAS Bank	-61048	30624
+Seattle NW	6thAge	Sixth Age Clinical Consulting	-61140	30670
+Seattle NW	CESA	Corporate Edge Security Automotives	-75026	37613
+Seattle NW	Church	First Methodist Church	-61130	30665
+Seattle NW	DennyTires	Denny Way Tires	-61178	30689
+Seattle NW	Jackies	Jackie's Biosculpting	-61142	30671
+Seattle NW	Kristins	Kristin's Restaurant	-61156	30678
+Seattle NW	LS17	Lone Star 17th Precinct	-7410	3805
+Seattle NW	Lysleul	Lysleul Plaza	-61102	30651
+Seattle NW	Matchsticks	Matchsticks	-61158	30679
+Seattle NW	Muscovite	Muscovite Lounge	-61096	30648
+Seattle NW	Racespec	Racespec Performance Workshop	-61146	30673
+Seattle NW	Sculleys	Sculley's	-61182	30691
+Seattle NW	SeattleLibrary	Seattle Public Library	-61200	30700
+Seattle SE	ActionComputers	Action Computers and Electronics	-65300	32750
+Seattle SE	AllenAssociates	Allen & Associates	-65414	32807
+Seattle SE	Bucks	Buck's Pizza	-11800	6000
+Seattle SE	Chiba	Little Chiba	-65372	32786
+Seattle SE	CinemaVieux	Le Cinema Vieux	-65176	32688
+Seattle SE	Dante	Dante's Inferno	-65322	32761
+Seattle SE	DavesDrugs	Dave's Discount Drugs	-65326	32763
+Seattle SE	DIYDSHardware	Doityadamnself & Son's Hardware and Appliances	-65400	32800
+Seattle SE	DocWagonClinic	DocWagon Clinic	-65376	32788
+Seattle SE	DocWagonOutlet	DocWagon Outlet Garage	-65388	32794
+Seattle SE	DSHeliport	Downtown Seattle Heliport	-65554	32877
+Seattle SE	FargoSecurity	Fargo Security Hardware	-65506	32853
+Seattle SE	Figgs	Figg's Gym	-65280	32740
+Seattle SE	Glenn	Quiet Glenn	-125800	63000
+Seattle SE	GLoser	Gentleman Loser	-130400	65300
+Seattle SE	Krishnas	Krishna's	-65190	32695
+Seattle SE	Lennys	Crazy Lenny's Crazy Deals	-2798	1499
+Seattle SE	LinguisticsSchool	Smith Linguistics School	-65336	32768
+Seattle SE	Mammon	Mall of Mammon	-31602	15901
+Seattle SE	Marksman	Marksman Indoor Firing Range	-65364	32782
+Seattle SE	MetroHolografix	Metro Holografix	-65298	32749
+Seattle SE	Nasers	Naser's Place	-65402	32801
+Seattle SE	Penumbra	Club Penumbra	-65174	32687
+Seattle SE	PhilsArmy	Phil's Army Surplus	-65506	32853
+Seattle SE	PL	Old Impound Lot	-186600	93400
+Seattle SE	Platinum	Platinum Club	-65370	32785
+Seattle SE	RapidFire	Rapid Fire Ammunition	-65328	32764
+Seattle SE	Renraku	Renraku Arcology	-17038	8619
+Seattle SE	Rhino	Big Rhino	-65270	32735
+Seattle SE	Rollos	Rollo's Cafe	-65264	32732
+Seattle SE	Seattle	Seattle Center	-65358	32779
+Seattle SE	SecondChances	Second Chances	-65502	32851
+Seattle SE	SecuroJa	Se-curo Ja	-64600	32400
+Seattle SE	ShoeFly	Shoe-Fly	-65360	32780
+Seattle SE	Slitch	Slitch Pit	-125612	62906
+Seattle SE	StopGap	The Stop Gap	-65416	32808
+Seattle SE	StufferShack	Stuffer Shack	-65404	32802
+Seattle SE	TopShelfBooks	The Top Shelf Bookstore	-65302	32751
+Seattle SE	VashonBoutique	Vashon Island Boutique	-65334	32767
+Seattle SE	WhiteFlowerDiner	White Flower Diner	-65418	32809
+Seattle SE	WIZ	WIZ!!!!!	-65370	32785
+Seattle SE	Yoshis	Yoshi's	-65502	32851
+Seattle SE	ZalenskysElectronics	Zalensky's Electronics	-65342	32771
+Seattle SE	ZoeBoutique	Zoe Boutique store	-65318	32759
+Seattle SW	AgostinaHome	The Saint Agostina Home for Women	-65116	32658
+Seattle SW	Biohyde	Biohyde	-65072	32636
+Seattle SW	HarborTV	Harbor Trucks & Vans	-75014	37607
+Seattle SW	Hellhound	Hellhound	-65002	32601
+Seattle SW	Novatech	Novatech	-120600	60400
+Seattle SW	Quinns	Quinn's	-65042	32621
+Seattle SW	Reaper	Reaper	-65034	32617
+Seattle SW	Reggies	Reggie's Hole-In-The-Wall	-65018	32609
+Seattle SW	Shalimar	Seattle Shalimar	-65002	32601
+Seattle SW	Shintaru	Shintaru	-19000	9600
+Seattle SW	Smiths	Smith's Pub	-65132	32666
+Seattle SW	SSPark	Seattle State Park	-65146	32673
+Seattle SW	Zoo	Seattle Municipal Zoo	-65156	32678
 Tacoma	Cave	The Cave	-29246	14723
+Tacoma	Hals	Hal's	-29216	14708
+Tacoma	PCM	PCM	-29208	14704
 Tacoma	PHellhound	Pavement Hellhound	-29398	14799
-Auburn	Auburn	Auburn Center	-58022	29111
-Auburn	Airsoft	Airsoft	-58044	29122
-Auburn	Couriers	Couriers	-58616	29408
-Auburn	OfficeWorks	Office Works	-58600	29400
-Everett	EAirport	Everett Airport	-17650	8925
+Tacoma	Roccos	Rocco's	-29460	14830
+Tacoma	Satyricon	Satyricon	-29222	14711
+Tacoma	SixthParking	6th Ave Parking	-29340	14770
+Tacoma	Thomason	Thomason	-29596	14898
+Tacoma	Toadstool	Toadstool	-29342	14771
+Tacoma	TTBank	TT Bank	-29220	14710
+Tacoma East	BurnsCo	BurnsCo Truck Stop	-24604	12402
+Tacoma East	Fenris	Fenris Nacht	-120476	60338
+Tacoma East	JNBL	Johnson NewBody Labs	-3092	1646
+Tacoma East	Junkyard	West Tacoma Junkyard	-4140	2170
+Tacoma East	Ketcham	Ketcham Building	-3076	1638
+Tacoma East	Knight	Knight Center	-3038	1619
+Tacoma East	ParkerCenter	Parker Center	-3146	1673
+Tacoma East	Pharaoh	Pharaoh	-3120	1660
+Tacoma East	Pooks	Pook's Place	-3060	1630
+Tacoma East	Sapphire	Star Sapphire Hotel	-140608	70404
+Tacoma West	Afterlife	Afterlife	-4144	2172
+Tacoma West	Beanos	Beano's Collection Agency	-4090	2145
+Tacoma West	Bryerson	Bryerson Medical Center	-5026	2613
+Tacoma West	Chinatown	Chinatown	-5054	2627
+Tacoma West	DeClerrys	DeClerry's Bar	-4174	2187
+Tacoma West	Evergreen	Evergreen Apartments	-4402	2301
+Tacoma West	Jamesons	Jameson's Mechanics	-75000	37600
+Tacoma West	JimsFixIt	Jim's FixIt	-4138	2169
+Tacoma West	Learson	Learson Shipyards	-4008	2104
+Tacoma West	Nybbles	Nybbles & Bytes	-4114	2157
+Tacoma West	Oldtown	Oldtown Station	-6000	3100
+Tacoma West	PJs	PJ's Coffee Corner	-4002	2101
+Tacoma West	PurpleHaze	Purple Haze	-4118	2159
+Tacoma West	TCoffin	Tacoma Coffin Motel	-4090	2145
+Tacoma West	TMall	Tacoma Mall	-4184	2192
+Tacoma West	TWE	Tacoma Weapons Emporium	-5028	2614
+Tacoma West	Velasquez	Velasquez Securities & Investments	-4080	2140
+Tacoma West	VinniesDrone	Vinnie's Drone Mart	-4166	2183
+Touristville	Banshee	Banshee	-50736	25468
+Touristville	Cabbie	Cabbie Connection	-50980	25590
+Touristville	crusher	Crusher 495	-50728	25464
+Touristville	Downfall	Downfall	-50660	25430
+Touristville	Monohan	Monohan Vehicle Retailer	-17824	9012
 Touristville	PuyN	Touristville North	-16216	8208
 Touristville	PuyS	Touristville South	-16222	8211
+Touristville	RHospital	Redmond General Hospital	-51400	25800
+Touristville	RWMall	Redmond Way Mall	-50706	25453
+Touristville	Skeleton	Skeleton	-50862	25531
+Touristville	YYKBBQ	Yumago Yangnom Korean BBQ	-50940	25570

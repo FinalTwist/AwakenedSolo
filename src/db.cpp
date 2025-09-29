@@ -828,8 +828,7 @@ void DBInit()
   NPCVoice::init();   // <-- load all category files into g_bank
 
   log("Loading taxi wiki destinations.");
-  TaxiWiki::load("lib/etc/taxi/wiki_destinations.txt");
-
+  TaxiWiki::load("etc/taxi/wiki_destinations.txt");
 
   log("DBInit -- DONE.");
 }

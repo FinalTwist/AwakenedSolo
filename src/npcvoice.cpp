@@ -193,9 +193,22 @@ static const string& pick_nonrepeating(const std::vector<string>& v,
   return v.empty() ? *(new string("")) : v[idx];
 }
 
+// Return true if any player character is present in mob's current room.
+static bool room_has_player(struct char_data* mob) {
+  if (!mob) return false;
+  struct room_data* room = mob->in_room;
+  if (!room) return false;
+  for (struct char_data* tch = room->people; tch; tch = tch->next_in_room) {
+    if (!IS_NPC(tch))
+      return true;
+  }
+  return false;
+}
+
 // speak via say or say-to
 static void speak_to_room_or_char(struct char_data* mob, struct char_data* ch, const char* msg) {
   if (!mob || !msg || !*msg) return;
+  if (!room_has_player(mob)) return;  
   char buf[MAX_STRING_LENGTH];
   snprintf(buf, sizeof(buf), "%s", msg);
   bool prev = g_in_speaking;

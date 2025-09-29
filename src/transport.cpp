@@ -34,17 +34,6 @@
 #include "vehicles.hpp"
 #include "taxi_wiki.hpp"  // Added: wiki fallback destinations
 
-// --- BEGIN: Seattle-environs taxi guard helper ---
-static bool room_has_seattle_taxi_sign(struct room_data* room) {
-  if (!room) return false;
-  for (struct obj_data *obj = room->contents; obj; obj = obj->next_content) {
-    if (GET_OBJ_VNUM(obj) == OBJ_SEATTLE_TAXI_SIGN)  // existing constant in your codebase
-      return true;
-  }
-  return false;
-}
-// --- END: Seattle-environs taxi guard helper ---
-
 extern int calculate_distance_between_rooms(vnum_t start_room_vnum, vnum_t target_room_vnum, bool ignore_roads, const char *origin, struct char_data *caller);
 
 extern int find_first_step(vnum_t src, vnum_t target, bool ignore_roads, const char *call_origin, struct char_data *caller);
@@ -1144,9 +1133,30 @@ SPECIAL(taxi)
     if (!found) {
       // === Wiki fallback: try keywords from internal wiki list before requiring coordinates. ===
       // === Seattle-only gate: run wiki fallback ONLY inside Seattle taxi interiors ===
-      if (room_has_seattle_taxi_sign(ch->in_room)) 
-      {
-        auto hits = TaxiWiki::find(argument, /*region*/"", /*max_hits*/16);
+      if ( (destination_list == seattle_taxi_destinations || GET_MOB_VNUM(driver) == 600) && GET_ACTIVE(driver) == ACT_AWAIT_CMD ) {
+        // Restrict to Seattle entries (dataset’s first column is "Seattle")
+        // Normalize the spoken text: trim spaces/quotes and strip trailing punctuation.
+        // This prevents "collection." from missing "Collection" entries.
+        std::string query = argument ? argument : "";
+
+        // trim leading/trailing spaces
+        while (!query.empty() && std::isspace((unsigned char)query.front())) query.erase(query.begin());
+        while (!query.empty() && std::isspace((unsigned char)query.back()))  query.pop_back();
+
+        // remove surrounding quotes if present
+        if (!query.empty() && (query.front() == '"' || query.front() == '\'')) query.erase(query.begin());
+        if (!query.empty() && (query.back()  == '"' || query.back()  == '\'')) query.pop_back();
+
+        // strip ONE trailing punctuation mark that commonly appears in speech
+        if (!query.empty() && (query.back() == '.' || query.back() == ',' || query.back() == '!' || query.back() == '?')) query.pop_back();
+
+        {
+          char logbuf[256];
+          snprintf(logbuf, sizeof(logbuf),
+                  "TaxiWiki: hits=%d for query='%s'",
+                  (int)hits.size(), query.c_str());
+          mudlog(logbuf, ch, LOG_SYSLOG, TRUE);
+        }
         if (!hits.empty()) {
           if (hits.size() == 1) {
             // Single hit: treat like a gridguide destination using its coordinates.
@@ -1154,7 +1164,7 @@ SPECIAL(taxi)
             dest_vnum = vnum_from_gridguide_coordinates(e.x, e.y, ch);
             if (dest_vnum <= 0) {
               // Invalid or non-drivable coords from wiki; tell rider and stop.
-              do_say(driver, "Those coordinates don't look valid from here.", 0, 0);
+              do_say(driver, "I don't know where you mean, Chummer.", 0, 0);
               return TRUE;
             }
             // Cross-jurisdiction?
@@ -1170,11 +1180,16 @@ SPECIAL(taxi)
                 break;
               }
             if (temp_room && find_first_step(real_room(temp_room->number), real_room(dest_vnum), FALSE, "cab request", ch) < 0) {
-              do_say(driver, "The GridGuide network doesn't connect through to there.", 0, 0);
+              do_say(driver, "The Road network doesn't connect through to there.", 0, 0);
               return TRUE;
             }
             // Success: proceed as if coordinates were spoken.
             comm = CMD_TAXI_DEST_GRIDGUIDE;
+            found = TRUE;
+            do_say(ch, query.c_str(), 0, 0);
+            strncpy(buf2, " punches a few buttons on the meter, calculating the fare.", sizeof(buf2));
+            do_echo(driver, buf2, 0, SCMD_EMOTE);
+            forget(driver, ch);
           } else if (hits.size() <= 4) {
             // Ambiguous: list choices and ask for precision.
             do_say(driver, "Do you mean:", 0, 0);
@@ -1183,7 +1198,7 @@ SPECIAL(taxi)
               snprintf(line, sizeof(line), "%s", e.display.c_str());
               do_say(driver, line, 0, 0);
             }
-            do_say(driver, "Tell me the precise name.", 0, 0);
+            do_say(driver, "You gotta be more precise, Chummer.", 0, 0);
             return TRUE;
           } else {
             do_say(driver, "I found a bunch of places by that—be more specific.", 0, 0);
@@ -1256,7 +1271,7 @@ SPECIAL(taxi)
         }
 
         // We didn't get a pair of coordinates, either. Bail out.
-        else {
+        else if (!found) {
           do_say(ch, argument, 0, 0);
           if (destination_list == portland_taxi_destinations) {
             snprintf(buf2, sizeof(buf2), " Sorry chummer, rules are rules. You need to tell me something from the sign, or give me a pair of GridGuide coordinates.");
@@ -1356,11 +1371,11 @@ SPECIAL(taxi)
     GET_ACTIVE(driver) = ACT_DRIVING;
 
     // Log it.
-#ifndef IS_BUILDPORT
+  #ifndef IS_BUILDPORT
     if (IS_SENATOR(ch)) {
       mudlog_vfprintf(ch, LOG_WIZLOG, "Staffer taking cab to game world location %ld (%s).", GET_SPARE2(driver), destination_list[GET_SPARE2(driver)].str);
     }
-#endif
+  #endif
 
     raw_taxi_leaves(real_room(GET_ROOM_VNUM(ch->in_room)));
   } else if (comm == CMD_TAXI_NO && memory(driver, ch) && GET_ACTIVE(driver) == ACT_AWAIT_YESNO) {

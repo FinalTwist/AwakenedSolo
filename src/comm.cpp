@@ -1645,7 +1645,7 @@ void game_loop(int mother_desc)
 
     // By default, every IRL hour, but configurable in config.h.
     if (!(pulse % (PASSES_PER_SEC * SECS_PER_REAL_MIN * IDLE_NUYEN_MINUTES_BETWEEN_AWARDS))) {
-      send_nuyen_rewards_to_pcs();
+      //send_nuyen_rewards_to_pcs();
     }
 
     // Every IRL day

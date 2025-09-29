@@ -60,6 +60,7 @@ ACMD_CONST(do_say) {
 
 ACMD(do_say)
 {
+  /*
   // +++ debug
   {
   int fd = open("say_trace.log", O_CREAT | O_WRONLY | O_APPEND, 0644);
@@ -72,7 +73,7 @@ ACMD(do_say)
             (void*)ch, IS_NPC(ch) ? 1 : 0,
             120, argument ? argument : "<null>");
   }
-  }
+  }*/
 
   // Only parse rename from player speech (never from NPC/debug/timed SAYs).
   if (ch && !IS_NPC(ch) && argument && *argument)
