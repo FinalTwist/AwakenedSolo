@@ -366,7 +366,7 @@ void Storage_save(const char *file_name, struct room_data *room) {
       continue;
     }
 
-    const bool allow_persist = is_system_art(obj) || !OBJ_SHOULD_NOT_SAVE_IN_APTS_AND_VEHS(obj);
+    const bool allow_persist = is_system_art(obj) || OBJ_SHOULD_NOT_SAVE_IN_APTS_AND_VEHS(obj);
 
     if (allow_persist) {
       obj_string_buf << "\t\tVnum:\t" << GET_OBJ_VNUM(obj) << "\n";
@@ -413,8 +413,7 @@ void Storage_save(const char *file_name, struct room_data *room) {
         continue;
       }
     } else {
-      log_vfprintf("Discarding house item %s (%ld) from %s because it is !RENT. [house_error_grep_string]",
-                  GET_OBJ_NAME(obj), GET_OBJ_VNUM(obj), file_name);
+      //log_vfprintf("Discarding house item %s (%ld) from %s because it is !RENT. [house_error_grep_string]", GET_OBJ_NAME(obj), GET_OBJ_VNUM(obj), file_name);
     }
 
     if (obj->next_content) {

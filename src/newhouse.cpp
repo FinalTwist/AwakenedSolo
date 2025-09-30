@@ -372,6 +372,18 @@ void daily_city_litter_sweep() {
     // Remove all objects on the ground in this room.
     for (struct obj_data *obj = room->contents, *next; obj; obj = next) {
       next = obj->next_content;
+
+      // --- IMPORTANT: Skip anything in an apartment/vehicle context.
+      // This reliably excludes vehicle interiors without relying on a room flag.
+      if (OBJ_SHOULD_NOT_SAVE_IN_APTS_AND_VEHS(obj))
+        continue;
+      // - system art should persist
+      // - corpses / timed items already decay naturally
+      if (is_system_art(obj))
+        continue;
+      if (IS_OBJ_STAT(obj, ITEM_EXTRA_CORPSE) || GET_OBJ_TIMER(obj) > 0)
+        continue;
+
       extract_obj(obj);
     }
 
