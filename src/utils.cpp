@@ -9740,7 +9740,13 @@ static const char *get_variant_suffix() {
 }
 
 // Discovery tracking: count system art found per day with a soft reward cap.
-struct DiscStats { int count; time_t last_reset; };
+#include <unordered_set>  // ensure this include is present near the other includes
+
+struct DiscStats {
+  int count;
+  time_t last_reset;
+  std::unordered_set<long> seen_rooms;  // rooms counted today
+};
 static std::unordered_map<long, DiscStats> g_discoveries;
 
 static void maybe_award_discovery(struct char_data *ch) {
@@ -9755,9 +9761,17 @@ static void maybe_award_discovery(struct char_data *ch) {
   long id = GET_IDNUM(ch);
   time_t now = time(0);
   DiscStats &ds = g_discoveries[id];
-  if (!ds.last_reset || now - ds.last_reset >= SECS_PER_REAL_DAY) { ds.count = 0; ds.last_reset = now; }
 
-    if (ds.count < 50) {
+  // Compute the room key and ensure we only count once per day per room
+  long rvnum = ch->in_room ? GET_ROOM_VNUM(ch->in_room) : -1;
+  if (rvnum >= 0) {
+    if (ds.seen_rooms.find(rvnum) != ds.seen_rooms.end()) {
+      return;  // already counted this room today; no award
+    }
+    ds.seen_rooms.insert(rvnum);
+  }
+
+  if (ds.count < 50) {
     ds.count++;
     int delta = number(10, 25);
     InnerVoice::adjust_attitude(ch, delta);

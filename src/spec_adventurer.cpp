@@ -543,7 +543,10 @@ static bool has_flag_named(struct room_data* room, const std::string& flag_name)
 static void spawn_one_adventurer_in_room(struct room_data* room) {
   if (!room) return;
   struct char_data* mob = read_mobile(adv_template_mobile_vnum, VIRTUAL);
-  if (!mob) return;
+  if (!mob) {
+  log_vfprintf("Adventurer: failed to read template mobile vnum %ld (no spawn).", adv_template_mobile_vnum);
+  return;
+  }
 
   const Tier* tier = pick_tier();
   std::string class_tag;
@@ -617,7 +620,11 @@ void adventurer_on_pc_login(struct char_data* ch) {
     if (!is_room_ok_for_spawn(R)) continue;
     candidates.push_back(R);
   }
-  if (candidates.empty()) return;
+  if (candidates.empty()) {
+  log_vfprintf("Adventurer: no eligible rooms in zone %d for %s.",
+               room->zone, GET_CHAR_NAME(ch));
+  return;
+  }
   struct room_data* dest = candidates[number(0, (int)candidates.size()-1)];
   spawn_one_adventurer_in_room(dest);
 }

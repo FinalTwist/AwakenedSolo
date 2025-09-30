@@ -80,6 +80,7 @@
 #include "player_exdescs.hpp"
 #include "gmcp.hpp"
 #include "spec_adventurer.hpp"
+#include "npcvoice.hpp"
 
 const unsigned perfmon::kPulsePerSecond = PASSES_PER_SEC;
 
@@ -1598,6 +1599,7 @@ void game_loop(int mother_desc)
     if (!(pulse % PASSES_PER_SEC)) {
       update_thievery_heat_and_police();
       InnerVoice::tick_inner_voice();
+      NPCVoice::tick();  
       EscalatorProcess();
       ElevatorProcess();
       msdp_update();

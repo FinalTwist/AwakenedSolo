@@ -75,7 +75,7 @@ static bool g_pickpocket_loaded = false;
 static void load_pickpocket_loot() {
   if (g_pickpocket_loaded) return;
   json j;
-  bf::path lootfile = bf::system_complete("lib") / "etc" / "pickpocket_loot.json";
+  bf::path lootfile = bf::system_complete("etc") / "pickpocket_loot.json";
   _json_parse_from_file(lootfile, j);
   try {
     // Your file uses top-level "T1".."T4"

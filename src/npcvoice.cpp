@@ -17,6 +17,19 @@ using std::string;
 extern int cmd_say;
 ACMD_DECLARE(do_say);
 
+#include <deque>   // add if not already present
+
+namespace {
+  struct PendingSpeech {
+    struct char_data* mob;
+    struct char_data* to;      // player being addressed (may be nullptr to talk to room)
+    std::string text;
+    time_t due;                // unix time when this should deliver
+  };
+
+  std::deque<PendingSpeech> g_pending_speech;
+}
+
 namespace NPCVoice {
 
 // Reentrancy guard so NPCVoice-generated speech doesn't trigger NPCVoice reactions.
@@ -253,8 +266,34 @@ void maybe_listen(struct char_data *ch, struct char_data *mob, const char* said)
   auto& vec = lines_for(pers, "listen");
   if (vec.empty()) return;
   const string& s = pick_nonrepeating(vec, mob, "listen");
-  if (!s.empty()) speak_to_room_or_char(mob, ch, s.c_str());
-  arm_cooldown(mob, "listen", 30);
+  if (!s.empty()) {
+    int delay = 1 + number(0, 1);
+    g_pending_speech.push_back(PendingSpeech{ mob, ch, s, nowts() + delay });
+  }
+}
+
+void tick() {
+  const time_t now = nowts();
+  for (size_t i = 0; i < g_pending_speech.size(); /* increment inside */) {
+    auto &ps = g_pending_speech[i];
+
+    // Basic safety: skip if mob disappeared.
+    if (!ps.mob || (ps.mob->in_room == nullptr && ps.mob->in_veh == nullptr)) {
+      g_pending_speech.erase(g_pending_speech.begin() + i);
+      continue;
+    }
+
+    if (ps.due > now) {
+      ++i;
+      continue;
+    }
+
+    // Deliver the line now.
+    speak_to_room_or_char(ps.mob, ps.to, ps.text.c_str());
+    arm_cooldown(ps.mob, "listen", 30);
+
+    g_pending_speech.erase(g_pending_speech.begin() + i);
+  }
 }
 
 void combat_start(struct char_data *ch, struct char_data *mob) {

@@ -41,4 +41,5 @@ void addressed_greet(struct char_data* ch, struct char_data* mob);
 
   bool contains_greeting(const char* said);
   bool in_speaking();  // <-- add this
+  void tick();  // process delayed NPC speech each second
 } // namespace NPCVoice
