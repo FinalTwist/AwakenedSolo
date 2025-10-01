@@ -62,7 +62,7 @@ template<typename T> static T clamp_val(T v, T lo, T hi) { if (v < lo) return lo
 // ---------- config & state ----------
 static int adv_zone_entry_spawn_chance_pct = 5;
 static int adv_zone_inactivity_despawn_seconds = 900;
-static long adv_template_mobile_vnum = 25200; // default, overridable via config
+static long adv_template_mobile_vnum = 20022; // default, overridable via config
 
 static std::vector<std::string> adv_spawn_allow_flags;
 static std::vector<std::string> adv_spawn_disallow_flags;
@@ -537,17 +537,32 @@ static bool has_flag_named(struct room_data* room, const std::string& flag_name)
   return FALSE;
 }
 
-
+ // Prototypes readiness gate: avoid spawning until mobiles are indexed.
+ // Uses only existing symbols from db.hpp; fully local/internal.
+ static bool adv_template_ready() {
+   // top_of_mobt > 0 implies mobiles have been indexed.
+   if (top_of_mobt <= 0) return false;
+   // real_mobile() returns -1 when vnum isn't known yet / not loaded.
+   return real_mobile(adv_template_mobile_vnum) >= 0;
+ }
 
 // ---------- spawn & despawn ----------
 static void spawn_one_adventurer_in_room(struct room_data* room) {
   if (!room) return;
-  struct char_data* mob = read_mobile(adv_template_mobile_vnum, VIRTUAL);
-  if (!mob) {
-  log_vfprintf("Adventurer: failed to read template mobile vnum %ld (no spawn).", adv_template_mobile_vnum);
-  return;
+  // Defer if prototypes aren’t ready yet (e.g., early login/copyover path).
+  if (!adv_template_ready()) {
+    log_vfprintf("Adventurer: template mobile vnum %ld not ready (top_of_mobt=%ld, real=-1). Skipping spawn for now.",
+                adv_template_mobile_vnum, (long)top_of_mobt);
+    return;
   }
 
+  struct char_data* mob = read_mobile(adv_template_mobile_vnum, VIRTUAL);
+  if (!mob) {
+    // Keep the message, but clarify the immediate cause.
+    log_vfprintf("Adventurer: failed to read template mobile vnum %ld (read_mobile returned null).",
+                adv_template_mobile_vnum);
+    return;
+  }
   const Tier* tier = pick_tier();
   std::string class_tag;
 
@@ -557,7 +572,7 @@ static void spawn_one_adventurer_in_room(struct room_data* room) {
 
   if (mob->player.physical_text.room_desc && tier) {
     std::string r = mob->player.physical_text.room_desc;
-    r += " (looks " + class_tag + " " + tier->name + ")";
+    r += " (looks " + class_tag + " " + tier->name + ")\r\n";
     DELETE_ARRAY_IF_EXTANT(mob->player.physical_text.room_desc);
     mob->player.physical_text.room_desc = str_dup(r.c_str());
   }
@@ -582,6 +597,14 @@ void adventurer_on_pc_login(struct char_data* ch) {
   struct room_data* room = get_ch_in_room(ch);
   if (!room) return;
   load_config_if_needed();
+
+  /*
+  //DEBUG  NEW: Spawn one adventurer directly in the player's current room on login.  for testing.
+  if (room) {
+    spawn_one_adventurer_in_room(room);
+    return; // Done: skip the zone-wide alternatives below
+  }
+    */
 
   int z = room->zone;
   adv_zone_last_activity[z] = time(0);

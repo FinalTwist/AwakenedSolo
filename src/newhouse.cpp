@@ -379,7 +379,7 @@ void daily_city_litter_sweep() {
         continue;
       // - system art should persist
       // - corpses / timed items already decay naturally
-      if (is_system_art(obj))
+      if (GET_OBJ_VNUM(obj) == 125)
         continue;
       if (IS_OBJ_STAT(obj, ITEM_EXTRA_CORPSE) || GET_OBJ_TIMER(obj) > 0)
         continue;

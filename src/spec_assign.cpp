@@ -881,7 +881,7 @@ void assign_mobiles(void)
   ASSIGNMOB(70302, bouncer_gentle);
 
   //Adventurers
-  ASSIGNMOB(25200, adventurer_spec);
+  ASSIGNMOB(20022, adventurer_spec);
 
 #ifdef USE_PRIVATE_CE_WORLD
   /* New Multnomah gate guard */

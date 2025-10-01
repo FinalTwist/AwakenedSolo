@@ -971,7 +971,6 @@ struct command_info cmd_info[] =
     { "status"     , POS_MORTALLYW, do_status   , 0, 0, ALLOWS_IDLE_REWARD },
     { "steal"      , POS_LYING   , do_steal    , 0, 0, BLOCKS_IDLE_REWARD },
     { "pickpocket" , POS_STANDING , do_pickpocket, 0, 0, BLOCKS_IDLE_REWARD },
-    { "pick"       , POS_STANDING , do_pickpocket, 0, 0, BLOCKS_IDLE_REWARD },
     { "hackbox"   , POS_STANDING , do_hackbox, 0, 0, BLOCKS_IDLE_REWARD },
     { "hack locker" , POS_STANDING , do_hackbox, 0, 0, BLOCKS_IDLE_REWARD },
     { "hack lockbox", POS_STANDING , do_hackbox, 0, 0, BLOCKS_IDLE_REWARD },
@@ -3832,6 +3831,7 @@ ACMD(do_unsupported_command) {
 // Attempts to map common typos to their actual commands.
 #define COMMAND_ALIAS(typo, corrected)   if (strncmp(arg, (typo), strlen(arg)) == 0) { return find_command_in_x((corrected), cmd_info); }
 
+
 int fix_common_command_fuckups(const char *arg, struct command_info *cmd_info) {
   // Doubled up and otherwise misspelled movement for those impatient-ass people.
   COMMAND_ALIAS("nn", "north");
@@ -4022,6 +4022,10 @@ int fix_common_command_fuckups(const char *arg, struct command_info *cmd_info) {
 
   // Must be after 'pick'
   COMMAND_ALIAS("pickup", "get");
+  COMMAND_ALIAS("rob", "pickpocket");
+  COMMAND_ALIAS("palm", "pickpocket");
+  COMMAND_ALIAS("thieve", "pickpocket");
+  COMMAND_ALIAS("pickpocket", "pickpocket");
 
   // Commands from other games and misc.
   COMMAND_ALIAS("bamfin", "poofin");
