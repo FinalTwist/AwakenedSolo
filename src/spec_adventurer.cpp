@@ -32,6 +32,9 @@
 #define ROOM_SOCIALIZE 32
 #endif
 
+extern int find_first_step(vnum_t src, vnum_t target, bool ignore_roads, const char *call_origin, struct char_data *caller);
+extern int perform_move(struct char_data *ch, int dir, int extra, struct char_data *vict, struct veh_data *veh);
+
 // ---------- utils ----------
 static std::string trim(const std::string& s) {
   size_t a = s.find_first_not_of(" \t\r\n");
@@ -332,6 +335,123 @@ static void adv_do_action(struct char_data* mob, const char* action, const char*
   if (target && *target) snprintf(buf, sizeof(buf), "%s %s", action, target);
   else snprintf(buf, sizeof(buf), "%s", action);
   command_interpreter(mob, buf, GET_CHAR_NAME(mob));
+}
+
+// ----- Adventurer AI (local, per-mob state) -----
+struct AdvAIState {
+  time_t next_idle_at = 0;       // when to do next idle action
+  time_t next_seek_at = 0;       // when to reevaluate targets
+  vnum_t target_room_vnum = -1;  // current target's room (we re-path each step)
+};
+static std::unordered_map<long, AdvAIState> adv_ai; // keyed by GET_IDNUM(mob)
+
+static bool mob_is_aggressive_any(struct char_data *ch) {
+  // Mirrors mobact's racial+generic aggressive mask.
+  return MOB_FLAGS(ch).AreAnySet(MOB_AGGRESSIVE, MOB_AGGR_ELF, MOB_AGGR_DWARF, MOB_AGGR_ORK, MOB_AGGR_TROLL, MOB_AGGR_HUMAN, ENDBIT);
+}
+
+static void adv_maybe_do_idle_action(struct char_data* mob) {
+  long id = GET_IDNUM(mob);
+  time_t now = time(0);
+  AdvAIState &S = adv_ai[id];
+  if (S.next_idle_at == 0) S.next_idle_at = now + number(120, 600); // first in 2–10m
+  if (now < S.next_idle_at) return;
+
+  // Small, flavor-safe idle actions.
+  static const char *idle_actions[] = {
+    "emote reshuffles their inventory.",
+    "emote checks their commlink.",
+    "emote rolls their shoulders and scans the area.",
+    "emote adjusts their gear straps.",
+    "say Keep your head on a swivel.",
+    "emote taps a foot impatiently.",
+    "emote studies the exits, counting them off under their breath.",
+    "emote cracks their knuckles one by one.",
+    "emote wipes a speck of dust from a lens and peers around.",
+    "emote loosens and retightens the straps of a backpack.",
+    "emote kneels to tighten a boot lace, then stands.",
+    "emote flips a credstick in their hand, catching it idly.",
+    "emote checks the edge on a blade, satisfied.",
+    "emote thumbs through a small paper map, then folds it away.",
+    "emote listens intently, head tilted, as if catching distant noise.",
+    "emote stretches their neck until it pops softly.",
+    "say This place never sits still, does it?",
+    "emote pats down pockets, doing a quick gear check.",
+    "emote wipes grime from a weapon housing with a cloth.",
+    "emote looks over recent footprints in the dust.",
+    "emote marks a note on a small pad and tucks it away.",
+    "emote breathes slowly, centering themselves.",
+    "emote glances at the sky to judge the time.",
+    "emote slides a magazine out, checks it, and seats it again.",
+    "emote idly traces warding symbols in the air, then stops."
+  };
+  const char *choice = idle_actions[number(0, (int)(sizeof(idle_actions)/sizeof(idle_actions[0])) - 1)];
+  char buf[256]; strlcpy(buf, choice, sizeof(buf));
+  command_interpreter(mob, buf, GET_CHAR_NAME(mob));
+
+  S.next_idle_at = now + number(120, 600);
+}
+
+static void adv_maybe_draw_on_combat(struct char_data* mob) {
+  if (!FIGHTING(mob)) return;
+  if (GET_EQ(mob, WEAR_WIELD)) return; // already have a weapon out
+  // Try to draw from a readied holster. If none, this safely no-ops.
+  command_interpreter(mob, const_cast<char*>("draw"), GET_CHAR_NAME(mob));
+}
+
+static bool adv_seek_and_step_toward_aggressor(struct char_data* mob) {
+  struct room_data *myroom = get_ch_in_room(mob);
+  if (!myroom) return false;
+  long id = GET_IDNUM(mob);
+  time_t now = time(0);
+  AdvAIState &S = adv_ai[id];
+
+  // Re-evaluate target occasionally (every 20–40s).
+  if (S.next_seek_at == 0 || now >= S.next_seek_at) {
+    S.next_seek_at = now + number(20, 40);
+    S.target_room_vnum = -1;
+
+    // Find an aggressive NPC somewhere in our zone, prefer same-zone rooms we can path to.
+    int z = myroom->zone;
+    vnum_t best_room = -1;
+
+    for (struct char_data *ch = character_list; ch; ch = ch->next_in_character_list) {
+      if (!IS_NPC(ch) || ch == mob) continue;
+      if (!mob_is_aggressive_any(ch)) continue;
+      struct room_data *r = get_ch_in_room(ch);
+      if (!r || r->zone != z) continue;
+      // Skip targets we can't legally reach (respect NPC zone-wander rules along the way).
+      if (find_first_step(real_room(myroom->number), real_room(r->number), FALSE, "adventurer_seek", mob) >= 0) {
+        best_room = r->number;
+        break; // good enough—no heavy scoring to keep it cheap
+      }
+    }
+    if (best_room != -1)
+      S.target_room_vnum = best_room;
+  }
+
+  if (S.target_room_vnum == -1) return false; // nothing to hunt
+
+  // If we share the room with any aggro mob, engage immediately.
+  for (struct char_data *ch = myroom->people; ch; ch = ch->next_in_room) {
+    if (IS_NPC(ch) && ch != mob && mob_is_aggressive_any(ch)) {
+      stop_fighting(mob);
+      set_fighting(mob, ch);
+      return true;
+    }
+  }
+
+  // Otherwise, take one BFS step toward the target room (recompute each step).
+  int dir = find_first_step(real_room(myroom->number), real_room(S.target_room_vnum), FALSE, "adventurer_seek_step", mob);
+  if (dir >= 0) {
+    perform_move(mob, dir, CHECK_SPECIAL | LEADER, NULL, NULL);
+    return true; // we acted
+  } else {
+    // Path failed—drop target and retry next window.
+    S.target_room_vnum = -1;
+  }
+
+  return false;
 }
 
 // ---------- tier scaling ----------
@@ -718,6 +838,26 @@ void adventurer_maintain() {
     int z = room->zone;
     zones_with_pcs.insert(z);
     adv_zone_last_activity[z] = now;
+  }
+
+  // Per-adventurer upkeep: idle actions, hunting, and weapon draw.
+  for (struct char_data* ch = character_list; ch; ch = ch->next_in_character_list) {
+    if (!is_adventurer(ch)) continue;
+    if (!AWAKE(ch)) continue;
+    if (!get_ch_in_room(ch)) continue;
+
+    // 3) Idle events every 2-10 minutes (randomized per mob).
+    adv_maybe_do_idle_action(ch);
+
+    // 2) Seek out aggressive mobs and engage them (one step per tick).
+    // Only when not currently fighting and not in vehicle.
+    if (!FIGHTING(ch) && !ch->in_veh) {
+      // Respect stay-in-zone: our pathing also respects zone via BFS and NPC wander checks.
+      (void) adv_seek_and_step_toward_aggressor(ch);
+    }
+
+    // 4) Draw on combat if applicable (holstering is handled by mobact when idle).
+    adv_maybe_draw_on_combat(ch);
   }
 
   std::unordered_set<int> zones_with_adventurers;

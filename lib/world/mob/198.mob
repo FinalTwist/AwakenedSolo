@@ -3183,7 +3183,7 @@ AttackType:	Claw
 	sorcery:	14
 	edged weapons:	12
 BREAK
-#25200
+#20022
 Keywords:	adventurer template
 Name:	an adventurer
 RoomDesc:$
@@ -3195,7 +3195,7 @@ He is a player looking for loot and adventure, just like you.
 ~
 ArriveMsg:	arrives from
 LeaveMsg:	leaves
-MobFlags:	1000000000000000000000000001010
+MobFlags:	0000000000000000000000000001100
 AffFlags:	0
 Race:	Human
 Gender:	Male
