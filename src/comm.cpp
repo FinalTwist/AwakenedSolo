@@ -82,6 +82,9 @@
 #include "spec_adventurer.hpp"
 #include "npcvoice.hpp"
 
+extern void gangster_global_maintain_hook();
+extern void adv_boot_cleanup_if_needed();  // from spec_adventurer.cpp
+
 const unsigned perfmon::kPulsePerSecond = PASSES_PER_SEC;
 
 /* externs */
@@ -891,6 +894,8 @@ void copyover_recover()
         //look_at_room(d->character, 0, 0);
         extern void adventurer_on_pc_login(struct char_data* ch);
         adventurer_on_pc_login(d->character);
+        extern void gangster_on_pc_login(struct char_data* ch);
+        gangster_on_pc_login(d->character);
       }
     }
   }
@@ -954,6 +959,9 @@ void init_game(int port)
   } else {
     global_last_booted_from = BOOTED_FROM_CRASH;
   }
+
+  //DEBUG+++
+  adv_boot_cleanup_if_needed();
 
   log("Entering game loop.");
   game_loop(mother_desc);
@@ -1604,6 +1612,7 @@ void game_loop(int mother_desc)
       ElevatorProcess();
       msdp_update();
       adventurer_maintain();
+      gangster_global_maintain_hook();
     }
 
     // Every 10 IRL seconds

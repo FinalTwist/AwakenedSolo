@@ -5604,7 +5604,9 @@ ACMD(do_pickpocket)
   // 2) Fallback: match tokens in NPC short descriptions (sdesc).
   if (!vict && ch->in_room) {
     for (struct char_data *m = ch->in_room->people; m; m = m->next_in_room) {
-      if (!IS_NPC(m) || m == ch) continue;
+      if (!IS_NPC(m) || m == ch) {
+        continue;
+      }
       // GET_NAME(m) is the mob's display short desc (e.g., "An ork in a chef's hat").
       if (isname(vict_name, GET_NAME(m))) { vict = m; break; }
     }
@@ -5644,7 +5646,7 @@ ACMD(do_pickpocket)
   int thief_dice = GET_SKILL(ch, SKILL_STEALTH);
   int observer_dice = GET_INT(vict);
 
-  if (AFF_FLAGGED(ch, AFF_SNEAK) || AFF_FLAGGED(ch, AFF_SPELLINVIS) || AFF_FLAGGED(ch, AFF_SPELLIMPINVIS)) {
+  if (AFF_FLAGGED(ch, AFF_SNEAK) || AFF_FLAGGED(ch, AFF_SPELLINVIS) || AFF_FLAGGED(ch, AFF_SPELLIMPINVIS)) 
   observer_dice += MAX(0, GET_LEVEL(vict) / 5);
   if (observer_dice < 1) observer_dice = 1;
 
@@ -5666,6 +5668,7 @@ ACMD(do_pickpocket)
 
   if (thief_succ > vict_succ) {
     // SUCCESS: award from tiered loot table.
+    send_to_char("You look in the victim's pockets...\r\n", ch);
     award_pickpocket_loot(ch, vict);
     return;
   }
@@ -5712,7 +5715,7 @@ ACMD(do_pickpocket)
 #define OBJ_LOCKER 9825
 #define OBJ_LOCKER_TERMINAL 9826
 // --- Hack lockbox / locker ---
-}
+
 ACMD(do_hackbox)
 {
   char arg[MAX_INPUT_LENGTH];

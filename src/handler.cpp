@@ -1563,6 +1563,8 @@ void char_to_room(struct char_data * ch, struct room_data *room)
 
   if (ch && !IS_NPC(ch) && get_ch_in_room(ch)) {
     adventurer_on_pc_enter_room(ch, get_ch_in_room(ch));
+    extern void gangster_on_pc_enter_room(struct char_data* ch, struct room_data* room);
+    gangster_on_pc_enter_room(ch, get_ch_in_room(ch));
   }
 }
 

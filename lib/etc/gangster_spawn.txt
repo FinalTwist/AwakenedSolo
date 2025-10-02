@@ -1,0 +1,6 @@
+# Template mob to clone. Defaults to 20022 if omitted.
+template_mobile_vnum = 20023
+# % chance (per active zone heartbeat) to spawn one gangster into a street/alley.
+zone_entry_spawn_chance_percent = 8
+# When a zone sees no PCs for this many seconds, all gangsters there despawn.
+despawn_zone_inactivity_seconds = 900

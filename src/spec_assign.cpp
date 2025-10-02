@@ -21,6 +21,7 @@
 extern void perform_secret_room_assignments();
 extern void perform_secret_mob_assignments();
 extern void perform_secret_obj_assignments();
+extern SPECIAL(gangster_spec);
 
 void ASSIGNMOB(long mob, SPECIAL(fname));
 
@@ -882,6 +883,9 @@ void assign_mobiles(void)
 
   //Adventurers
   ASSIGNMOB(20022, adventurer_spec);
+
+  //gangsters
+  ASSIGNMOB(20023, gangster_spec);
 
 #ifdef USE_PRIVATE_CE_WORLD
   /* New Multnomah gate guard */

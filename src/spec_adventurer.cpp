@@ -1,9 +1,14 @@
+#include <stdio.h>
+#ifndef ADV_TRACE
+#define ADV_TRACE(fmt, ...) do { fprintf(stderr, "[ADV] " fmt "\n", ##__VA_ARGS__); } while(0)
+#endif
+
 /*
  * Adventurer NPC system (v2+confirm)
  * Pipeline:  zone-entry detect -> 5% spawn (eligible room in same zone)
  *  -> pick archetype (from archetypes.cpp) -> apply tier (skill + attribute MULT + gear)
  *  -> class-aware gear -> place -> supports socials, aggro, pickpocket+money.
- * Template mobile VNUM is read from lib/etc/adventurer_spawn.txt: template_mobile_vnum=####
+ * Template mobile VNUM is read from etc/adventurer_spawn.txt: template_mobile_vnum=####
  */
 #include <unordered_map>
 #include <unordered_set>
@@ -13,6 +18,8 @@
 #include <sstream>
 #include <algorithm>
 #include <ctime>
+#include <cctype>
+#include <cstring>
 
 #include "awake.hpp"
 #include "types.hpp"
@@ -32,9 +39,10 @@
 #define ROOM_SOCIALIZE 32
 #endif
 
+extern SPECIAL(gangster_spec);
+
 extern int find_first_step(vnum_t src, vnum_t target, bool ignore_roads, const char *call_origin, struct char_data *caller);
 extern int perform_move(struct char_data *ch, int dir, int extra, struct char_data *vict, struct veh_data *veh);
-
 // ---------- utils ----------
 static std::string trim(const std::string& s) {
   size_t a = s.find_first_not_of(" \t\r\n");
@@ -130,7 +138,8 @@ static void load_config_if_needed() {
 
   // Load spawn config
   std::vector<std::string> lines;
-  if (file_read_lines("lib/etc/adventurer_spawn.txt", lines)) {
+  if (file_read_lines("etc/adventurer_spawn.txt", lines)) {
+    log_vfprintf("FOUND SPAWN TXT");
     for (auto &ln : lines) {
       auto eq = ln.find('=');
       if (eq == std::string::npos) continue;
@@ -162,7 +171,7 @@ static void load_config_if_needed() {
 static void load_tiers_if_needed() {
   if (!adv_tiers.empty()) return;
   std::vector<std::string> lines;
-  if (!file_read_lines("lib/etc/adventurer_difficulty.txt", lines)) {
+  if (!file_read_lines("etc/adventurer_difficulty.txt", lines)) {
     Tier t; t.id=2; t.name="Street"; t.weight=100; t.skill_mult=1.0f; t.skill_jitter=1;
     adv_tiers.push_back(t); adv_total_weight = t.weight; return;
   }
@@ -198,7 +207,7 @@ static void load_tiers_if_needed() {
 static void load_alias_map_if_needed() {
   if (!adv_alias_vnums.empty()) return;
   std::vector<std::string> lines;
-  if (!file_read_lines("lib/etc/adventurer_gear_map.txt", lines)) return;
+  if (!file_read_lines("etc/adventurer_gear_map.txt", lines)) return;
   for (auto &ln : lines) {
     auto eq = ln.find('|');
     if (eq==std::string::npos) continue;
@@ -213,7 +222,10 @@ static void load_alias_map_if_needed() {
 static void load_class_gear_if_needed() {
   if (!adv_class_gear.empty()) return;
   std::vector<std::string> lines;
-  if (!file_read_lines("lib/etc/adventurer_class_gear.txt", lines)) return;
+  if (!file_read_lines("etc/adventurer_class_gear.txt", lines)) {
+    log_vfprintf("COULDNT FIND GEAR");
+    return;
+  }
   for (auto &ln : lines) {
     std::vector<std::string> tok; split(ln, '|', tok);
     if (tok.size() < 2 || tok[0] != "class") continue;
@@ -241,8 +253,8 @@ static inline bool is_room_socialize(struct room_data *room) {
 // ---------- names ----------
 static void load_names_if_needed() {
   if (names_loaded) return;
-  file_read_lines("lib/etc/adventurer_first.txt", adv_first);
-  file_read_lines("lib/etc/adventurer_last.txt", adv_last);
+  file_read_lines("etc/adventurer_first.txt", adv_first);
+  file_read_lines("etc/adventurer_last.txt", adv_last);
   if (adv_first.empty()) adv_first.push_back("Alex");
   if (adv_last.empty()) adv_last.push_back("Johnson");
   names_loaded = true;
@@ -258,7 +270,7 @@ static std::string random_fullname() {
 static void load_replies_if_needed() {
   if (replies_loaded) return;
   std::vector<std::string> lines;
-  file_read_lines("lib/etc/adventurer_social_replies.txt", lines);
+  file_read_lines("etc/adventurer_social_replies.txt", lines);
   auto add = [&](std::unordered_map<std::string, std::vector<Reply>>& bucket,
                  std::vector<Reply>& def,
                  const std::string& key, const Reply& r) {
@@ -292,18 +304,15 @@ static void load_replies_if_needed() {
 
 // ---------- identity & flags ----------
 static void adv_assign_identity(struct char_data* mob) {
-  std::string fullname = random_fullname();
-  DELETE_ARRAY_IF_EXTANT(mob->player.physical_text.name);
-  mob->player.physical_text.name = str_dup(fullname.c_str());
-  DELETE_ARRAY_IF_EXTANT(mob->player.physical_text.keywords);
-  std::string keys = fullname + " adventurer runner";
+  ADV_TRACE("adv_assign_identity enter mob=%p", (void*)mob);
+  std::string fullname = random_fullname();mob->player.physical_text.name = str_dup(fullname.c_str());
+  ADV_TRACE(" set name: %s", fullname.c_str());std::string keys = fullname + " adventurer runner";
   mob->player.physical_text.keywords = str_dup(keys.c_str());
-  DELETE_ARRAY_IF_EXTANT(mob->player.physical_text.room_desc);
-  std::string rdesc = fullname + " is here, gearing up for the next run.";
+  ADV_TRACE(" set keywords: %s", keys.c_str());std::string rdesc = fullname + " is here, gearing up for the next run.";
   mob->player.physical_text.room_desc = str_dup(rdesc.c_str());
-  DELETE_ARRAY_IF_EXTANT(mob->player.physical_text.look_desc);
-  std::string ldesc = "A grim-faced adventurer with the look of someone who's seen a few too many back-alley clinics.";
+  ADV_TRACE(" set roomdesc: %s", rdesc.c_str());std::string ldesc = "A grim-faced adventurer with the look of someone who's seen a few too many back-alley clinics.";
   mob->player.physical_text.look_desc = str_dup(ldesc.c_str());
+  ADV_TRACE(" set lookdesc: %s", ldesc.c_str());
 }
 static void adv_configure_flags(struct char_data* mob) {
   MOB_FLAGS(mob).RemoveBit(MOB_SENTINEL);
@@ -314,8 +323,9 @@ static void adv_configure_flags(struct char_data* mob) {
   #endif
 }
 
+
 // ---------- helpers ----------
-static bool is_adventurer(struct char_data* ch) {
+bool is_adventurer(struct char_data* ch) {
   return IS_NPC(ch) && IS_MOB(ch) && MOB_HAS_SPEC(ch, adventurer_spec);
 }
 static bool cooldown_ok(struct char_data* mob) {
@@ -348,6 +358,66 @@ static std::unordered_map<long, AdvAIState> adv_ai; // keyed by GET_IDNUM(mob)
 static bool mob_is_aggressive_any(struct char_data *ch) {
   // Mirrors mobact's racial+generic aggressive mask.
   return MOB_FLAGS(ch).AreAnySet(MOB_AGGRESSIVE, MOB_AGGR_ELF, MOB_AGGR_DWARF, MOB_AGGR_ORK, MOB_AGGR_TROLL, MOB_AGGR_HUMAN, ENDBIT);
+}
+
+// --- One-time boot cleanup (runs once per process) ---------------------------
+static bool adv_boot_cleanup_done = false;
+
+// Broader match for dynamic NPCs created by our systems:
+// - Adventurer (via is_adventurer())
+// - Gangster (keyword "gangster")
+// - Any NPC with Adventurer base template VNUM (eg 20022) -- catches old saves
+// - OPTIONAL: keywords containing "adventurer" (older builds)
+static bool adv_is_dynamic_spawn(struct char_data* ch) {
+  if (!ch || !IS_NPC(ch)) 
+    return false;
+
+  // Adventurer via current helper.
+  if (is_adventurer(ch))
+    return true;
+
+  // Older adventurers saved from past runs: match by VNUM.
+  // Replace '20022' with your actual adventurer template vnum if different.
+  if (GET_MOB_VNUM(ch) == 20022)
+    return true;
+
+    if (GET_MOB_VNUM(ch) == 20023)
+    return true;
+
+  // Fallback: older builds that tagged keywords with 'adventurer'.
+  if (ch->player.physical_text.keywords && str_str(ch->player.physical_text.keywords, "adventurer"))
+    return true;
+
+  // Gangster tag (current approach).
+  if (ch->player.physical_text.keywords && str_str(ch->player.physical_text.keywords, "gangster"))
+    return true;
+
+  return false;
+}
+
+// Make this NON-static so other files can call it.
+void adv_boot_cleanup_if_needed() {
+  if (adv_boot_cleanup_done) return;
+
+  int removed = 0;
+  for (struct char_data *ch = character_list, *next; ch; ch = next) {
+    next = ch->next_in_character_list;
+    if (!adv_is_dynamic_spawn(ch)) continue;
+
+    // Strip inventory and equipment to avoid litter/dangling refs, then extract.
+    while (ch->carrying)
+      extract_obj(ch->carrying);
+    for (int i = 0; i < NUM_WEARS; ++i)
+      if (GET_EQ(ch, i))
+        extract_obj(GET_EQ(ch, i));
+
+    extract_char(ch);
+    ++removed;
+  }
+
+  if (removed)
+    log_vfprintf("Boot cleanup: removed %d dynamic NPC(s) (Adventurers/Gangsters) from previous session.", removed);
+  adv_boot_cleanup_done = true;
 }
 
 static void adv_maybe_do_idle_action(struct char_data* mob) {
@@ -417,7 +487,8 @@ static bool adv_seek_and_step_toward_aggressor(struct char_data* mob) {
 
     for (struct char_data *ch = character_list; ch; ch = ch->next_in_character_list) {
       if (!IS_NPC(ch) || ch == mob) continue;
-      if (!mob_is_aggressive_any(ch)) continue;
+      // Hunt if it's aggressive by flags OR it's a gangster by spec.
+      if (!mob_is_aggressive_any(ch) && GET_MOB_SPEC(ch) != gangster_spec) continue;
       struct room_data *r = get_ch_in_room(ch);
       if (!r || r->zone != z) continue;
       // Skip targets we can't legally reach (respect NPC zone-wander rules along the way).
@@ -465,7 +536,7 @@ static void adv_apply_tier_scaling(struct char_data* mob, const Tier* tier) {
     int jitter = number(-tier->skill_jitter, tier->skill_jitter);
     int val = (int) (base * tier->skill_mult + 0.5f) + jitter;
     val = clamp_val(val, 2, 12);
-    set_character_skill(mob, skill, val, FALSE, FALSE);
+    SET_SKILL(mob, skill, val);
   }
   // Attributes: multiplicative then additive, clamped
   #undef SET_ATTR
@@ -569,7 +640,7 @@ static bool adv_apply_archetype_to_mob(struct char_data* mob, const Tier* tier, 
 
   for (int skill = 0; skill < MAX_SKILLS; skill++)
     if (A->skills[skill])
-      set_character_skill(mob, skill, A->skills[skill], FALSE, FALSE);
+      SET_SKILL(mob, skill, A->skills[skill]);
 
   for (int s = 0; s < NUM_ARCHETYPE_SPELLS; s++) {
     if (!A->spells[s][0]) break;
@@ -642,7 +713,7 @@ static bool adv_apply_archetype_to_mob(struct char_data* mob, const Tier* tier, 
 }
 
 // ---------- room flags ----------
-static bool has_flag_named(struct room_data* room, const std::string& flag_name) {
+static inline bool has_flag_named(struct room_data* room, const std::string& flag_name) {
   if (flag_name == "PEACEFUL") return ROOM_IS_PEACEFUL(room);
   if (flag_name == "!MOB") return ROOM_FLAGGED(room, ROOM_NOMOB);
   if (flag_name == "INDOORS") return ROOM_FLAGGED(room, ROOM_INDOORS);
@@ -666,8 +737,65 @@ static bool has_flag_named(struct room_data* room, const std::string& flag_name)
    return real_mobile(adv_template_mobile_vnum) >= 0;
  }
 
+
+// ---------------------------------------------------------------------------
+// Ephemeral "fresh spawn" tag helpers (keyword-based) to gate configuration.
+// Only spawns we create right now will have this tag; persisted/old NPCs won’t.
+// ---------------------------------------------------------------------------
+const char *ADV_FRESH_KW = "adv_fresh_spawn_tag";
+
+void adv_kw_append(struct char_data *mob, const char *kw) {
+  if (!mob || !kw) return;
+
+  // Safe copy of existing keywords (handles NULL)
+  std::string current_kw = mob->player.physical_text.keywords
+                           ? mob->player.physical_text.keywords
+                           : "";
+
+  // Already present? Do nothing.
+  if (!current_kw.empty() && str_str(current_kw.c_str(), kw))
+    return;
+
+  // Build new keywords string
+  std::string new_kw = current_kw.empty()
+                       ? std::string(kw)
+                       : current_kw + " " + kw;
+
+  // Replace
+  DELETE_ARRAY_IF_EXTANT(mob->player.physical_text.keywords);
+  mob->player.physical_text.keywords = str_dup(new_kw.c_str());
+}
+
+void adv_kw_remove(struct char_data *mob, const char *kw) {
+  if (!mob || !kw) return;
+
+  // Safe copy
+  const char *raw = mob->player.physical_text.keywords;
+  if (!raw) return;
+  std::string current_kw(raw), out;
+
+  // Tokenize on whitespace and rebuild without tokens that contain 'kw'
+  for (size_t i = 0; i < current_kw.size(); ) {
+    while (i < current_kw.size() && isspace((unsigned char)current_kw[i])) ++i;
+    if (i >= current_kw.size()) break;
+    size_t j = i;
+    while (j < current_kw.size() && !isspace((unsigned char)current_kw[j])) ++j;
+
+    std::string tok = current_kw.substr(i, j - i);
+    if (!str_str(tok.c_str(), kw)) {
+      if (!out.empty()) out.push_back(' ');
+      out += tok;
+    }
+    i = j;
+  }
+
+  DELETE_ARRAY_IF_EXTANT(mob->player.physical_text.keywords);
+  mob->player.physical_text.keywords = str_dup(out.c_str());
+}
+
 // ---------- spawn & despawn ----------
 static void spawn_one_adventurer_in_room(struct room_data* room) {
+  ADV_TRACE("spawn_one_adventurer_in_room begin room=%p vnum=%ld", (void*)room, adv_template_mobile_vnum);
   if (!room) return;
   // Defer if prototypes aren’t ready yet (e.g., early login/copyover path).
   if (!adv_template_ready()) {
@@ -678,6 +806,7 @@ static void spawn_one_adventurer_in_room(struct room_data* room) {
 
   struct char_data* mob = read_mobile(adv_template_mobile_vnum, VIRTUAL);
   if (!mob) {
+    ADV_TRACE(" read_mobile failed for vnum=%ld", adv_template_mobile_vnum);
     // Keep the message, but clarify the immediate cause.
     log_vfprintf("Adventurer: failed to read template mobile vnum %ld (read_mobile returned null).",
                 adv_template_mobile_vnum);
@@ -688,16 +817,47 @@ static void spawn_one_adventurer_in_room(struct room_data* room) {
 
   adv_assign_identity(mob);
   adv_configure_flags(mob);
-  adv_apply_archetype_to_mob(mob, tier, class_tag);
-
+  char_to_room(mob, room);
+  ADV_TRACE(" mob %p placed in room %ld", (void*)mob, GET_ROOM_VNUM(room));
+  // Mark as fresh so configure proceeds once.
+  adv_kw_append(mob, ADV_FRESH_KW);
+  (void) adventurer_configure_like(mob);
+  ADV_TRACE(" mob %p configured", (void*)mob);
   if (mob->player.physical_text.room_desc && tier) {
     std::string r = mob->player.physical_text.room_desc;
     r += " (looks " + class_tag + " " + tier->name + ")\r\n";
     DELETE_ARRAY_IF_EXTANT(mob->player.physical_text.room_desc);
     mob->player.physical_text.room_desc = str_dup(r.c_str());
   }
+}
 
-  char_to_room(mob, room);
+
+// Build an adventurer exactly the same way SPECIAL(adventurer_spec) did on first run.
+bool adventurer_configure_like(struct char_data *mob)
+{
+  ADV_TRACE("configure_like enter mob=%p kw=%s", (void*)mob, mob && mob->player.physical_text.keywords ? mob->player.physical_text.keywords : "<null>");
+  if (!mob || !IS_NPC(mob)) return false;
+
+  // Only configure if this mob was just freshly spawned by our code.
+  if (!(mob->player.physical_text.keywords && str_str(mob->player.physical_text.keywords, ADV_FRESH_KW))) {
+    return true; // Not a fresh spawn => do nothing (prevents re-init of persisted NPCs).
+  }
+
+  const Tier* tier = pick_tier();
+  std::string class_tag;
+
+  // Identity/flags belong to the configure pipeline (handles both adventurers and gangsters).
+  ADV_TRACE(" configure: identity");
+  adv_assign_identity(mob);
+  ADV_TRACE(" configure: flags");
+  adv_configure_flags(mob);
+  ADV_TRACE(" configure: archetype tier=%s class=%s", tier ? "present" : "none", class_tag.c_str());
+  adv_apply_archetype_to_mob(mob, tier, class_tag);
+
+  // Remove the ephemeral marker so the mob becomes a normal NPC.
+  ADV_TRACE(" configure: remove fresh tag");
+  adv_kw_remove(mob, ADV_FRESH_KW);
+  return true;
 }
 
 static const Tier* pick_tier() {
@@ -712,10 +872,12 @@ static const Tier* pick_tier() {
 }
 
 void adventurer_on_pc_login(struct char_data* ch) {
+   adv_boot_cleanup_if_needed();
   //log_vfprintf("adventureronpclogin1");
   if (!ch || IS_NPC(ch)) return;
   struct room_data* room = get_ch_in_room(ch);
-  if (!room) return;
+  if (!room) 
+    return;
   load_config_if_needed();
 
   /*
@@ -752,9 +914,7 @@ void adventurer_on_pc_login(struct char_data* ch) {
     }
   }
 
-  // Fall back to the normal random attempt (but WITHOUT the zone-change guard).
-  if (number(1, 100) > adv_zone_entry_spawn_chance_pct) return;
-
+  // Fall back: roll ONCE PER ELIGIBLE ROOM (5%) in this zone.
   std::vector<struct room_data*> candidates;
   for (rnum_t rr = 0; rr <= top_of_world; rr++) {
     if (!VALID_ROOM_RNUM(rr)) continue;
@@ -764,12 +924,16 @@ void adventurer_on_pc_login(struct char_data* ch) {
     candidates.push_back(R);
   }
   if (candidates.empty()) {
-  log_vfprintf("Adventurer: no eligible rooms in zone %d for %s.",
-               room->zone, GET_CHAR_NAME(ch));
-  return;
+    log_vfprintf("Adventurer: no eligible rooms in zone %d for %s.",
+                 room->zone, GET_CHAR_NAME(ch));
+    return;
   }
-  struct room_data* dest = candidates[number(0, (int)candidates.size()-1)];
-  spawn_one_adventurer_in_room(dest);
+  const int per_room_pct = 8; // same as adv_zone_entry_spawn_chance_pct default
+  for (struct room_data* dest : candidates) {
+    if (number(1, 100) <= per_room_pct) {
+      spawn_one_adventurer_in_room(dest);
+    }
+  }
 }
 
 // Zone-entry hook
@@ -809,9 +973,7 @@ void adventurer_on_pc_enter_room(struct char_data* ch, struct room_data* room) {
     }
   }
 
-  if (number(1, 100) > adv_zone_entry_spawn_chance_pct) return;
-
-  // random eligible room in zone
+  // Roll ONCE PER ELIGIBLE ROOM (5%) in this zone.
   std::vector<struct room_data*> candidates;
   for (rnum_t rr = 0; rr <= top_of_world; rr++) {
     if (!VALID_ROOM_RNUM(rr)) continue;
@@ -821,12 +983,17 @@ void adventurer_on_pc_enter_room(struct char_data* ch, struct room_data* room) {
     candidates.push_back(R);
   }
   if (candidates.empty()) return;
-  struct room_data* dest = candidates[number(0, (int)candidates.size()-1)];
-  spawn_one_adventurer_in_room(dest);
+  const int per_room_pct = 5; // same as adv_zone_entry_spawn_chance_pct default
+  for (struct room_data* dest : candidates) {
+    if (number(1, 100) <= per_room_pct) {
+      spawn_one_adventurer_in_room(dest);
+    }
+  }
 }
 
 // maintenance
 void adventurer_maintain() {
+   adv_boot_cleanup_if_needed();
   load_config_if_needed();
   time_t now = time(0);
 
@@ -908,16 +1075,6 @@ void adventurer_maintain() {
 // SPECIAL
 SPECIAL(adventurer_spec) {
   struct char_data* mob = (struct char_data*) me;
-  if (!IS_NPC(mob)) return FALSE;
-  if (cmd == 0 && get_ch_in_room(mob)) {
-    if (!mob->player.physical_text.keywords || !str_str(mob->player.physical_text.keywords, "adventurer")) {
-      const Tier* tier = pick_tier();
-      std::string class_tag;
-      adv_assign_identity(mob);
-      adv_configure_flags(mob);
-      adv_apply_archetype_to_mob(mob, tier, class_tag);
-    }
-  }
   return FALSE;
 }
 
