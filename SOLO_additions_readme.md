@@ -495,3 +495,99 @@ Color:
 Region filtering:
 - The third argument to `handle_player_utterance` can be "" to search all, or a region string ("Seattle", "Tacoma", "CAS", etc.).
   The provided wiki file does not tag regions; searching across all is fine.
+  
+  Addendum — Adventurer System Enhancements (Solo Changes)
+
+This addendum documents the new behavior added to Adventurers and how to use/tune it. It’s intended to be appended to your existing Solo changes README.
+
+Summary of Changes
+
+Exploration: Adventurers now wander their zone using the existing mobile movement system (still respect MOB_STAY_ZONE).
+
+“Seek & Destroy” Aggressors: Adventurers periodically locate aggressive NPCs in their current zone, path toward them, and engage.
+
+Ambient Idle RP: Every 2–10 minutes (random), each Adventurer performs a natural-looking idle action (emote/say) chosen from a curated list of 25 lines.
+
+Weapon Discipline: Adventurers holster when idle (leverages existing behavior) and auto-draw upon entering combat if not already wielding.
+
+Files Touched
+
+src/spec_adventurer.cpp — all logic contained here (helpers + maintenance hook-in).
+
+(Includes added) interpreter.hpp
+
+(External symbols referenced) find_first_step, perform_move
+
+No data files or build flags were added.
+
+Template Requirements
+
+If you use #20022 as your base template, update its flags so Adventurers are killable and may scavenge:
+
+MobFlags (compact): 1100
+(Sets MOB_SCAVENGER + MOB_ISNPC; clears MOB_SENTINEL and MOB_NOKILL.)
+
+If you prefer to keep templates as-is, you can instead clear MOB_NOKILL at spawn within adventurer_spec. This addendum assumes the template is updated.
+
+How It Works (High-Level)
+
+Exploration: The spec clears MOB_SENTINEL. The engine’s standard mob act loop handles idle movement. Adventurers remain zone-bound (MOB_STAY_ZONE).
+
+Aggressor Hunting: On a short cadence (≈ every 20–40s), each Adventurer:
+
+Scans the same zone for NPCs with any aggressive flag.
+
+Uses the built-in BFS (find_first_step) to get a legal direction.
+
+Moves one room per maintenance tick via perform_move.
+
+On contact, starts combat (normal combat systems apply).
+
+Idle Actions: Each Adventurer tracks a private next_idle_at. When the time arrives, it executes one randomized say/emote line through the command interpreter (so output looks like a real player).
+
+Holster/Draw: Existing mobact holsters weapons while idle. On entering combat, Adventurers issue draw once if unarmed, pulling from readied holsters when available.
+
+New Idle Action Lines (25)
+
+These are the default, natural-feeling lines used for ambient RP:
+
+emote reshuffles their inventory.
+emote checks their commlink.
+emote rolls their shoulders and scans the area.
+emote adjusts their gear straps.
+say Keep your head on a swivel.
+emote taps a foot impatiently.
+emote studies the exits, counting them off under their breath.
+emote cracks their knuckles one by one.
+emote wipes a speck of dust from a lens and peers around.
+emote loosens and retightens the straps of a backpack.
+emote kneels to tighten a boot lace, then stands.
+emote flips a credstick in their hand, catching it idly.
+emote checks the edge on a blade, satisfied.
+emote thumbs through a small paper map, then folds it away.
+emote listens intently, head tilted, as if catching distant noise.
+emote stretches their neck until it pops softly.
+say This place never sits still, does it?
+emote pats down pockets, doing a quick gear check.
+emote wipes grime from a weapon housing with a cloth.
+emote looks over recent footprints in the dust.
+emote marks a note on a small pad and tucks it away.
+emote breathes slowly, centering themselves.
+emote glances at the sky to judge the time.
+emote slides a magazine out, checks it, and seats it again.
+emote idly traces warding symbols in the air, then stops.
+
+
+Timing: randomized per Adventurer; next action scheduled to now + 120–600s.
+
+Configuration & Tuning
+
+Spawn/despawn: unchanged; still governed by your existing files in lib/etc/ (spawn chance, inactivity despawn, class gear, etc.).
+
+Idle cadence: change the number(120, 600) window in the Adventurer idle helper to adjust frequency.
+
+Aggressor cadence: change the number(20, 40) re-evaluation window for hunting targets.
+
+Wandering intensity: by default, exploration uses standard mob movement frequency. You can optionally bias movement frequency in mobact if you want them to roam more often.
+
+No new config files are required.
