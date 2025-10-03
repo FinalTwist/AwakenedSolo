@@ -9,6 +9,12 @@
 //   in that zone whose name/description contains "street" or "alley" (case-insensitive).
 // - Cleanup: despawn after zone inactivity; strip items before extract to avoid litter.
 
+// Use adventurer drip-queue helpers
+extern bool adv_zone_spawn_cooldown_allows(int zone);
+extern bool adv_schedule_room_spawn(struct room_data* room, bool is_gangster);
+extern void adv_record_zone_spawn(int zone);
+
+
 #include "structs.hpp"
 #include "awake.hpp"
 #include "utils.hpp"
@@ -26,8 +32,8 @@
 #include "spec_adventurer.hpp"  // adventurer_configure_like(), is_adventurer()
 
 // Fresh-spawn tag helpers from spec_adventurer.cpp
-extern void adv_kw_append(struct char_data *mob, const char *kw);
 extern void adv_kw_remove(struct char_data *mob, const char *kw);
+extern void adv_kw_append(struct char_data *mob, const char *kw);
 extern const char *ADV_FRESH_KW;
 #include "spec_gangster.hpp"
 
@@ -57,6 +63,13 @@ static void gangster_read_spawn_cfg() {
 }
 
 // ------------------------ Helpers ------------------------
+
+static inline bool gs_keywords_alias_proto(struct char_data* mob) {
+  if (!mob || !IS_NPC(mob)) return false;
+  int rnum = GET_MOB_RNUM(mob);
+  if (rnum < 0 || rnum > top_of_mobt) return false;
+  return mob->player.physical_text.keywords == mob_proto[rnum].player.physical_text.keywords;
+}
 
 static bool ci_contains(const char* hay, const char* needle) {
   if (!hay || !needle || !*needle) return false;
@@ -95,8 +108,10 @@ static void gangster_append_keyword(struct char_data* mob) {
 
   char buf[MAX_INPUT_LENGTH];
   snprintf(buf, sizeof(buf), "%s gangster", cur);
-  // Free old keywords if they were dynamically allocated (codebase uses DELETE_ARRAY_IF_EXTANT elsewhere).
-  DELETE_ARRAY_IF_EXTANT(mob->player.physical_text.keywords);
+  // Only free if not aliasing the proto.
+  if (!gs_keywords_alias_proto(mob)) {
+    DELETE_ARRAY_IF_EXTANT(mob->player.physical_text.keywords);
+  }
   mob->player.physical_text.keywords = str_dup(buf);
 }
 
@@ -116,7 +131,6 @@ SPECIAL(gangster_spec) {
 // ------------------------ Spawning (8% per street/alley room) ------------------------
 
 void gangster_on_pc_login(struct char_data* ch) {
-      adv_boot_cleanup_if_needed();
   if (!ch || IS_NPC(ch)) return;
   gangster_read_spawn_cfg();
 
@@ -124,6 +138,7 @@ void gangster_on_pc_login(struct char_data* ch) {
   if (!here) return;
   const int z = here->zone;
 
+  bool enqueued_any = false;  // <-- add this
   std::vector<rnum_t> candidates;
   candidates.reserve(64);
 
@@ -135,7 +150,10 @@ void gangster_on_pc_login(struct char_data* ch) {
     if (!room_is_streetlike(R)) continue;
     candidates.push_back(rr);
   }
-  if (candidates.empty()) { g_zone_last_activity[z] = time(0); return; }
+  if (candidates.empty()) { 
+    if (enqueued_any) { adv_record_zone_spawn(z); }
+    g_zone_last_activity[z] = time(0); return; 
+  }
 
   const int chance = 8; // 8% per eligible room
   for (rnum_t rr : candidates) {
@@ -149,22 +167,39 @@ void gangster_on_pc_login(struct char_data* ch) {
     char_to_room(mob, &world[rr]);
 
     // Configure identically to Adventurers, then apply gangster deltas and tag.
-    // Mark fresh, then configure once.
-    adv_kw_append(mob, ADV_FRESH_KW);
-    (void) adventurer_configure_like(mob);
-    gangster_apply_flag_deltas(mob);
-    gangster_append_keyword(mob);
-  }
+    // Mark fresh, then configure once. }
 
+  if (enqueued_any) { adv_record_zone_spawn(z); }
   g_zone_last_activity[z] = time(0);
+  }
+}
+
+
+// Drip-spawn a single gangster in the given room (called from adventurer maintainer)
+void gangster_spawn_one_in_room(struct room_data* room) {
+  if (!room) return;
+  // Ensure template is ready in the same way the immediate path would
+  if (real_mobile(g_template_vnum) < 0) {
+    // Fallback: skip if template not loaded yet
+    return;
+  }
+  struct char_data* mob = read_mobile(g_template_vnum, VIRTUAL);
+  if (!mob) return;
+  char_to_room(mob, room);
+  // Configure like an adventurer, then apply gangster specifics
+  adv_kw_append(mob, ADV_FRESH_KW);
+  (void) adventurer_configure_like(mob);
+  gangster_apply_flag_deltas(mob);
+  gangster_append_keyword(mob);
 }
 
 void gangster_on_pc_enter_room(struct char_data* ch, struct room_data* room) {
-      adv_boot_cleanup_if_needed();
   if (!ch || IS_NPC(ch) || !room) return;
   gangster_read_spawn_cfg();
 
   const int z = room->zone;
+  bool enqueued_any = false;
+  if (!adv_zone_spawn_cooldown_allows(z)) { return; }
 
   std::vector<rnum_t> candidates;
   candidates.reserve(64);
@@ -177,23 +212,16 @@ void gangster_on_pc_enter_room(struct char_data* ch, struct room_data* room) {
     if (!room_is_streetlike(R)) continue;
     candidates.push_back(rr);
   }
-  if (candidates.empty()) { g_zone_last_activity[z] = time(0); return; }
+  if (candidates.empty()) { if (enqueued_any) { adv_record_zone_spawn(z); }
+  g_zone_last_activity[z] = time(0); return; }
 
   const int chance = 8; // 8% per eligible room
   for (rnum_t rr : candidates) {
     if (number(1, 100) > chance) continue;
 
-    struct char_data* mob = read_mobile(g_template_vnum, VIRTUAL);
-    if (!mob) continue;
+    if (adv_schedule_room_spawn(&world[rr], /*is_gangster=*/true)) { enqueued_any = true; } }
 
-    char_to_room(mob, &world[rr]);
-    // Mark fresh, then configure once.
-    adv_kw_append(mob, ADV_FRESH_KW);
-    (void) adventurer_configure_like(mob);
-    gangster_apply_flag_deltas(mob);
-    gangster_append_keyword(mob);
-  }
-
+  if (enqueued_any) { adv_record_zone_spawn(z); }
   g_zone_last_activity[z] = time(0);
 }
 

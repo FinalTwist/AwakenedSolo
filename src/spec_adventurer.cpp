@@ -1,7 +1,3 @@
-#include <stdio.h>
-#ifndef ADV_TRACE
-#define ADV_TRACE(fmt, ...) do { fprintf(stderr, "[ADV] " fmt "\n", ##__VA_ARGS__); } while(0)
-#endif
 
 /*
  * Adventurer NPC system (v2+confirm)
@@ -39,11 +35,44 @@
 #define ROOM_SOCIALIZE 32
 #endif
 
+#include <deque>
+
+#include <stdio.h>
+#ifndef ADV_TRACE
+#define ADV_TRACE(fmt, ...) do { fprintf(stderr, "[ADV] " fmt "\n", ##__VA_ARGS__); } while(0)
+#endif
+
+// Tracks the last time a zone *scheduled* a spawn burst.
+static std::unordered_map<int, time_t> adv_zone_last_spawn;
+
+// Queue of rooms that should get a spawn, processed in adventurer_maintain().
+struct AdvSpawnItem { struct room_data* room; bool is_gangster; };
+static std::deque<AdvSpawnItem> s_adv_spawn_queue;
+
+// Reentrancy guard: prevent nested/burst scheduling from the same login event.
+static bool s_adv_login_spawning = false;
+
+// Throttle: max number of queued spawns we will process per maintain tick.
+#define ADV_SPAWNS_PER_TICK 2
+
+// Optional cap to prevent pathological memory growth if many logins queue spawns at once.
+#define ADV_SPAWN_QUEUE_CAP 1024
+
 extern SPECIAL(gangster_spec);
+// Spawn one gangster in a room (implemented in spec_gangster.cpp)
+extern void gangster_spawn_one_in_room(struct room_data* room);
 
 extern int find_first_step(vnum_t src, vnum_t target, bool ignore_roads, const char *call_origin, struct char_data *caller);
 extern int perform_move(struct char_data *ch, int dir, int extra, struct char_data *vict, struct veh_data *veh);
 // ---------- utils ----------
+// Returns true if this mob's keywords pointer is the same pointer as its proto's keywords pointer.
+static inline bool adv_keywords_alias_proto(struct char_data* mob) {
+  if (!mob || !IS_NPC(mob)) return false;
+  int rnum = GET_MOB_RNUM(mob);
+  if (rnum < 0 || rnum > top_of_mobt) return false;
+  return mob->player.physical_text.keywords == mob_proto[rnum].player.physical_text.keywords;
+}
+
 static std::string trim(const std::string& s) {
   size_t a = s.find_first_not_of(" \t\r\n");
   size_t b = s.find_last_not_of(" \t\r\n");
@@ -74,6 +103,30 @@ template<typename T> static T clamp_val(T v, T lo, T hi) { if (v < lo) return lo
 static int adv_zone_entry_spawn_chance_pct = 5;
 static int adv_zone_inactivity_despawn_seconds = 900;
 static long adv_template_mobile_vnum = 20022; // default, overridable via config
+
+// NEW: per-zone spawn cooldown (default 2 hours)
+static int adv_zone_spawn_cooldown_seconds = 2 * 60 * 60; // 7200
+
+// --- public helpers for other specs (e.g., gangster) ---
+bool adv_zone_spawn_cooldown_allows(int zone) {
+  time_t now = time(0);
+  auto it = adv_zone_last_spawn.find(zone);
+  if (it == adv_zone_last_spawn.end()) return true;
+  return (now - it->second) >= adv_zone_spawn_cooldown_seconds;
+}
+
+// Enqueue a room for spawn; 'is_gangster' selects the spawn path at drip time.
+bool adv_schedule_room_spawn(struct room_data* room, bool is_gangster) {
+  if (!room) return false;
+  if ((int)s_adv_spawn_queue.size() >= ADV_SPAWN_QUEUE_CAP) return false;
+  if (!s_adv_login_spawning) s_adv_login_spawning = true;
+  s_adv_spawn_queue.push_back({room, is_gangster});
+  return true;
+}
+
+void adv_record_zone_spawn(int zone) {
+  adv_zone_last_spawn[zone] = time(0);
+}
 
 static std::vector<std::string> adv_spawn_allow_flags;
 static std::vector<std::string> adv_spawn_disallow_flags;
@@ -139,7 +192,6 @@ static void load_config_if_needed() {
   // Load spawn config
   std::vector<std::string> lines;
   if (file_read_lines("etc/adventurer_spawn.txt", lines)) {
-    log_vfprintf("FOUND SPAWN TXT");
     for (auto &ln : lines) {
       auto eq = ln.find('=');
       if (eq == std::string::npos) continue;
@@ -222,10 +274,7 @@ static void load_alias_map_if_needed() {
 static void load_class_gear_if_needed() {
   if (!adv_class_gear.empty()) return;
   std::vector<std::string> lines;
-  if (!file_read_lines("etc/adventurer_class_gear.txt", lines)) {
-    log_vfprintf("COULDNT FIND GEAR");
-    return;
-  }
+  if (!file_read_lines("etc/adventurer_class_gear.txt", lines)) return;
   for (auto &ln : lines) {
     std::vector<std::string> tok; split(ln, '|', tok);
     if (tok.size() < 2 || tok[0] != "class") continue;
@@ -761,8 +810,10 @@ void adv_kw_append(struct char_data *mob, const char *kw) {
                        ? std::string(kw)
                        : current_kw + " " + kw;
 
-  // Replace
-  DELETE_ARRAY_IF_EXTANT(mob->player.physical_text.keywords);
+  // Replace: only free if this pointer is not shared with the proto.
+  if (!adv_keywords_alias_proto(mob)) {
+    DELETE_ARRAY_IF_EXTANT(mob->player.physical_text.keywords);
+  }
   mob->player.physical_text.keywords = str_dup(new_kw.c_str());
 }
 
@@ -789,7 +840,10 @@ void adv_kw_remove(struct char_data *mob, const char *kw) {
     i = j;
   }
 
-  DELETE_ARRAY_IF_EXTANT(mob->player.physical_text.keywords);
+  // Replace: only free if not aliasing the proto.
+  if (!adv_keywords_alias_proto(mob)) {
+    DELETE_ARRAY_IF_EXTANT(mob->player.physical_text.keywords);
+  }
   mob->player.physical_text.keywords = str_dup(out.c_str());
 }
 
@@ -876,9 +930,10 @@ void adventurer_on_pc_login(struct char_data* ch) {
   //log_vfprintf("adventureronpclogin1");
   if (!ch || IS_NPC(ch)) return;
   struct room_data* room = get_ch_in_room(ch);
-  if (!room) 
-    return;
+  if (!room) return;
   load_config_if_needed();
+
+  bool adv_scheduled_any_in_zone = false;
 
   /*
   //DEBUG  NEW: Spawn one adventurer directly in the player's current room on login.  for testing.
@@ -890,6 +945,23 @@ void adventurer_on_pc_login(struct char_data* ch) {
 
   int z = room->zone;
   adv_zone_last_activity[z] = time(0);
+
+  // Cooldown: only allow one spawn burst per zone per cooldown window.
+  {
+    time_t now = time(0);
+    auto it = adv_zone_last_spawn.find(z);
+    if (it != adv_zone_last_spawn.end()) {
+      time_t last = it->second;
+      if (now - last < adv_zone_spawn_cooldown_seconds) {
+        // Too soon: skip scheduling spawns in this zone.
+        return;
+      }
+    }
+  }
+
+  if (adv_scheduled_any_in_zone) {
+    adv_zone_last_spawn[z] = time(0);
+  }
 
 // -- SOCIALIZE rooms: force guaranteed spawns on zone entry.
   {
@@ -908,7 +980,17 @@ void adventurer_on_pc_login(struct char_data* ch) {
       int to_spawn = number(1, 3);
       for (int i = 0; i < to_spawn; ++i) {
         struct room_data* dest = socialize_rooms[number(0, (int)socialize_rooms.size() - 1)];
-        spawn_one_adventurer_in_room(dest);
+          if (!s_adv_login_spawning) {
+            s_adv_login_spawning = true;  // begin scheduling burst
+          }
+          // Don’t let the queue blow up.
+          if ((int)s_adv_spawn_queue.size() < ADV_SPAWN_QUEUE_CAP) {
+            s_adv_spawn_queue.push_back({dest, false});  // schedule spawn for maintain() to process
+            adv_scheduled_any_in_zone = true;
+          }
+      }
+      if (adv_scheduled_any_in_zone) {
+        adv_zone_last_spawn[z] = time(0);
       }
       return; // We handled the special case; skip the normal random-chance path.
     }
@@ -931,9 +1013,20 @@ void adventurer_on_pc_login(struct char_data* ch) {
   const int per_room_pct = 8; // same as adv_zone_entry_spawn_chance_pct default
   for (struct room_data* dest : candidates) {
     if (number(1, 100) <= per_room_pct) {
-      spawn_one_adventurer_in_room(dest);
+      if (!s_adv_login_spawning) {
+        s_adv_login_spawning = true;  // begin scheduling burst
+      }
+      // Don’t let the queue blow up.
+      if ((int)s_adv_spawn_queue.size() < ADV_SPAWN_QUEUE_CAP) {
+        s_adv_spawn_queue.push_back({dest, false});  // schedule spawn for maintain() to process
+        adv_scheduled_any_in_zone = true;
+      }
     }
   }
+  if (s_adv_login_spawning) s_adv_login_spawning = false;
+  if (adv_scheduled_any_in_zone) {
+        adv_zone_last_spawn[z] = time(0);
+      }
 }
 
 // Zone-entry hook
@@ -942,6 +1035,8 @@ void adventurer_on_pc_enter_room(struct char_data* ch, struct room_data* room) {
   if (IS_NPC(ch)) return;
   load_config_if_needed();
 
+  bool adv_scheduled_any_in_zone = false;
+
   int z = room->zone;
   long id = GET_IDNUM(ch);
   int last = adv_last_zone_for_pc[id];
@@ -949,6 +1044,23 @@ void adventurer_on_pc_enter_room(struct char_data* ch, struct room_data* room) {
 
   if (last == z) return; // only on zone change
   adv_last_zone_for_pc[id] = z;
+
+  // Cooldown: only allow one spawn burst per zone per cooldown window.
+  {
+    time_t now = time(0);
+    auto it = adv_zone_last_spawn.find(z);
+    if (it != adv_zone_last_spawn.end()) {
+      time_t last = it->second;
+      if (now - last < adv_zone_spawn_cooldown_seconds) {
+        // Too soon: skip scheduling spawns in this zone.
+        return;
+      }
+    }
+  }
+
+  if (adv_scheduled_any_in_zone) {
+    adv_zone_last_spawn[z] = time(0);
+  }
 
     // -- SOCIALIZE rooms: force guaranteed spawns on zone entry.
   {
@@ -967,7 +1079,17 @@ void adventurer_on_pc_enter_room(struct char_data* ch, struct room_data* room) {
       int to_spawn = number(1, 3);
       for (int i = 0; i < to_spawn; ++i) {
         struct room_data* dest = socialize_rooms[number(0, (int)socialize_rooms.size() - 1)];
-        spawn_one_adventurer_in_room(dest);
+          if (!s_adv_login_spawning) {
+        s_adv_login_spawning = true;  // begin scheduling burst
+        }
+        // Don’t let the queue blow up.
+        if ((int)s_adv_spawn_queue.size() < ADV_SPAWN_QUEUE_CAP) {
+          s_adv_spawn_queue.push_back({dest, false});  // schedule spawn for maintain() to process
+          adv_scheduled_any_in_zone = true;
+        }
+      }
+      if (adv_scheduled_any_in_zone) {
+        adv_zone_last_spawn[z] = time(0);
       }
       return; // We handled the special case; skip the normal random-chance path.
     }
@@ -986,13 +1108,35 @@ void adventurer_on_pc_enter_room(struct char_data* ch, struct room_data* room) {
   const int per_room_pct = 5; // same as adv_zone_entry_spawn_chance_pct default
   for (struct room_data* dest : candidates) {
     if (number(1, 100) <= per_room_pct) {
-      spawn_one_adventurer_in_room(dest);
+        if (!s_adv_login_spawning) {
+          s_adv_login_spawning = true;  // begin scheduling burst
+        }
+        // Don’t let the queue blow up.
+        if ((int)s_adv_spawn_queue.size() < ADV_SPAWN_QUEUE_CAP) {
+          s_adv_spawn_queue.push_back({dest, false});  // schedule spawn for maintain() to process
+          adv_scheduled_any_in_zone = true;
+        }
     }
   }
+  if (adv_scheduled_any_in_zone) {
+        adv_zone_last_spawn[z] = time(0);
+      }
 }
 
 // maintenance
 void adventurer_maintain() {
+
+  // Drip scheduled login spawns out at a safe rate per tick.
+  int allowance = ADV_SPAWNS_PER_TICK;
+  while (allowance-- > 0 && !s_adv_spawn_queue.empty()) {
+    AdvSpawnItem room_item = s_adv_spawn_queue.front();
+    s_adv_spawn_queue.pop_front();
+    if (room_item.room) {
+      if (room_item.is_gangster) gangster_spawn_one_in_room(room_item.room);
+      else spawn_one_adventurer_in_room(room_item.room);
+    }
+  }
+
    adv_boot_cleanup_if_needed();
   load_config_if_needed();
   time_t now = time(0);
