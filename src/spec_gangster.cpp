@@ -9,11 +9,14 @@
 //   in that zone whose name/description contains "street" or "alley" (case-insensitive).
 // - Cleanup: despawn after zone inactivity; strip items before extract to avoid litter.
 
-// Use adventurer drip-queue helpers
-extern bool adv_zone_spawn_cooldown_allows(int zone);
-extern bool adv_schedule_room_spawn(struct room_data* room, bool is_gangster);
-extern void adv_record_zone_spawn(int zone);
 
+
+#include <vector>
+#include <unordered_map>
+#include <cctype>
+#include <cstring>
+
+#include "spec_adventurer.hpp"  // adventurer_configure_like(), is_adventurer()
 
 #include "structs.hpp"
 #include "awake.hpp"
@@ -23,19 +26,26 @@ extern void adv_record_zone_spawn(int zone);
 #include "interpreter.hpp"
 #include "constants.hpp"
 #include "handler.hpp"      // char_to_room, extract_obj, extract_char, GET_EQ, etc.
+#include "spec_gangster.hpp"
 
-#include <vector>
-#include <unordered_map>
-#include <cctype>
-#include <cstring>
+// Use adventurer drip-queue helpers
+extern bool adv_zone_spawn_cooldown_allows(int zone);
+extern bool adv_schedule_room_spawn(struct room_data* room, bool is_gangster);
+extern void adv_record_zone_spawn(int zone);
 
-#include "spec_adventurer.hpp"  // adventurer_configure_like(), is_adventurer()
+// --- PDA / SOS assist state for gangsters ---
+enum GsIntent { GS_INTENT_IDLE = 0, GS_INTENT_TRAVEL_TO_ASSIST = 1 };
+struct GsAssist { long target_id = 0; int ttl_ticks = 0; };
+static std::unordered_map<long/*mob id*/, GsIntent> gs_intent;
+static std::unordered_map<long/*mob id*/, GsAssist> gs_assist_state;
+
+extern int find_first_step(vnum_t src, vnum_t target, bool ignore_roads, const char *call_origin, struct char_data *caller);
 
 // Fresh-spawn tag helpers from spec_adventurer.cpp
 extern void adv_kw_remove(struct char_data *mob, const char *kw);
 extern void adv_kw_append(struct char_data *mob, const char *kw);
 extern const char *ADV_FRESH_KW;
-#include "spec_gangster.hpp"
+
 
 extern void adv_boot_cleanup_if_needed();  // defined in spec_adventurer.cpp
 
@@ -82,6 +92,22 @@ static bool ci_contains(const char* hay, const char* needle) {
   return false;
 }
 
+// Identify a gangster by the keyword tag (safe; no proto mutations).
+static bool is_gangster(struct char_data* ch) {
+  if (!ch || !IS_NPC(ch)) return false;
+  const char* kw = ch->player.physical_text.keywords;
+  return kw && ci_contains(kw, "gangster");
+}
+
+// Called by Adventurer SOS to request hostile assist from this gangster.
+void gangster_request_assist(struct char_data* mob, long target_id, int ttl_ticks) {
+  if (!mob || !is_gangster(mob)) return;
+  gs_intent[GET_IDNUM(mob)] = GS_INTENT_TRAVEL_TO_ASSIST;
+  GsAssist &st = gs_assist_state[GET_IDNUM(mob)];
+  st.target_id = target_id;
+  st.ttl_ticks = ttl_ticks;
+}
+
 static bool room_is_streetlike(struct room_data* room) {
   if (!room) return false;
   const char* nm = room->name ? room->name : "";
@@ -113,13 +139,6 @@ static void gangster_append_keyword(struct char_data* mob) {
     DELETE_ARRAY_IF_EXTANT(mob->player.physical_text.keywords);
   }
   mob->player.physical_text.keywords = str_dup(buf);
-}
-
-// Identify a gangster by the keyword tag (safe; no proto mutations).
-static bool is_gangster(struct char_data* ch) {
-  if (!ch || !IS_NPC(ch)) return false;
-  const char* kw = ch->player.physical_text.keywords;
-  return kw && ci_contains(kw, "gangster");
 }
 
 // ------------------------ Spec entry (no command handling) ------------------------
@@ -234,6 +253,46 @@ static void gangster_maybe_draw_on_combat(struct char_data *mob) {
 }
 
 static void gangster_maintain() {
+  // --- PDA hostile assist pathing ---
+  for (struct char_data* m = character_list; m; m = m->next_in_character_list) {
+    if (!is_gangster(m)) continue;
+    long mid = GET_IDNUM(m);
+    auto ii = gs_intent.find(mid);
+    if (ii == gs_intent.end() || ii->second != GS_INTENT_TRAVEL_TO_ASSIST) continue;
+
+    GsAssist &as = gs_assist_state[mid];
+    --as.ttl_ticks;
+    if (as.ttl_ticks <= 0) { gs_intent.erase(mid); gs_assist_state.erase(mid); continue; }
+
+    // Resolve target
+    struct char_data* tgt = NULL;
+    for (struct char_data* t = character_list; t; t = t->next_in_character_list) {
+      if (!IS_NPC(t) && GET_IDNUM(t) == as.target_id) { tgt = t; break; }
+    }
+    if (!tgt) { gs_intent.erase(mid); gs_assist_state.erase(mid); continue; }
+
+    struct room_data* mr = get_ch_in_room(m);
+    struct room_data* tr = get_ch_in_room(tgt);
+    if (!mr || !tr) { gs_intent.erase(mid); gs_assist_state.erase(mid); continue; }
+    if (mr->zone != tr->zone) { gs_intent.erase(mid); gs_assist_state.erase(mid); continue; }
+
+    // Arrived? Engage immediately (hostile).
+    if (mr == tr) {
+      stop_fighting(m);
+      set_fighting(m, tgt);
+      gs_intent.erase(mid); gs_assist_state.erase(mid);
+      continue;
+    }
+
+    // BFS one step toward target
+    int dir = find_first_step(real_room(mr->number), real_room(tr->number), FALSE, "gs_pda_walk", m);
+    if (dir >= 0) {
+      perform_move(m, dir, CHECK_SPECIAL | LEADER, NULL, NULL);
+    } else {
+      gs_intent.erase(mid); gs_assist_state.erase(mid);
+    }
+  }
+
   gangster_read_spawn_cfg();
 
   time_t now = time(0);

@@ -16,6 +16,29 @@
 #include <ctime>
 #include <cctype>
 #include <cstring>
+extern void gangster_request_assist(struct char_data* mob, long target_id, int ttl_ticks);
+
+
+// ---- SOS assist state (Pocket Secretary / Phone) ----
+enum AdvIntent {
+  ADV_INTENT_IDLE = 0,
+  ADV_INTENT_TRAVEL_TO_ASSIST = 1,
+};
+
+struct AdvAssist {
+  long target_id = 0;     // PC we're assisting
+  int  ttl_ticks = 0;     // give up after N ticks
+};
+
+static std::unordered_map<long/*mob id*/, AdvIntent>  adv_intent;
+static std::unordered_map<long/*mob id*/, AdvAssist>  adv_assist_state;
+static std::unordered_map<long/*pc id*/, time_t>      adv_last_pda_call;
+
+static const int ADV_PDA_CALL_COOLDOWN_SEC = 180; // 3 minutes
+static const int ADV_ASSIST_TTL_TICKS      = 120; // ~2 minutes at mobact tick
+static const int ADV_MAX_ASSIST_STEPS      = 30;  // don't cross half the world
+
+
 
 #include "awake.hpp"
 #include "types.hpp"
@@ -61,9 +84,124 @@ static bool s_adv_login_spawning = false;
 extern SPECIAL(gangster_spec);
 // Spawn one gangster in a room (implemented in spec_gangster.cpp)
 extern void gangster_spawn_one_in_room(struct room_data* room);
+extern void gangster_request_assist(struct char_data* mob, long target_id, int ttl_ticks);
+// NOTE: Do NOT extern is_gangster() from spec_gangster.cpp (it's file-local there).
+// We do our own local tag check here to avoid cross-TU linkage on a static symbol.
+
+static bool ci_contains(const char* hay, const char* needle) {
+  if (!hay || !needle || !*needle) return false;
+  const size_t nlen = strlen(needle);
+  for (const char* p = hay; *p; ++p) {
+    size_t i = 0;
+    while (i < nlen && p[i] && std::tolower((unsigned char)p[i]) == std::tolower((unsigned char)needle[i])) ++i;
+    if (i == nlen) return true;
+  }
+  return false;
+}
+
+// Local helper: identify a gangster by keyword tag (mirrors spec_gangster.cpp).
+static inline bool adv_is_gangster_tag(struct char_data* ch) {
+  if (!ch || !IS_NPC(ch)) return false;
+  const char* kw = ch->player.physical_text.keywords;
+  return kw && ci_contains(kw, "gangster");
+}
 
 extern int find_first_step(vnum_t src, vnum_t target, bool ignore_roads, const char *call_origin, struct char_data *caller);
 extern int perform_move(struct char_data *ch, int dir, int extra, struct char_data *vict, struct veh_data *veh);
+
+// Quick step-bounded distance estimate using existing stepper.
+// Returns steps if reachable within max_steps, else -1.
+static int estimate_room_distance(vnum_t src, vnum_t dst, int max_steps) {
+  vnum_t cur = src;
+  for (int i = 0; i < max_steps; ++i) {
+    int dir = find_first_step(cur, dst, /*ignore_roads=*/false, "pda_dist", nullptr);
+    if (dir < 0) return -1;
+
+    rnum_t cr = real_room(cur);
+    if (!VALID_ROOM_RNUM(cr)) return -1;
+
+    struct room_data* next = world[cr].dir_option[dir] ? world[cr].dir_option[dir]->to_room : NULL;
+    if (!next) return -1;
+
+    vnum_t next_vnum = GET_ROOM_VNUM(next);
+    rnum_t nr = real_room(next_vnum);
+    if (!VALID_ROOM_RNUM(nr)) return -1;
+
+    cur = next_vnum;
+    if (cur == dst) return i + 1;
+  }
+  return -1;
+}
+
+// Entry point from devices: broadcast an SOS; nearby Adventurers may respond.
+void adventurer_pda_call_for_help(struct char_data* caller) {
+  if (!caller || IS_NPC(caller)) return;
+  struct room_data* here = get_ch_in_room(caller);
+  if (!here) return;
+
+  time_t now = time(0);
+  long cid = GET_IDNUM(caller);
+  auto itc = adv_last_pda_call.find(cid);
+  if (itc != adv_last_pda_call.end() && (now - itc->second) < ADV_PDA_CALL_COOLDOWN_SEC) {
+    int left = (int)(ADV_PDA_CALL_COOLDOWN_SEC - (now - itc->second));
+    send_to_char(caller, "Your device is cooling down (%d sec).\r\n", left);
+    return;
+  }
+  adv_last_pda_call[cid] = now;
+
+  int z = here->zone;
+  int responders = 0;
+
+  for (struct char_data* mob = character_list; mob; mob = mob->next_in_character_list) {
+    if (!is_adventurer(mob)) continue;
+    if (!AWAKE(mob)) continue;
+    struct room_data* r = get_ch_in_room(mob);
+    if (!r || r->zone != z) continue;
+    if (mob == caller) continue;
+
+    int steps = estimate_room_distance(GET_ROOM_VNUM(r), GET_ROOM_VNUM(here), ADV_MAX_ASSIST_STEPS);
+    if (steps < 0) continue;
+    if (number(1, 100) > 50) continue;
+
+    long mid = GET_IDNUM(mob);
+    adv_intent[mid] = ADV_INTENT_TRAVEL_TO_ASSIST;
+    AdvAssist &st = adv_assist_state[mid];
+    st.target_id = cid;
+    st.ttl_ticks = ADV_ASSIST_TTL_TICKS;
+    ++responders;
+    if (responders >= 2) break;
+  }
+
+  
+  // Also give gangsters a 25% chance to respond (hostile) if within range.
+  for (struct char_data* mob = character_list; mob; mob = mob->next_in_character_list) {
+    if (!adv_is_gangster_tag(mob)) continue;
+    if (!AWAKE(mob)) continue;
+    struct room_data* r = get_ch_in_room(mob);
+    if (!r || r->zone != z) continue;
+
+    int steps = estimate_room_distance(GET_ROOM_VNUM(r), GET_ROOM_VNUM(here), ADV_MAX_ASSIST_STEPS);
+    if (steps < 0) continue;
+    if (number(1, 100) > 25) continue; // 25% hostile response
+
+    gangster_request_assist(mob, cid, ADV_ASSIST_TTL_TICKS);
+    ++responders; // they will come, but they are hostile
+  }
+if (responders == 0)
+    send_to_char(caller, "You broadcast an SOS... no one answers.\r\n");
+  else
+    send_to_char(caller, "You broadcast an SOS on your device.\r\n");
+}
+
+// Locate a player character by idnum; returns NULL if not online.
+static struct char_data* find_char_by_idnum(long id) {
+  for (struct char_data* ch = character_list; ch; ch = ch->next_in_character_list) {
+    if (IS_NPC(ch)) continue;
+    if (GET_IDNUM(ch) == id) return ch;
+  }
+  return NULL;
+}
+
 // ---------- utils ----------
 // Returns true if this mob's keywords pointer is the same pointer as its proto's keywords pointer.
 static inline bool adv_keywords_alias_proto(struct char_data* mob) {
@@ -427,10 +565,7 @@ static bool adv_is_dynamic_spawn(struct char_data* ch) {
 
   // Older adventurers saved from past runs: match by VNUM.
   // Replace '20022' with your actual adventurer template vnum if different.
-  if (GET_MOB_VNUM(ch) == 20022)
-    return true;
-
-    if (GET_MOB_VNUM(ch) == 20023)
+  if (GET_MOB_VNUM(ch) == 20022 || GET_MOB_VNUM(ch) == 20023)
     return true;
 
   // Fallback: older builds that tagged keywords with 'adventurer'.
@@ -1125,6 +1260,46 @@ void adventurer_on_pc_enter_room(struct char_data* ch, struct room_data* room) {
 
 // maintenance
 void adventurer_maintain() {
+  // --- PDA assist pathing (Pocket Secretary / Phone) ---
+  for (struct char_data* m = character_list; m; m = m->next_in_character_list) {
+    if (!is_adventurer(m)) continue;
+    long mid = GET_IDNUM(m);
+    auto ii = adv_intent.find(mid);
+    if (ii == adv_intent.end() || ii->second != ADV_INTENT_TRAVEL_TO_ASSIST) continue;
+
+    AdvAssist &as = adv_assist_state[mid];
+    --as.ttl_ticks;
+    if (as.ttl_ticks <= 0) { adv_intent.erase(mid); adv_assist_state.erase(mid); continue; }
+
+    struct char_data* tgt = find_char_by_idnum(as.target_id);
+    if (!tgt || IS_NPC(tgt)) { adv_intent.erase(mid); adv_assist_state.erase(mid); continue; }
+
+    struct room_data* mr = get_ch_in_room(m);
+    struct room_data* tr = get_ch_in_room(tgt);
+    if (!mr || !tr) { adv_intent.erase(mid); adv_assist_state.erase(mid); continue; }
+
+    if (mr->zone != tr->zone) { adv_intent.erase(mid); adv_assist_state.erase(mid); continue; }
+
+    if (mr == tr) {
+      act("$n says, \"You called? Need a hand?\"", FALSE, m, 0, 0, TO_ROOM);
+      adv_intent.erase(mid); adv_assist_state.erase(mid);
+      continue;
+    }
+
+    if (estimate_room_distance(GET_ROOM_VNUM(mr), GET_ROOM_VNUM(tr), ADV_MAX_ASSIST_STEPS) < 0) {
+      adv_intent.erase(mid); adv_assist_state.erase(mid);
+      continue;
+    }
+
+    int dir = find_first_step(GET_ROOM_VNUM(mr), GET_ROOM_VNUM(tr),
+                              /*ignore_roads=*/false, "pda_walk", m);
+    if (dir >= 0) {
+      perform_move(m, dir, CHECK_SPECIAL | LEADER, NULL, NULL);
+    } else {
+      adv_intent.erase(mid); adv_assist_state.erase(mid);
+    }
+  }
+
 
   // Drip scheduled login spawns out at a safe rate per tick.
   int allowance = ADV_SPAWNS_PER_TICK;
@@ -1219,6 +1394,7 @@ void adventurer_maintain() {
 // SPECIAL
 SPECIAL(adventurer_spec) {
   struct char_data* mob = (struct char_data*) me;
+  (void) mob; // silence unused when invoked as SPECIAL without using 'mob'
   return FALSE;
 }
 

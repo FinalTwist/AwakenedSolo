@@ -1,4 +1,6 @@
 #include <mysql/mysql.h>
+extern void adventurer_pda_call_for_help(struct char_data* caller);
+
 
 #include "structs.hpp"
 #include "awake.hpp"
@@ -221,6 +223,7 @@ void pocketsec_menu(struct descriptor_data *d)
                  "   [^c5^n] ^cBanking^n\r\n"
                  "   [^c6^n] ^c%sock^n\r\n"
                  "   [^c7^n] ^c%s^n\r\n"
+                 "   [^c8^n] ^cBroadcast SOS^n\r\n"
                  "   [^c0^n] ^cQuit^n\r\n",
                  amount_of_mail_waiting(CH) > 0 ? " ^R" : " ",
                  amount_of_mail_waiting(CH) > 0 ? " (new messages)" : "",
@@ -328,6 +331,10 @@ void pocketsec_parse(struct descriptor_data *d, char *arg)
           break;
         case 7:
           GET_POCKET_SECRETARY_SILENCED(SEC) = !GET_POCKET_SECRETARY_SILENCED(SEC);
+          pocketsec_menu(d);
+          break;
+        case 8:
+          adventurer_pda_call_for_help(CH);
           pocketsec_menu(d);
           break;
       }
