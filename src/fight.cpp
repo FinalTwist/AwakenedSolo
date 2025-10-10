@@ -925,6 +925,48 @@ void death_cry(struct char_data * ch, idnum_t cause_of_death_idnum)
 
 void raw_kill(struct char_data * ch, idnum_t cause_of_death_idnum)
 {
+  // --- Killing a guard -> promote existing THEFT heat to Tier 3 and dispatch police (as per theft path) ---
+  if (IS_NPC(ch) && MOB_FLAGGED(ch, MOB_GUARD) && cause_of_death_idnum > 0) {
+    // Find the killer by idnum (pattern matches the InnerVoice lookup above).
+    struct char_data *killer = NULL;
+    for (struct descriptor_data *d = descriptor_list; d; d = d->next) {
+      if (d->character && GET_IDNUM(d->character) == cause_of_death_idnum) {
+        killer = d->character;
+        break;
+      }
+    }
+
+    if (killer && !IS_NPC(killer)) {
+      time_t now = time(0);
+
+      // Anchor the heat where the kill happened.
+      long anchor = 0;
+      if (killer->in_room) anchor = killer->in_room->number;
+      else if (killer->in_veh && killer->in_veh->in_room) anchor = killer->in_veh->in_room->number;
+      if (anchor)
+        killer->char_specials.theft_heat_anchor_room = anchor;
+
+      // Promote to Tier 3 if not already there.
+      if (killer->char_specials.theft_heat_level < 3)
+        killer->char_specials.theft_heat_level = 3;
+
+      // Use the same Tier-3 decay you use in act.other.cpp.
+      extern int number(int from, int to);
+      extern void schedule_police_response_for_target(long target_idnum, long origin_room_vnum, int count, int delay_seconds);
+      int decay_secs = (2 + number(0, 1)) * 60;  // 2–3 min
+      killer->char_specials.theft_heat_cooldown_end = now + decay_secs;
+
+      // Dispatch with your Tier-3 probability (80%, halved if moved off anchor).
+      int chance = 80;
+      if (killer->in_room && anchor && killer->in_room->number != anchor) chance /= 2;
+      if (number(1, 100) <= chance && anchor) {
+        int count = number(1, 3);
+        int delay = 3 + number(0, 7);
+        schedule_police_response_for_target(GET_IDNUM(killer), anchor, count, delay);
+      }
+    }
+  }
+  // --- end on-kill heat promotion ---
   if (IS_NPC(ch) && cause_of_death_idnum > 0 && number(1,100) <= 10) {
     for (struct descriptor_data *d = descriptor_list; d; d = d->next) {
       if (d->character && GET_IDNUM(d->character) == cause_of_death_idnum) {
@@ -3416,6 +3458,71 @@ bool raw_damage(struct char_data *ch, struct char_data *victim, int dam, int att
 
     // Re-add the effects of damage to their initiative roll.
     GET_INIT_ROLL(victim) -= damage_modifier(victim, 0, 0, 0, 0);
+    // --- Assault-on-guard -> raise existing THEFT heat tiers (T1 first hit, T2 second hit) ---
+    // Conditions: player damages an NPC guard; we escalate theft heat using the same
+    // anchor, decay, and police-dispatch logic you already use in act.other.cpp.
+    if (dam > 0
+        && ch && victim
+        && !IS_NPC(ch)
+        && IS_NPC(victim)
+        && MOB_FLAGGED(victim, MOB_GUARD)) {
+
+      time_t now = time(0);
+
+      // If heat expired, treat this as a fresh incident.
+      if (ch->char_specials.theft_heat_cooldown_end <= now) {
+        ch->char_specials.theft_heat_level = 0;
+      }
+
+      // Anchor the heat to where the assault happened (matches your theft path).
+      long anchor = 0;
+      if (ch->in_room) anchor = ch->in_room->number;
+      else if (ch->in_veh && ch->in_veh->in_room) anchor = ch->in_veh->in_room->number;
+      if (anchor)
+        ch->char_specials.theft_heat_anchor_room = anchor;
+
+      // We’ll reuse your decay + police-dispatch approach from act.other.cpp
+      extern int number(int from, int to);
+      extern void schedule_police_response_for_target(long target_idnum, long origin_room_vnum, int count, int delay_seconds);
+
+      // First damaging hit -> Tier 1.
+      if (ch->char_specials.theft_heat_level < 1) {
+        ch->char_specials.theft_heat_level = 1;
+
+        // Same decay window pattern as your theft heat Tier 1.
+        int decay_secs = (9 + number(0, 4)) * 60;   // 9–13 min
+        ch->char_specials.theft_heat_cooldown_end = now + decay_secs;
+
+        // Mirror your immediate police roll (10% at T1, halved if moved off anchor).
+        int chance = 10;
+        if (ch->in_room && anchor && ch->in_room->number != anchor) chance /= 2;
+        if (number(1, 100) <= chance && anchor) {
+          int count = number(1, 3);
+          int delay = 3 + number(0, 7);
+          schedule_police_response_for_target(GET_IDNUM(ch), anchor, count, delay);
+        }
+      }
+      // Any subsequent damaging hit while Tier 1 is active -> Tier 2.
+      else if (ch->char_specials.theft_heat_level == 1
+              && ch->char_specials.theft_heat_cooldown_end > now) {
+        ch->char_specials.theft_heat_level = 2;
+
+        // Same decay window pattern as your theft heat Tier 2.
+        int decay_secs = (5 + number(0, 2)) * 60;   // 5–7 min
+        ch->char_specials.theft_heat_cooldown_end = now + decay_secs;
+
+        // Tier 2 police roll (30%, halved if moved off anchor).
+        int chance = 30;
+        if (ch->in_room && anchor && ch->in_room->number != anchor) chance /= 2;
+        if (number(1, 100) <= chance && anchor) {
+          int count = number(1, 3);
+          int delay = 3 + number(0, 7);
+          schedule_police_response_for_target(GET_IDNUM(ch), anchor, count, delay);
+        }
+      }
+      // If already >= 2, we leave it; a kill below can promote to T3.
+    }
+    // --- end assault-on-guard heat bump ---
   }
   if (!awake && GET_PHYSICAL(victim) <= 0)
     GET_LAST_DAMAGETIME(victim) = time(0);
